@@ -1,0 +1,43 @@
+=== INSTRUCTIONS ===
+0:  MOV  imm16/reg, reg  -> reg = imm16/reg
+1:  PUSH imm16/reg       -> [SP--] = imm16/reg
+2:  POP  reg             -> reg = [++SP]
+3:  LEA  mem, reg        -> reg = &mem
+4:  JNZ  imm16/reg       -> PC = HL if imm16/reg != 0 else NOP
+5:  INB  reg, imm8/reg   -> reg = PORT[imm8/reg]
+6:  OUTB imm8/reg, reg   -> PORT[imm8/reg] = reg
+7:  ADD  imm16/reg, reg  -> reg = reg + imm16/reg
+8:  SUB  imm16/reg, reg  -> reg = reg - imm16/reg
+9:  MUL  imm16/reg, reg  -> reg = reg * imm16/reg // unsigned multiplication
+A:  IMUL imm16/reg, reg  -> reg = reg * imm16/reg // signed multiplication
+B:  DIV  imm16/reg, reg  -> R0  = reg / imm16/reg && R1 = reg % imm16/reg // unsigned division
+C:  IDIV imm16/reg, reg  -> R0  = reg / imm16/reg && R1 = reg % imm16/reg // signed division
+D:  AND  imm16/reg, reg  -> reg = reg & imm16/reg
+E:  OR   imm16/reg, reg  -> reg = reg | imm16/reg
+F:  NOR  imm16/reg, reg  -> reg = ~(reg | imm8/reg)
+10: CMP imm16/reg, reg   -> f = compare reg, imm16/reg (see below)
+
+* imm8/16 are the byte(s) immediately following the instruction byte in memory
+
+=== REGISTERS ===
+R0 (0): GP register
+R1 (1): GP register
+R2 (2): GP register
+R3 (3): GP register
+R4 (4): GP register
+R5 (5): GP register
+R6 (6): GP register
+R7 (7): GP register
+R8 (8): GP register
+RS (9): Stack pointer (RSP on x86_64)
+RB (A): Base pointer (RBP on x86_64)
+RF (B): Flags (LSB to MSB)
+    LESS
+    EQUAL
+    CARRY
+    BORROW
+
+* Calling convention
+    * R0, R1, R2, R3, R4, R5 for arguments
+    * Remaining arguments pushed to stack in order
+    * Return value in R0
