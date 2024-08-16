@@ -49,11 +49,17 @@ namespace Log::Impl::Win
 
     bool EnableAnsiEscapeSequences()
     {
-        const HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+        const HANDLE handle = GetStdHandle(STD_ERROR_HANDLE);
         if (handle == INVALID_HANDLE_VALUE)
         {
             std::cerr << "[Emulator Win Error] Failed to get stdout handle: " << GetLastErrorAsString() << std::endl;
             return false;
+        }
+
+        // Check if the handle is a console handle
+        if (GetFileType(handle) != FILE_TYPE_CHAR)
+        {
+            return false; // not a console
         }
 
         // Get the current console mode
