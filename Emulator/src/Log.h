@@ -29,7 +29,7 @@
 
 namespace Log::Impl::Win
 {
-    std::string WinGetLastErrorAsString()
+    std::string GetLastErrorAsString()
     {
         const DWORD errorMessageID = ::GetLastError();
         if (errorMessageID == 0)
@@ -47,12 +47,12 @@ namespace Log::Impl::Win
     }
 
 
-    bool WinEnableAnsiEscapeSequences()
+    bool EnableAnsiEscapeSequences()
     {
         const HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         if (handle == INVALID_HANDLE_VALUE)
         {
-            std::cerr << "[Emulator Win Error] Failed to get stdout handle: " << WinGetLastErrorAsString() << std::endl;
+            std::cerr << "[Emulator Win Error] Failed to get stdout handle: " << GetLastErrorAsString() << std::endl;
             return false;
         }
 
@@ -60,7 +60,7 @@ namespace Log::Impl::Win
         DWORD dwMode = 0;
         if (!GetConsoleMode(handle, &dwMode))
         {
-            std::cerr << "[Emulator Win Error] Failed to get console mode: " << WinGetLastErrorAsString() << std::endl;
+            std::cerr << "[Emulator Win Error] Failed to get console mode: " << GetLastErrorAsString() << std::endl;
             return false;
         }
 
@@ -68,7 +68,7 @@ namespace Log::Impl::Win
         dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
         if (!SetConsoleMode(handle, dwMode))
         {
-            std::cerr << "[Emulator Win Error] Failed to set console mode: " << WinGetLastErrorAsString() << std::endl;
+            std::cerr << "[Emulator Win Error] Failed to set console mode: " << GetLastErrorAsString() << std::endl;
             return false;
         }
         return true;
@@ -102,7 +102,7 @@ namespace Log::Impl
         static const bool AnsiEnabled = []()
         {
             #ifdef PLATFORM_WINDOWS
-                return Log::Impl::Win::WinEnableAnsiEscapeSequences();
+                return Log::Impl::Win::EnableAnsiEscapeSequences();
             #elif defined PLATFORM_UNIX
                 return Log::Impl::Unix::IsTerminal();
             #else
