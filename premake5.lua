@@ -15,6 +15,7 @@ filter "system:windows"
     defines { "_CRT_SECURE_NO_WARNINGS", "PLATFORM_WINDOWS" }
 filter "system:linux"
     platforms { "x64", "x86" }
+    defines "PLATFORM_UNIX"
 filter "system:macosx"
     platforms "universal"
     defines { "MAC_OS", "GL_SILENCE_DEPRECATION" }

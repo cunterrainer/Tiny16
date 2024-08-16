@@ -74,8 +74,17 @@ namespace Log::Impl::Win
         return true;
     }
 }
-#endif // PLATFORM_WINDOWS
+#elif defined PLATFORM_UNIX // PLATFORM_WINDOWS
+#include <unistd.h>
 
+namespace Log::Impl::Unix
+{
+    inline bool IsTerminal() noexcept
+    {
+        return isatty(STDOUT_FILENO); // We have to trust that the terminal support ansi escape codes
+    }
+}
+#endif // PLATFORM_UNIX
 
 namespace Log::Impl
 {
@@ -94,8 +103,10 @@ namespace Log::Impl
         {
             #ifdef PLATFORM_WINDOWS
                 return Log::Impl::Win::WinEnableAnsiEscapeSequences();
+            #elif defined PLATFORM_UNIX
+                return Log::Impl::Unix::IsTerminal();
             #else
-                return false; // TODO: Add Linux & macos support
+                return false;
             #endif
         }();
 
