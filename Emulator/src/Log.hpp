@@ -25,72 +25,73 @@
 
 #ifdef BUILD_DEBUG
 #ifdef PLATFORM_WINDOWS
-#include <Windows.h>
+    #include <Windows.h>
 
-namespace Log::Impl::Win
-{
-    std::string GetLastErrorAsString()
+    namespace Log::Impl::Win
     {
-        const DWORD errorMessageID = ::GetLastError();
-        if (errorMessageID == 0)
+        std::string GetLastErrorAsString()
         {
-            return std::string(); //No error message has been recorded
+            const DWORD errorMessageID = ::GetLastError();
+            if (errorMessageID == 0)
+            {
+                return std::string(); //No error message has been recorded
+            }
+
+            LPSTR messageBuffer = nullptr;
+            //Ask Win32 to give us the string version of that message ID.
+            //The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
+            const DWORD size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+            const std::string message(messageBuffer, static_cast<std::size_t>(size));
+            LocalFree(messageBuffer);
+            return message;
         }
 
-        LPSTR messageBuffer = nullptr;
-        //Ask Win32 to give us the string version of that message ID.
-        //The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
-        const DWORD size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-        const std::string message(messageBuffer, static_cast<std::size_t>(size));
-        LocalFree(messageBuffer);
-        return message;
+
+        bool EnableAnsiEscapeSequences()
+        {
+            const HANDLE handle = GetStdHandle(STD_ERROR_HANDLE);
+            if (handle == INVALID_HANDLE_VALUE)
+            {
+                std::cerr << "[Emulator Win Error] Failed to get stdout handle: " << GetLastErrorAsString() << std::endl;
+                return false;
+            }
+
+            // Check if the handle is a console handle
+            if (GetFileType(handle) != FILE_TYPE_CHAR)
+            {
+                return false; // not a console
+            }
+
+            // Get the current console mode
+            DWORD dwMode = 0;
+            if (!GetConsoleMode(handle, &dwMode))
+            {
+                std::cerr << "[Emulator Win Error] Failed to get console mode: " << GetLastErrorAsString() << std::endl;
+                return false;
+            }
+
+            // Enable Virtual Terminal Processing
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            if (!SetConsoleMode(handle, dwMode))
+            {
+                std::cerr << "[Emulator Win Error] Failed to set console mode: " << GetLastErrorAsString() << std::endl;
+                return false;
+            }
+            return true;
+        }
     }
+#elif defined PLATFORM_UNIX
+    #include <unistd.h>
 
-
-    bool EnableAnsiEscapeSequences()
+    namespace Log::Impl::Unix
     {
-        const HANDLE handle = GetStdHandle(STD_ERROR_HANDLE);
-        if (handle == INVALID_HANDLE_VALUE)
+        inline bool IsTerminal() noexcept
         {
-            std::cerr << "[Emulator Win Error] Failed to get stdout handle: " << GetLastErrorAsString() << std::endl;
-            return false;
+            return isatty(STDOUT_FILENO); // We have to trust that the terminal support ansi escape codes
         }
-
-        // Check if the handle is a console handle
-        if (GetFileType(handle) != FILE_TYPE_CHAR)
-        {
-            return false; // not a console
-        }
-
-        // Get the current console mode
-        DWORD dwMode = 0;
-        if (!GetConsoleMode(handle, &dwMode))
-        {
-            std::cerr << "[Emulator Win Error] Failed to get console mode: " << GetLastErrorAsString() << std::endl;
-            return false;
-        }
-
-        // Enable Virtual Terminal Processing
-        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-        if (!SetConsoleMode(handle, dwMode))
-        {
-            std::cerr << "[Emulator Win Error] Failed to set console mode: " << GetLastErrorAsString() << std::endl;
-            return false;
-        }
-        return true;
     }
-}
-#elif defined PLATFORM_UNIX // PLATFORM_WINDOWS
-#include <unistd.h>
-
-namespace Log::Impl::Unix
-{
-    inline bool IsTerminal() noexcept
-    {
-        return isatty(STDOUT_FILENO); // We have to trust that the terminal support ansi escape codes
-    }
-}
 #endif // PLATFORM_UNIX
+
 
 namespace Log::Impl
 {
@@ -103,8 +104,8 @@ namespace Log::Impl
 
     namespace Global
     {
-        // Has to be global because if it's in ImplErr it will be called
-        // for every ImplErr overload which can be a lot because it's a templated function
+        // Has to be global because if it's in Err it will be called
+        // for every Err overload which can be a lot since it's a templated function
         static const bool AnsiEnabled = []()
         {
             #ifdef PLATFORM_WINDOWS
