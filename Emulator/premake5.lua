@@ -5,7 +5,7 @@ project "Tiny16-Emulator"
 
     files {
         "src/**.cpp",
-        "src/**.h"
+        "src/**.hpp"
     }
 
     -- gcc* clang* msc*
