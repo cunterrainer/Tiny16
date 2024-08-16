@@ -1,6 +1,6 @@
 project "Tiny16-Emulator"
     language "C++"
-    cppdialect "C++17"
+    cppdialect "C++20"
     flags "FatalWarnings"
 
     files {

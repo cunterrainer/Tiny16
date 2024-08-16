@@ -12,7 +12,7 @@ objdir(cwd .. outputdir .. "bin-int")
 
 filter "system:windows"
     platforms { "x64", "x86" }
-    defines "_CRT_SECURE_NO_WARNINGS"
+    defines { "_CRT_SECURE_NO_WARNINGS", "PLATFORM_WINDOWS" }
 filter "system:linux"
     platforms { "x64", "x86" }
 filter "system:macosx"
@@ -30,11 +30,12 @@ filter { "configurations:Debug" }
     runtime "Debug"
     symbols "on"
     optimize "off"
+    defines "BUILD_DEBUG"
 filter { "configurations:Release" }
     runtime "Release"
     symbols "off"
-    defines "NDEBUG"
     optimize "Speed"
+    defines "NDEBUG"
     flags "LinkTimeOptimization"
 filter {}
 
