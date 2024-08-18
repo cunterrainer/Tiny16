@@ -37,6 +37,7 @@ filter { "configurations:Release" }
     symbols "off"
     optimize "Speed"
     defines "NDEBUG"
+    inlining "Auto"
     flags "LinkTimeOptimization"
 filter {}
 
