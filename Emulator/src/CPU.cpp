@@ -167,6 +167,87 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
             i += 3;
             break;
         }
+        case Instruction::DIVI: // div (16bit) reg
+        {
+            ERR_IF(i + 4 > code.size(), "DIVI: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 4, code.size() - i, i);
+
+            const std::uint16_t imm = GetImmediate16(&code[i + 1]);
+            const Register reg = static_cast<Register>(code[i + 3]);
+            ERR_IF(reg >= Register::RF, "DIVI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
+
+            [[likely]] if (imm != 0)
+            {
+                // otherwise we may override R0 for the second division
+                const uint16_t r0tmp = m_Registers[reg] / imm;
+                const uint16_t r1tmp = m_Registers[reg] % imm;
+                m_Registers[Register::R0] = r0tmp;
+                m_Registers[Register::R1] = r1tmp;
+            }
+            i += 4;
+            break;
+        }
+        case Instruction::DIVR: // div reg reg
+        {
+            ERR_IF(i + 3 > code.size(), "DIVR: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 3, code.size() - i, i);
+
+            const std::uint8_t src = code[i + 1];
+            const std::uint8_t dest = code[i + 2];
+            ERR_IF(src >= Register::RF, "DIVR: Source register doesn't exist: 0x{:X}", src);
+            ERR_IF(dest >= Register::RF, "DIVR: Destination register doesn't exist: 0x{:X}", dest);
+
+            [[likely]] if (m_Registers[src] != 0)
+            {
+                // otherwise the my override R0 for the second division
+                const std::uint16_t r0tmp = m_Registers[dest] / m_Registers[src];
+                const std::uint16_t r1tmp = m_Registers[dest] % m_Registers[src];
+                m_Registers[Register::R0] = r0tmp;
+                m_Registers[Register::R1] = r1tmp;
+            }
+            i += 3;
+            break;
+        }
+        case Instruction::IDIVI: // idiv (16bit) reg
+        {
+            ERR_IF(i + 4 > code.size(), "IDIVI: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 4, code.size() - i, i);
+
+            const std::uint16_t imm = GetImmediate16(&code[i + 1]);
+            const Register reg = static_cast<Register>(code[i + 3]);
+            ERR_IF(reg >= Register::RF, "IDIVI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
+            m_Registers[reg] = static_cast<std::int16_t>(m_Registers[reg]) * static_cast<std::int16_t>(imm);
+
+            [[likely]] if (imm != 0)
+            {
+                // otherwise we may override R0 for the second division
+                const std::int16_t r0tmp = static_cast<std::int16_t>(m_Registers[reg]) / static_cast<std::int16_t>(imm);
+                const std::int16_t r1tmp = static_cast<std::int16_t>(m_Registers[reg]) % static_cast<std::int16_t>(imm);
+                m_Registers[Register::R0] = r0tmp;
+                m_Registers[Register::R1] = r1tmp;
+            }
+
+            i += 4;
+            break;
+        }
+        case Instruction::IDIVR: // idiv reg reg
+        {
+            ERR_IF(i + 3 > code.size(), "IDIVR: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 3, code.size() - i, i);
+
+            const std::uint8_t src = code[i + 1];
+            const std::uint8_t dest = code[i + 2];
+            ERR_IF(src >= Register::RF, "IDIVR: Source register doesn't exist: 0x{:X}", src);
+            ERR_IF(dest >= Register::RF, "IDIVR: Destination register doesn't exist: 0x{:X}", dest);
+
+            [[likely]] if (m_Registers[src] != 0)
+            {
+                // otherwise we may override R0 for the second division
+                const std::int16_t r0tmp = static_cast<std::int16_t>(m_Registers[dest]) / static_cast<std::int16_t>(m_Registers[src]);
+                const std::int16_t r1tmp = static_cast<std::int16_t>(m_Registers[dest]) % static_cast<std::int16_t>(m_Registers[src]);
+                m_Registers[Register::R0] = r0tmp;
+                m_Registers[Register::R1] = r1tmp;
+            }
+
+            i += 3;
+            break;
+        }
         case Instruction::EXIT:
         {
             return;

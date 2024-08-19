@@ -25,6 +25,10 @@ public:
         MULR  = 35,
         IMULI = 36,
         IMULR = 37,
+        DIVI  = 38,
+        DIVR  = 39,
+        IDIVI = 40,
+        IDIVR = 41,
         EXIT = 0xFF
     };
 
