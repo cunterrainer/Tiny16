@@ -2,6 +2,8 @@
 #define LOG_HPP
 #include <format>
 #include <string>
+#include <cerrno>
+#include <cstring>
 #include <cstddef>
 #include <cstdlib>
 #include <iostream>
@@ -12,24 +14,52 @@
 #ifdef BUILD_DEBUG
     #define LOG(fmt, ...) Log::Impl::Log(fmt, __VA_ARGS__)
     #define ERR(fmt, ...) Log::Impl::Err(std::source_location::current(), fmt, __VA_ARGS__)
+    #define LOG_REASON(fmt, ...) Log::Impl::LogReason(fmt, __VA_ARGS__)
+    #define ERR_REASON(fmt, ...) Log::Impl::ErrReason(std::source_location::current(), fmt, __VA_ARGS__)
 
     #define LOG_IF(cond, fmt, ...) if (cond) { LOG(fmt, __VA_ARGS__); }
     #define ERR_IF(cond, fmt, ...) if (cond) { ERR(fmt, __VA_ARGS__); }
+    #define LOG_REASON_IF(cond, fmt, ...) if (cond) { LOG_REASON(fmt, __VA_ARGS__); }
+    #define ERR_REASON_IF(cond, fmt, ...) if (cond) { ERR_REASON(fmt, __VA_ARGS__); }
 #elif defined NDEBUG
-    #define LOG(fmt, ...)
+    #define LOG(fmt, ...) Log::Impl::Log(fmt, __VA_ARGS__)
     #define ERR(fmt, ...)
+    #define LOG_REASON(fmt, ...) Log::Impl::LogReason(fmt, __VA_ARGS__)
+    #define ERR_REASON(fmt, ...)
 
-    #define LOG_IF(cond, fmt, ...)
+    #define LOG_IF(cond, fmt, ...) if (cond) { LOG(fmt, __VA_ARGS__); }
     #define ERR_IF(cond, fmt, ...)
+    #define LOG_REASON_IF(cond, fmt, ...) if (cond) { LOG_REASON(fmt, __VA_ARGS__); }
+    #define ERR_REASON_IF(cond, fmt, ...)
 #endif
+
+
+namespace Log::Impl
+{
+    template <typename... Args>
+    inline void Log(std::format_string<Args...> fmt, Args&&... args)
+    {
+        std::cout << "[Emulator] " << std::format(fmt, std::forward<Args>(args)...) << std::endl;
+    }
+
+
+    template <typename... Args>
+    inline void LogReason(std::format_string<Args...> fmt, Args&&... args)
+    {
+        std::cout << "[Emulator] " << std::format(fmt, std::forward<Args>(args)...) << ", Reason: " << strerror(errno) << std::endl;
+    }
+}
+
 
 #ifdef BUILD_DEBUG
 #ifdef PLATFORM_WINDOWS
     #include <Windows.h>
+    #undef min
+    #undef max
 
     namespace Log::Impl::Win
     {
-        std::string GetLastErrorAsString()
+        inline std::string GetLastErrorAsString()
         {
             const DWORD errorMessageID = ::GetLastError();
             if (errorMessageID == 0)
@@ -47,7 +77,7 @@
         }
 
 
-        bool EnableAnsiEscapeSequences()
+        inline bool EnableAnsiEscapeSequences()
         {
             const HANDLE handle = GetStdHandle(STD_ERROR_HANDLE);
             if (handle == INVALID_HANDLE_VALUE)
@@ -95,18 +125,11 @@
 
 namespace Log::Impl
 {
-    template <typename... Args>
-    inline void Log(std::format_string<Args...> fmt, Args&&... args)
-    {
-        std::cout << "[Emulator Log] " << std::format(fmt, std::forward<Args>(args)...) << std::endl;
-    }
-
-
     namespace Global
     {
         // Has to be global because if it's in Err it will be called
         // for every Err overload which can be a lot since it's a templated function
-        static const bool AnsiEnabled = []()
+        inline const bool AnsiEnabled = []()
         {
             #ifdef PLATFORM_WINDOWS
                 return Log::Impl::Win::EnableAnsiEscapeSequences();
@@ -117,15 +140,23 @@ namespace Log::Impl
             #endif
         }();
 
-        static const std::string_view RedSequence = AnsiEnabled ? "\033[31m" : "";
-        static const std::string_view ResetSequence = AnsiEnabled ? "\033[0m" : "";
+        inline const std::string_view RedSequence = AnsiEnabled ? "\033[31m" : "";
+        inline const std::string_view ResetSequence = AnsiEnabled ? "\033[0m" : "";
     }
 
 
     template <typename... Args>
     inline void Err(const std::source_location& location, std::format_string<Args...> fmt, Args&&... args)
     {
-        std::cerr << Log::Impl::Global::RedSequence << "[Emulator Error] " << std::format(fmt, std::forward<Args>(args)...) << " in file " << location.file_name() << ", line " << location.line() << ", function " << location.function_name() << Log::Impl::Global::ResetSequence << std::endl;
+        std::cerr << Log::Impl::Global::RedSequence << "[Emulator Error] " << std::format(fmt, std::forward<Args>(args)...) << " in file " << location.file_name() << ", line " << location.line() << Log::Impl::Global::ResetSequence << std::endl;
+        std::abort();
+    }
+
+
+    template <typename... Args>
+    inline void ErrReason(const std::source_location& location, std::format_string<Args...> fmt, Args&&... args)
+    {
+        std::cerr << Log::Impl::Global::RedSequence << "[Emulator Error] " << std::format(fmt, std::forward<Args>(args)...) << " in file " << location.file_name() << ", line " << location.line() << ", Reason: " << strerror(errno) << Log::Impl::Global::ResetSequence << std::endl;
         std::abort();
     }
 }
