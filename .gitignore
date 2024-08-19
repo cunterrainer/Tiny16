@@ -8,6 +8,7 @@ Makefile
 *.make
 *.DS_STORE
 
+*.bak
 *.sln
 
 *.user
