@@ -49,10 +49,13 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
 {
     for (std::size_t i = 0; i < code.size();)
     {
+        // TODO add flags e.g. overflow to add
         switch (static_cast<Instruction>(code[i]))
         {
         case Instruction::MOVI: // mov (16bit) reg
         {
+            ERR_IF(i + 4 > code.size(), "MOVI: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 4, code.size() - i, i);
+
             const std::uint16_t imm = GetImmediate16(&code[i + 1]);
             const Register reg = static_cast<Register>(code[i + 3]);
             ERR_IF(reg >= Register::RF, "MOVI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
@@ -62,6 +65,8 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
         }
         case Instruction::MOVR: // mov reg reg
         {
+            ERR_IF(i + 3 > code.size(), "MOVR: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 3, code.size() - i, i);
+
             const std::uint8_t src = code[i + 1];
             const std::uint8_t dest = code[i + 2];
             ERR_IF(src >= Register::RF, "MOVR: Source register doesn't exist: 0x{:X}", src);
@@ -72,6 +77,8 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
         }
         case Instruction::ADDI: // add (16bit) reg
         {
+            ERR_IF(i + 4 > code.size(), "ADDI: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 4, code.size() - i, i);
+
             const std::uint16_t imm = GetImmediate16(&code[i + 1]);
             const Register reg = static_cast<Register>(code[i + 3]);
             ERR_IF(reg >= Register::RF, "ADDI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
@@ -81,6 +88,8 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
         }
         case Instruction::ADDR: // add reg reg
         {
+            ERR_IF(i + 3 > code.size(), "ADDR: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 3, code.size() - i, i);
+
             const std::uint8_t src = code[i + 1];
             const std::uint8_t dest = code[i + 2];
             ERR_IF(src >= Register::RF, "ADDR: Source register doesn't exist: 0x{:X}", src);
@@ -91,6 +100,8 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
         }
         case Instruction::SUBI: // sub (16bit) reg
         {
+            ERR_IF(i + 4 > code.size(), "SUBI: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 4, code.size() - i, i);
+
             const std::uint16_t imm = GetImmediate16(&code[i + 1]);
             const Register reg = static_cast<Register>(code[i + 3]);
             ERR_IF(reg >= Register::RF, "SUBI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
@@ -100,6 +111,8 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
         }
         case Instruction::SUBR: // sub reg reg
         {
+            ERR_IF(i + 3 > code.size(), "SUBR: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 3, code.size() - i, i);
+
             const std::uint8_t src = code[i + 1];
             const std::uint8_t dest = code[i + 2];
             ERR_IF(src >= Register::RF, "SUBR: Source register doesn't exist: 0x{:X}", src);
