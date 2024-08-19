@@ -28,7 +28,7 @@ void CPU::Debug_PrintRegisters() const
 #endif
 
 
-void CPU::Execute(const std::vector<std::uint8_t>& code)
+void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
 {
     for (std::size_t i = 0; i < code.size();)
     {

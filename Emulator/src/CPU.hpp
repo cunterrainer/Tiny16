@@ -38,9 +38,10 @@ public:
         RF  // Reserved for flags can't be used
     };
 
+private:
     std::array<std::uint16_t, static_cast<std::size_t>(Register::RF) + 1> m_Registers = { 0 };
 public:
-    void Execute(const std::vector<std::uint8_t>& code);
+    void Execute(const std::vector<std::uint8_t>& code) noexcept;
 
     #ifndef NDEBUG
         void Debug_PrintRegisters() const;
