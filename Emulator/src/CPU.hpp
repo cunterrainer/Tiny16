@@ -15,12 +15,16 @@ class CPU
 public:
     enum class Instruction
     {
-        MOVI = 20,
-        MOVR = 21,
-        ADDI = 30,
-        ADDR = 31,
-        SUBI = 32,
-        SUBR = 33,
+        MOVI  = 20,
+        MOVR  = 21,
+        ADDI  = 30,
+        ADDR  = 31,
+        SUBI  = 32,
+        SUBR  = 33,
+        MULI  = 34,
+        MULR  = 35,
+        IMULI = 36,
+        IMULR = 37,
         EXIT = 0xFF
     };
 

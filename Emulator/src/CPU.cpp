@@ -121,6 +121,52 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
             i += 3;
             break;
         }
+        case Instruction::MULI: // mul (16bit) reg
+        {
+            ERR_IF(i + 4 > code.size(), "MULI: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 4, code.size() - i, i);
+
+            const std::uint16_t imm = GetImmediate16(&code[i + 1]);
+            const Register reg = static_cast<Register>(code[i + 3]);
+            ERR_IF(reg >= Register::RF, "MULI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
+            m_Registers[reg] *= imm;
+            i += 4;
+            break;
+        }
+        case Instruction::MULR: // mul reg reg
+        {
+            ERR_IF(i + 3 > code.size(), "MULR: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 3, code.size() - i, i);
+
+            const std::uint8_t src = code[i + 1];
+            const std::uint8_t dest = code[i + 2];
+            ERR_IF(src >= Register::RF, "MULR: Source register doesn't exist: 0x{:X}", src);
+            ERR_IF(dest >= Register::RF, "MULR: Destination register doesn't exist: 0x{:X}", dest);
+            m_Registers[dest] *= m_Registers[src];
+            i += 3;
+            break;
+        }
+        case Instruction::IMULI: // imul (16bit) reg
+        {
+            ERR_IF(i + 4 > code.size(), "IMULI: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 4, code.size() - i, i);
+
+            const std::uint16_t imm = GetImmediate16(&code[i + 1]);
+            const Register reg = static_cast<Register>(code[i + 3]);
+            ERR_IF(reg >= Register::RF, "IMULI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
+            m_Registers[reg] = static_cast<std::int16_t>(m_Registers[reg]) * static_cast<std::int16_t>(imm);
+            i += 4;
+            break;
+        }
+        case Instruction::IMULR: // imul reg reg
+        {
+            ERR_IF(i + 3 > code.size(), "IMULR: Instruction not complete, expected {} bytes, received {} bytes, code index {}", 3, code.size() - i, i);
+
+            const std::uint8_t src = code[i + 1];
+            const std::uint8_t dest = code[i + 2];
+            ERR_IF(src >= Register::RF, "IMULR: Source register doesn't exist: 0x{:X}", src);
+            ERR_IF(dest >= Register::RF, "IMULR: Destination register doesn't exist: 0x{:X}", dest);
+            m_Registers[dest] = static_cast<std::int16_t>(m_Registers[dest]) * static_cast<std::int16_t>(m_Registers[src]);
+            i += 3;
+            break;
+        }
         case Instruction::EXIT:
         {
             return;
