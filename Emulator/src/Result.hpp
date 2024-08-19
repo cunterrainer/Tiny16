@@ -183,12 +183,12 @@ public:
         return *this;
     }
 
-    inline const std::string& What() const noexcept
+    inline const std::string& what() const noexcept
     {
         return m_What;
     }
 
-    inline Type Type() const noexcept
+    inline Type type() const noexcept
     {
         return m_Type;
     }
