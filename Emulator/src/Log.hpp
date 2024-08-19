@@ -1,5 +1,5 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef LOG_HPP
+#define LOG_HPP
 #include <format>
 #include <string>
 #include <cstddef>
@@ -130,4 +130,4 @@ namespace Log::Impl
     }
 }
 #endif //BUILD_DEBUG
-#endif // LOG_H
+#endif // LOG_HPP
