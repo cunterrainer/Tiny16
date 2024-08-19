@@ -19,6 +19,8 @@ public:
         MOVR = 21,
         ADDI = 30,
         ADDR = 31,
+        SUBI = 32,
+        SUBR = 33,
         EXIT = 0xFF
     };
 

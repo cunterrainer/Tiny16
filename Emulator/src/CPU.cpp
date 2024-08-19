@@ -89,6 +89,25 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
             i += 3;
             break;
         }
+        case Instruction::SUBI: // sub (16bit) reg
+        {
+            const std::uint16_t imm = GetImmediate16(&code[i + 1]);
+            const Register reg = static_cast<Register>(code[i + 3]);
+            ERR_IF(reg >= Register::RF, "SUBI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
+            m_Registers[reg] -= imm;
+            i += 4;
+            break;
+        }
+        case Instruction::SUBR: // sub reg reg
+        {
+            const std::uint8_t src = code[i + 1];
+            const std::uint8_t dest = code[i + 2];
+            ERR_IF(src >= Register::RF, "SUBR: Source register doesn't exist: 0x{:X}", src);
+            ERR_IF(dest >= Register::RF, "SUBR: Destination register doesn't exist: 0x{:X}", dest);
+            m_Registers[dest] -= m_Registers[src];
+            i += 3;
+            break;
+        }
         case Instruction::EXIT:
         {
             return;
