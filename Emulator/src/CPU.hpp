@@ -40,6 +40,8 @@ public:
 
 private:
     std::array<std::uint16_t, static_cast<std::size_t>(Register::RF) + 1> m_Registers = { 0 };
+private:
+    inline std::uint16_t GetImmediate16(const std::uint8_t* ptr) const noexcept;
 public:
     void Execute(const std::vector<std::uint8_t>& code) noexcept;
 

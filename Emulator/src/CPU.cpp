@@ -3,6 +3,7 @@
 
 #include "CPU.hpp"
 #include "Log.hpp"
+#include "Utility.hpp"
 
 #ifndef NDEBUG
 #include <iostream>
@@ -28,19 +29,34 @@ void CPU::Debug_PrintRegisters() const
 #endif
 
 
+inline std::uint16_t CPU::GetImmediate16(const std::uint8_t* ptr) const noexcept
+{
+    uint16_t imm = *reinterpret_cast<const std::uint16_t*>(ptr);
+
+    // We emulate a little endian CPU
+    if constexpr (Util::Bytes::HostIsBigEndian())
+    {
+        return Util::Bytes::SwapEndian16(imm);
+    }
+    else
+    {
+        return imm;
+    }
+}
+
+
 void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
 {
     for (std::size_t i = 0; i < code.size();)
     {
         switch (static_cast<Instruction>(code[i]))
         {
-        // TODO: Support big endian
         case Instruction::MOVI: // mov (16bit) reg
         {
-            const std::uint16_t* imm16 = reinterpret_cast<const std::uint16_t*>(&code[i + 1]);
+            const std::uint16_t imm = GetImmediate16(&code[i + 1]);
             const Register reg = static_cast<Register>(code[i + 3]);
             ERR_IF(reg >= Register::RF, "MOVI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
-            m_Registers[reg] = *imm16;
+            m_Registers[reg] = imm;
             i += 4;
             break;
         }
@@ -56,10 +72,10 @@ void CPU::Execute(const std::vector<std::uint8_t>& code) noexcept
         }
         case Instruction::ADDI: // add (16bit) reg
         {
-            const std::uint16_t* imm16 = reinterpret_cast<const std::uint16_t*>(&code[i + 1]);
+            const std::uint16_t imm = GetImmediate16(&code[i + 1]);
             const Register reg = static_cast<Register>(code[i + 3]);
             ERR_IF(reg >= Register::RF, "ADDI: Illegal register used: 0x{:X}", static_cast<std::size_t>(reg));
-            m_Registers[reg] += *imm16;
+            m_Registers[reg] += imm;
             i += 4;
             break;
         }
