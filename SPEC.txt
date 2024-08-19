@@ -15,7 +15,8 @@ C:  IDIV imm16/reg, reg  -> R0  = reg / imm16/reg && R1 = reg % imm16/reg // sig
 D:  AND  imm16/reg, reg  -> reg = reg & imm16/reg
 E:  OR   imm16/reg, reg  -> reg = reg | imm16/reg
 F:  NOR  imm16/reg, reg  -> reg = ~(reg | imm8/reg)
-10: CMP imm16/reg, reg   -> f = compare reg, imm16/reg (see below)
+10: CMP  imm16/reg, reg  -> f = compare reg, imm16/reg (see below)
+11: EXT                  -> exit the program
 
 * imm8/16 are the byte(s) immediately following the instruction byte in memory
 
@@ -41,3 +42,62 @@ RF (B): Flags (LSB to MSB)
     * R0, R1, R2, R3, R4, R5 for arguments
     * Remaining arguments pushed to stack in order
     * Return value in R0
+
+=== ENCODING ===
+We are using a little endian architecture
+=== REGISTERS ===
+0x0 R0
+0x1 R1
+0x2 R2
+0x3 R3
+0x4 R4
+0x5 R5
+0x6 R6
+0x7 R7
+0x8 R8
+0x9 RS
+0xA RB
+0xB RF
+
+The binary starts at main and has to start with an instruction,
+then we just execute these instructions, e.g. the binary looks like:
+mov 1 r0 add 2 r0 sub 3 r0
+
+At the moment we only support 16 bit!
+TODO: Add pointers
+
+=== INSTRUCTIONS ===
+20: MOV imm16, reg
+21: MOV reg,   reg
+
+30: ADD imm16, reg
+31: ADD reg,   reg
+
+32: SUB imm16, reg
+33: SUB reg,   reg
+
+34: MUL imm16, reg
+35: MUL reg,   reg
+
+36: IMUL imm16, reg
+37: IMUL reg,   reg
+
+38: DIV imm16, reg
+39: DIV reg,   reg
+
+40: IDIV imm16, reg
+41: IDIV reg,   reg
+
+255: EXT
+
+TODO: implement:
+1:  PUSH imm16/reg       -> [SP--] = imm16/reg
+2:  POP  reg             -> reg = [++SP]
+3:  LEA  mem, reg        -> reg = &mem
+4:  JNZ  imm16/reg       -> PC = HL if imm16/reg != 0 else NOP
+5:  INB  reg, imm8/reg   -> reg = PORT[imm8/reg]
+6:  OUTB imm8/reg, reg   -> PORT[imm8/reg] = reg
+D:  AND  imm16/reg, reg  -> reg = reg & imm16/reg
+E:  OR   imm16/reg, reg  -> reg = reg | imm16/reg
+F:  NOR  imm16/reg, reg  -> reg = ~(reg | imm8/reg)
+10: CMP imm16/reg, reg   -> f = compare reg, imm16/reg (see below)
