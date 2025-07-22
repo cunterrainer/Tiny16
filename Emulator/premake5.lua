@@ -1,35 +1,49 @@
 project "Tiny16-Emulator"
     language "C++"
     cppdialect "C++20"
-    flags "FatalWarnings"
 
     files {
         "src/**.cpp",
         "src/**.hpp"
     }
 
-    -- gcc* clang* msc*
-    filter "toolset:msc*"
-        warnings "High" -- High
-        externalwarnings "Default" -- Default
-        buildoptions { "/sdl" }
+    filter "system:windows"
+        links {
+        }
 
-    filter { "toolset:gcc* or toolset:clang*" }
+    filter "system:linux"
+        links {
+        }
+
+    filter "system:macosx"
+
+    filter "system:emscripten"
+
+    filter "configurations:Debug"
+        warnings "off"
+        externalwarnings "off"
+
+    -- gcc* clang* msc*
+    filter { "toolset:msc*", "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution" }
+        warnings "High" -- High
+        externalwarnings "off" -- Default
+        -- buildoptions { "/sdl" } -- only usefull for debug and maybe not even that, we don't want uninitialized pointers to be nullptrs
+        -- disablewarnings "4244" -- float to int without cast
+
+    filter { "toolset:gcc* or toolset:clang*", "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution" }
         enablewarnings {
             "cast-align",
             "cast-qual",
-            "ctor-dtor-privacy",
             "disabled-optimization",
             "format=2",
             "init-self",
             "missing-declarations",
             "missing-include-dirs",
-            "old-style-cast",
-            "overloaded-virtual",
+            "missing-field-initializers",
+            "unused-parameter",
             "redundant-decls",
             "shadow",
             "sign-conversion",
-            "sign-promo",
             "strict-overflow=5",
             "switch-default",
             "undef",
@@ -41,34 +55,18 @@ project "Tiny16-Emulator"
             "deprecated",
             "format-security",
             "null-dereference",
+            "deprecated-copy",
             "stack-protector",
             "vla",
             "shift-overflow"
         }
-        disablewarnings "unknown-warning-option"
+        disablewarnings { "unknown-warning-option" }
 
-    filter { "configurations:Release", "toolset:gcc*" }
-        buildoptions { "-ffunction-sections", "-fdata-sections" } -- places each function and data item in its own section
-        linkoptions { "-Wl,--gc-sections" } -- remove unused sections (code)
-
-    filter { "system:linux or system:macosx", "configurations:Release", "toolset:clang*" }
-        buildoptions { "-ffunction-sections", "-fdata-sections" } -- places each function and data item in its own section
-        linkoptions { "-Wl,--gc-sections" } -- remove unused sections (code)
-
-    filter { "system:windows", "configurations:Release", "toolset:clang*" }
-        buildoptions { "-ffunction-sections", "-fdata-sections" } -- places each function and data item in its own section
-        linkoptions { "-fuse-ld=lld", "-Wl,/OPT:REF,/OPT:ICF" } -- remove unused sections (code)
-
-    filter { "configurations:Release", "toolset:msc*" }
-        linkoptions { "/OPT:REF", "/OPT:ICF" } -- remove unused sections (code)
-
-    filter "toolset:gcc*"
+    filter { "toolset:gcc*", "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution" }
         warnings "Extra"
-        externalwarnings "Off"
-        linkgroups "on" -- activate position independent linking
+        externalwarnings "off"
+        -- linkgroups "on" -- activate position independent linking
         enablewarnings {
-            "noexcept",
-            "strict-null-sentinel",
             "array-bounds=2",
             "duplicated-branches",
             "duplicated-cond",
@@ -79,7 +77,7 @@ project "Tiny16-Emulator"
             "trampolines"
         }
 
-    filter "toolset:clang*"
+    filter { "toolset:clang*", "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution" }
         warnings "Extra"
         externalwarnings "Everything"
         enablewarnings {
@@ -88,11 +86,20 @@ project "Tiny16-Emulator"
             "implicit-fallthrough", 
         }
 
+    filter { "system:emscripten", "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution" }
+        linkoptions "--memory-init-file 0"
+        warnings "Extra"
+        externalwarnings "Everything"
+
     filter { "configurations:Debug" }
         kind "ConsoleApp"
-        floatingpoint "Default"
 
     filter { "configurations:Release" }
         kind "ConsoleApp"
-        floatingpoint "Default"
-filter {}
+        fatalwarnings { "All" }
+
+    filter { "configurations:Distribution or MinSizeDistribution" }
+        kind "WindowedApp"
+        entrypoint "mainCRTStartup"
+        fatalwarnings { "All" }
+    filter {}
