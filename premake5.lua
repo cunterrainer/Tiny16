@@ -95,3 +95,4 @@ staticruntime "on"
 removeunreferencedcodedata "on"
 
 include "Emulator"
+include "Dependencies/raylib"

@@ -1,11 +1,11 @@
 === INSTRUCTIONS ===
-0:  LOAD  addr, reg      -> reg = *addr
-1:  STORE reg, addr      -> *addr = reg
+0:  LOAD  addr16, reg    -> reg = *addr16
+1:  STORE reg, addr16    -> *addr16 = reg
 2:  MOV  imm16/reg, reg  -> reg = imm16/reg
 3:  ADD  imm16/reg, reg  -> reg = reg + imm16/reg
 4:  SUB  imm16/reg, reg  -> reg = reg - imm16/reg
-5:  JMP  addr            -> PC = addr
-4:  JZ   addr            -> PC = addr if RF (Flag register) == 0 else NOP
+5:  JMP  addr16          -> PC = addr16
+4:  JE   addr16          -> PC = addr16 if RF (Flag register) == 0 else NOP
 7:  CMP  imm16/reg, reg  -> Set flag (RF) if equal / greater / less (reg - imm16/reg)
 8:  HLT                  -> Halt execution effectively exit the program
 
@@ -21,12 +21,13 @@ R5 (5): GP register
 R6 (6): GP register
 R7 (7): GP register
 R8 (8): GP register
-RF (9): Flags (LSB to MSB)
+R9 (9): GP register
+RF (A): Flags (LSB to MSB)
     LESS
     EQUAL
     CARRY
     BORROW
-PC (A): Program counter
+PC (B): Program counter
 
 === ENCODING ===
 We are using a little endian architecture
@@ -40,16 +41,17 @@ We are using a little endian architecture
 0x6 R6
 0x7 R7
 0x8 R8
-0x9 RF
-0xA PC
+0x9 R9
+0xA RF
+0xB PC
 
 The binary starts at main and has to start with an instruction,
 then we just execute these instructions, e.g. the binary looks like:
 mov 1 r0 add 2 r0 sub 3 r0
 
 === INSTRUCTIONS ===
-10: LOAD addr, reg
-11: STORE reg, addr
+10: LOAD addr16, reg
+11: STORE reg, addr16
 
 20: MOV imm16, reg
 21: MOV reg,   reg
@@ -60,8 +62,8 @@ mov 1 r0 add 2 r0 sub 3 r0
 32: SUB imm16, reg
 33: SUB reg,   reg
 
-50: JMP addr
-51: JZ  addr
+50: JMP addr16
+51: JE  addr16
 
 60: CMP imm16/reg, reg
 

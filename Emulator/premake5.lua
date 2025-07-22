@@ -7,17 +7,45 @@ project "Tiny16-Emulator"
         "src/**.hpp"
     }
 
+    includedirs {
+        RaylibDir .. "/src",
+        "../Dependencies/raygui"
+    }
+
+    externalincludedirs {
+        RaylibDir .. "/src",
+        "../Dependencies/raygui",
+        "../Dependencies/raygui/src"
+    }
+
+    links {
+        "raylib"
+    }
+
     filter "system:windows"
         links {
+            "Winmm",
+            "opengl32",
+            "gdi32",
+            "shell32",
+            "User32"
         }
 
     filter "system:linux"
         links {
+            "GL",
+            "X11",
+            "rt",
+            "dl",
+            "m"
         }
 
     filter "system:macosx"
+        linkoptions "-framework AppKit -framework iokit -framework OpenGl"
+        disablewarnings { "sign-conversion" }
 
     filter "system:emscripten"
+        linkoptions { "-sUSE_GLFW=3", "-sASYNCIFY", "-sMIN_WEBGL_VERSION=2", "-sMAX_WEBGL_VERSION=2", "-sALLOW_MEMORY_GROWTH=1", "-sUSE_PTHREADS=1" }
 
     filter "configurations:Debug"
         warnings "off"
