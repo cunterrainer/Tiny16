@@ -57,6 +57,8 @@ std::optional<Instruction> ParseLine(std::string line, size_t lineNumber)
     Instruction instr;
     instr.lineNumber = lineNumber;
 
+    // TODO: When validating make sure there is no : in an instruction,
+    // Parser doesnt consider it e.g. IsEqual:Error would be an opcode in this case because it doesnt consider it as an invalid label
     if (tokens.begin()->ends_with(':'))
     {
         instr.label = tokens.begin()->substr(0, tokens.begin()->size() - 1);
@@ -83,6 +85,7 @@ std::optional<Instruction> ParseLine(std::string line, size_t lineNumber)
 }
 
 
+// TODO Assign an Opcode a label
 std::vector<Instruction> ParseSourceCode(const std::vector<std::string>& lines)
 {
     std::vector<Instruction> instructions;
