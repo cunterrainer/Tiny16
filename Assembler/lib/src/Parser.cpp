@@ -54,6 +54,13 @@ std::optional<Instruction> ParseLine(std::string line, size_t lineNumber)
     std::vector<std::string> tokens = Tokenize(line);
     if (tokens.empty()) return std::nullopt;
 
+    constexpr size_t maxOpNum = 3;
+    if (tokens.size() > maxOpNum) // At max 3 tokens e.g. MOV R1, R0 T1: MOV T2 R1 T3 R0
+    {
+        std::cerr << std::format("Error: Too many instruction operands: '{}', Line {}, max number of operands: {}", line, lineNumber, maxOpNum);
+        return std::nullopt;
+    }
+
     Instruction instr;
     instr.lineNumber = lineNumber;
 
