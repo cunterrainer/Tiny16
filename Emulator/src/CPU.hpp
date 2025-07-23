@@ -2,34 +2,27 @@
 #define CPU_H
 #include <array>
 #include <vector>
+#include <string>
 #include <cstdint>
 
-#ifndef NDEBUG
-#define CPU_PRINT_REGISTERS(cpu) cpu.Debug_PrintRegisters()
-#else
-#define CPU_PRINT_REGISTERS(cpu)
-#endif
+#include "PROM.hpp"
 
 class CPU
 {
 public:
     enum class Instruction
     {
-        MOVI  = 20,
-        MOVR  = 21,
-        ADDI  = 30,
-        ADDR  = 31,
-        SUBI  = 32,
-        SUBR  = 33,
-        MULI  = 34,
-        MULR  = 35,
-        IMULI = 36,
-        IMULR = 37,
-        DIVI  = 38,
-        DIVR  = 39,
-        IDIVI = 40,
-        IDIVR = 41,
-        EXIT = 0xFF
+        MOVI = 20,
+        MOVR = 21,
+        ADDI = 30,
+        ADDR = 31,
+        SUBI = 32,
+        SUBR = 33,
+        JMP  = 50,
+        JE   = 51,
+        CMPI = 60,
+        CMPR = 61,
+        HLT  = 0xFF
     };
 
     enum Register
@@ -43,21 +36,29 @@ public:
         R6,
         R7,
         R8,
-        RS,
-        RB,
+        R9,
         RF  // Reserved for flags can't be used
     };
 
+    enum Flags
+    {
+        Less    = 0b00000001,
+        Equal   = 0b00000010,
+        Greater = 0b00000100,
+        Carry   = 0b00001000,
+        Borrow  = 0b00010000
+    };
 private:
+    PROM& m_Prom;
+    std::uint16_t m_ProgramCounter = 0;
     std::array<std::uint16_t, static_cast<std::size_t>(Register::RF) + 1> m_Registers = { 0 };
 private:
     inline std::uint16_t GetImmediate16(const std::uint8_t* ptr) const noexcept;
 public:
-    void Execute(const std::vector<std::uint8_t>& code) noexcept;
-
-    #ifndef NDEBUG
-        void Debug_PrintRegisters() const;
-    #endif
+    explicit CPU(PROM& prom) : m_Prom(prom) {};
+    std::string Clock() noexcept;
+    constexpr std::uint16_t GetRegister(Register reg) const noexcept { return m_Registers[reg]; }
+    constexpr std::uint16_t GetProgramCounter() const noexcept { return m_ProgramCounter; }
 };
 
 #endif // CPU_H

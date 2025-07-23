@@ -1,6 +1,7 @@
 .git/
 .vs/
 .vscode/
+.idea/
 
 BIN/
 
@@ -15,3 +16,6 @@ Makefile
 *.vcxproj
 *.vcxproj.user
 *.vcxproj.filters
+
+*.xcodeproj
+*.xcworkspace

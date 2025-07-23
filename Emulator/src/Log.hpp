@@ -11,7 +11,7 @@
 #include <source_location>
 
 // ERR acts as an assert calling std::abort when used
-#ifdef BUILD_DEBUG
+#ifndef NDEBUG
     #define LOG(fmt, ...) Log::Impl::Log(fmt, __VA_ARGS__)
     #define ERR(fmt, ...) Log::Impl::Err(std::source_location::current(), fmt, __VA_ARGS__)
     #define LOG_REASON(fmt, ...) Log::Impl::LogReason(fmt, __VA_ARGS__)
@@ -51,7 +51,7 @@ namespace Log::Impl
 }
 
 
-#ifdef BUILD_DEBUG
+#ifndef NDEBUG
 #ifdef PLATFORM_WINDOWS
     #include <Windows.h>
     #undef min
