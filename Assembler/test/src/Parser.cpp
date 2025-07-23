@@ -2,177 +2,231 @@
 
 #include "Parser.hpp"
 
-TEST_CASE("Testing Tokenize()")
+TEST_CASE("Testing ParseLine() Instructions")
 {
-    auto tokens = Tokenize("MOV $1, R0");
-    CHECK(tokens[0] == "MOV");
-    CHECK(tokens[1] == "$1");
-    CHECK(tokens[2] == "R0");
-
-    tokens = Tokenize("MOV $1,R0");
-    CHECK(tokens[0] == "MOV");
-    CHECK(tokens[1] == "$1");
-    CHECK(tokens[2] == "R0");
-    
-    tokens = Tokenize("MOV $123456789, R6");
-    CHECK(tokens[0] == "MOV");
-    CHECK(tokens[1] == "$123456789");
-    CHECK(tokens[2] == "R6");
-
-    tokens = Tokenize("MOV $123456789 R6");
-    CHECK(tokens[0] == "MOV");
-    CHECK(tokens[1] == "$123456789");
-    CHECK(tokens[2] == "R6");
-    
-    tokens = Tokenize("MOV $123456789,R6");
-    CHECK(tokens[0] == "MOV");
-    CHECK(tokens[1] == "$123456789");
-    CHECK(tokens[2] == "R6");
-
-    tokens = Tokenize("MOV R1,R6");
-    CHECK(tokens[0] == "MOV");
-    CHECK(tokens[1] == "R1");
-    CHECK(tokens[2] == "R6");
-
-    tokens = Tokenize("JMP R0");
-    CHECK(tokens[0] == "JMP");
-    CHECK(tokens[1] == "R0");
-
-    tokens = Tokenize("HLT");
-    CHECK(tokens[0] == "HLT");
-
-    tokens = Tokenize("HLT");
-    CHECK(tokens[0] == "HLT");
-
-    SUBCASE("Not allowed number of tokens")
+    SUBCASE("Instructions not allowed")
     {
-        // Not the tokenizers responsibility to report this so this is a correct test
-        tokens = Tokenize("MOV $1, R0, R1");
-        CHECK(tokens[0] == "MOV");
-        CHECK(tokens[1] == "$1");
-        CHECK(tokens[2] == "R0");
-        CHECK(tokens[3] == "R1");
+        // Missing comma between operands
+        auto ins = ParseLine("MOV R1 R0", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Comma immediately after opcode without space (invalid syntax)
+        ins = ParseLine("MOV, R1 R0", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Comma immediately after opcode with operands (still invalid)
+        ins = ParseLine("MOV, R1, R0", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Too many operands (3 operands, only max 2 allowed)
+        ins = ParseLine("MOV R1 R0 R1", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Too many operands with comma misplaced
+        ins = ParseLine("MOV R1 R0, R1", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Too many operands with two commas (3 operands)
+        ins = ParseLine("MOV R1, R0, R1", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Invalid opcode name with underscores (only letters allowed)
+        ins = ParseLine("___ R1, R2", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Opcode is numeric, which is invalid
+        ins = ParseLine("1234 R1, R2", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Comma immediately after opcode with no space (invalid)
+        ins = ParseLine("MOV,R1,R0", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Double commas without operand in between
+        ins = ParseLine("MOV R1,, R0", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Missing first operand (empty before comma)
+        ins = ParseLine("MOV , R2", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Missing second operand (empty after comma)
+        ins = ParseLine("MOV R1, ", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Opcode contains invalid character '!' (only letters allowed)
+        ins = ParseLine("MO!V R1, R2", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Trailing comma with no operand after
+        ins = ParseLine("MOV R1, R2,", 0xFF);
+        CHECK(ins.has_value() == false);
+
+        // Multiple commas in a row with empty operands
+        ins = ParseLine("MOV , , R2", 0xFF);
+        CHECK(ins.has_value() == false);
+    }
+
+
+    SUBCASE("Instructions allowed")
+    {
+        auto ins = ParseLine("MOV R1, R0", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "MOV");
+        CHECK(ins.value().lhs == "R1");
+        CHECK(ins.value().rhs == "R0");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("MOV R1", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "MOV");
+        CHECK(ins.value().lhs == "R1");
+        CHECK(ins.value().rhs == "");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("MOV $9090, $9090", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "MOV");
+        CHECK(ins.value().lhs == "$9090");
+        CHECK(ins.value().rhs == "$9090");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("MOV $4, R0", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "MOV");
+        CHECK(ins.value().lhs == "$4");
+        CHECK(ins.value().rhs == "R0");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("MOV $0b111, R1", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "MOV");
+        CHECK(ins.value().lhs == "$0b111");
+        CHECK(ins.value().rhs == "R1");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("MOV $0x00FF, R1", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "MOV");
+        CHECK(ins.value().lhs == "$0x00FF");
+        CHECK(ins.value().rhs == "R1");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("JMP R1", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "JMP");
+        CHECK(ins.value().lhs == "R1");
+        CHECK(ins.value().rhs == "");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("MOV", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "MOV");
+        CHECK(ins.value().lhs == "");
+        CHECK(ins.value().rhs == "");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("   HLT   ", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "HLT");
+        CHECK(ins.value().lhs == "");
+        CHECK(ins.value().rhs == "");
+        CHECK(ins.value().lineNumber == 0xFF);
+
+        ins = ParseLine("   SUB R1, R2   ", 0xFF);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label == "");
+        CHECK(ins.value().opcode == "SUB");
+        CHECK(ins.value().lhs == "R1");
+        CHECK(ins.value().rhs == "R2");
+        CHECK(ins.value().lineNumber == 0xFF);
     }
 }
 
 
-TEST_CASE("Testing ParseLine()")
+TEST_CASE("Testing ParseLine() Labels and Commas")
 {
     SUBCASE("Non instruction lines")
     {
         auto ins = ParseLine("# Test comment", 0);
         CHECK(ins.has_value() == false);
-
+    
         ins = ParseLine("          # Test comment", 0);
         CHECK(ins.has_value() == false);
-
+    
         ins = ParseLine("          ", 0);
         CHECK(ins.has_value() == false);
-
-        ins = ParseLine("IsEqual: TokenAfterLabelError", 0);
-        CHECK(ins.has_value() == false);
-        // IsEqual:TokenAfterLabelError Read TODO in Parser.cpp of Assembler-Lib
     }
 
 
-    SUBCASE("Instruction lines")
+    SUBCASE("Labels not allowed")
     {
-        auto ins = ParseLine("IsEqual:", 0).value();
-        CHECK(ins.lineNumber == 0);
-        CHECK(ins.label      == "IsEqual");
-        CHECK(ins.opcode     == "");
-        CHECK(ins.lhs        == "");
-        CHECK(ins.rhs        == "");
-        
-        ins = ParseLine("   IsEqual:   ", 0).value();
-        CHECK(ins.lineNumber == 0);
-        CHECK(ins.label      == "IsEqual");
-        CHECK(ins.opcode     == "");
-        CHECK(ins.lhs        == "");
-        CHECK(ins.rhs        == "");
+        auto ins = ParseLine("IsEqual: Test", 0);
+        CHECK(ins.has_value() == false);
 
-        ins = ParseLine("   IsEqual:TokenAfterLabelError   ", 0xFF).value();
-        CHECK(ins.lineNumber == 0xFF);
-        CHECK(ins.label      == "");
-        CHECK(ins.opcode     == "IsEqual:TokenAfterLabelError");
-        CHECK(ins.lhs        == "");
-        CHECK(ins.rhs        == "");
+        ins = ParseLine("IsEqual:Test", 0);
+        CHECK(ins.has_value() == false);
 
-        ins = ParseLine("   IsEqual:TokenAfterLabelError   LHS RHS", 0xFF).value();
-        CHECK(ins.lineNumber == 0xFF);
-        CHECK(ins.label      == "");
-        CHECK(ins.opcode     == "IsEqual:TokenAfterLabelError");
-        CHECK(ins.lhs        == "LHS");
-        CHECK(ins.rhs        == "RHS");
+        ins = ParseLine("123IsEqual: Test", 0);
+        CHECK(ins.has_value() == false);
 
-        ins = ParseLine("MOV $0xFF, R0", 0xFF).value();
-        CHECK(ins.lineNumber == 0xFF);
-        CHECK(ins.label      == "");
-        CHECK(ins.opcode     == "MOV");
-        CHECK(ins.lhs        == "$0xFF");
-        CHECK(ins.rhs        == "R0");
+        ins = ParseLine("123IsEqual:Test", 0);
+        CHECK(ins.has_value() == false);
 
-        ins = ParseLine("MOV $0xFF,R0", 0xFF).value();
-        CHECK(ins.lineNumber == 0xFF);
-        CHECK(ins.label      == "");
-        CHECK(ins.opcode     == "MOV");
-        CHECK(ins.lhs        == "$0xFF");
-        CHECK(ins.rhs        == "R0");
-
-        ins = ParseLine("MOV $0xFF R0", 0xFF).value();
-        CHECK(ins.lineNumber == 0xFF);
-        CHECK(ins.label      == "");
-        CHECK(ins.opcode     == "MOV");
-        CHECK(ins.lhs        == "$0xFF");
-        CHECK(ins.rhs        == "R0");
+        ins = ParseLine("   IsEqual:  Test   ", 0);
+        CHECK(ins.has_value() == false);
     }
 
 
-    SUBCASE("Too many operands")
+    SUBCASE("Labels allowed")
     {
-        auto ins = ParseLine("MOV $0xFF, R0, R1", 0xFF);
-        CHECK(ins.has_value() == false);
-
-        ins = ParseLine("MOV $0xFF, R0, R1, R2", 0xFF);
-        CHECK(ins.has_value() == false);
-
-        ins = ParseLine("MOV $0xFF R0 R1 R2", 0xFF);
-        CHECK(ins.has_value() == false);
-
-        ins = ParseLine("MOV $0xFF,R0, R1, R2", 0xFF);
-        CHECK(ins.has_value() == false);
-
-        ins = ParseLine("MOV $0xFF,R0,R1,R2", 0xFF);
+        auto ins = ParseLine("IsEqual:", 0);
         CHECK(ins.has_value() == true);
-        CHECK(ins.value().lineNumber == 0xFF);
-        CHECK(ins.value().label      == "");
-        CHECK(ins.value().opcode     == "MOV");
-        CHECK(ins.value().lhs        == "$0xFF");
-        CHECK(ins.value().rhs        == "R0,R1,R2");
-    }
+        CHECK(ins.value().label  == "IsEqual");
+        CHECK(ins.value().opcode == "");
+        CHECK(ins.value().lhs    == "");
+        CHECK(ins.value().rhs    == "");
+        CHECK(ins.value().lineNumber == 0);
 
+        ins = ParseLine("IsEqual:    ", 0);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label  == "IsEqual");
+        CHECK(ins.value().opcode == "");
+        CHECK(ins.value().lhs    == "");
+        CHECK(ins.value().rhs    == "");
+        CHECK(ins.value().lineNumber == 0);
 
-    SUBCASE("Not enought operands")
-    {
-        auto ins = ParseLine("MOV $0xFF,", 0xFF).value();
-        CHECK(ins.lineNumber == 0xFF);
-        CHECK(ins.label      == "");
-        CHECK(ins.opcode     == "MOV");
-        CHECK(ins.lhs        == "$0xFF");
-        CHECK(ins.rhs        == "");
+        ins = ParseLine("IsEqual:  # This is a comma", 0);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label  == "IsEqual");
+        CHECK(ins.value().opcode == "");
+        CHECK(ins.value().lhs    == "");
+        CHECK(ins.value().rhs    == "");
+        CHECK(ins.value().lineNumber == 0);
 
-        ins = ParseLine("MOV $0xFF", 0xFF).value();
-        CHECK(ins.lineNumber == 0xFF);
-        CHECK(ins.label      == "");
-        CHECK(ins.opcode     == "MOV");
-        CHECK(ins.lhs        == "$0xFF");
-        CHECK(ins.rhs        == "");
+        ins = ParseLine("   _IsEqual:   # This is a comma", 0);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label  == "_IsEqual");
+        CHECK(ins.value().opcode == "");
+        CHECK(ins.value().lhs    == "");
+        CHECK(ins.value().rhs    == "");
+        CHECK(ins.value().lineNumber == 0);
 
-        ins = ParseLine("MOV", 0xFF).value();
-        CHECK(ins.lineNumber == 0xFF);
-        CHECK(ins.label      == "");
-        CHECK(ins.opcode     == "MOV");
-        CHECK(ins.lhs        == "");
-        CHECK(ins.rhs        == "");
+        ins = ParseLine("   _Is_Equal:   # This is a comma", 0);
+        CHECK(ins.has_value() == true);
+        CHECK(ins.value().label  == "_Is_Equal");
+        CHECK(ins.value().opcode == "");
+        CHECK(ins.value().lhs    == "");
+        CHECK(ins.value().rhs    == "");
+        CHECK(ins.value().lineNumber == 0);
     }
 }
