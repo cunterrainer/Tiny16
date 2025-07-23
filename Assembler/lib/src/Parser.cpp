@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <format>
+#include <utility>
 #include <iostream>
 #include <optional>
 
@@ -63,7 +64,6 @@ std::optional<Instruction> ParseLine(std::string line, size_t lineNumber)
 }
 
 
-// TODO Assign an Opcode a label
 std::vector<Instruction> ParseSourceCode(const std::vector<std::string>& lines)
 {
     std::vector<Instruction> instructions;
@@ -75,12 +75,25 @@ std::vector<Instruction> ParseSourceCode(const std::vector<std::string>& lines)
 
         if (!instr.has_value())
             continue;
-        instructions.push_back(instr.value());
+
+        if (!instructions.empty() && !instructions.back().label.empty() && instructions.back().opcode.empty())
+        {
+            Instruction tmp = instr.value();
+            Instruction& a = instructions.back();
+            a.opcode = tmp.opcode;
+            a.lineNumber = tmp.lineNumber;
+            a.lhs = tmp.lhs;
+            a.rhs = tmp.rhs;
+        }
+        else
+        {
+            instructions.push_back(std::move(instr.value()));
+        }
 #ifndef NDEBUG
-        std::cout << "Label: " << instr.value().label
-            << " | Opcode: " << instr.value().opcode
-            << " | Op1: " << instr.value().lhs
-            << " | Op2: " << instr.value().rhs << "\n";
+        std::cout << "Label: " << instructions.back().label
+            << " | Opcode: " << instructions.back().opcode
+            << " | Op1: " << instructions.back().lhs
+            << " | Op2: " << instructions.back().rhs << "\n";
 #endif
     }
 
