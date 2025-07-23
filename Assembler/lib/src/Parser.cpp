@@ -89,12 +89,8 @@ std::vector<Instruction> ParseSourceCode(const std::vector<std::string>& lines)
 
     for (size_t i = 0; i < lines.size(); i++)
     {
-        // Lowercase in-place
-        std::string line = lines[i];
-        std::ranges::transform(line, line.begin(), [](unsigned char c) { return std::tolower(c); });
-
-        std::optional<Instruction> instr = ParseLine(line, i);
-        std::cout << line << std::endl;
+        std::optional<Instruction> instr = ParseLine(lines[i], i);
+        std::cout << lines[i] << std::endl;
 
         if (!instr.has_value())
             continue;
