@@ -96,4 +96,6 @@ removeunreferencedcodedata "on"
 
 include "Emulator"
 include "Assembler"
+include "Assembler/lib"
+include "Assembler/test"
 include "Dependencies/raylib"

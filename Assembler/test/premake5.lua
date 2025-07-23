@@ -1,4 +1,4 @@
-project "Tiny16-Assembler"
+project "Tiny16-Assembler-Tests"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
@@ -9,7 +9,12 @@ project "Tiny16-Assembler"
     }
 
     includedirs {
-        "lib/src"
+        "Dependencies/doctest",
+        "../lib/src"
+    }
+
+    externalincludedirs {
+        "Dependencies/doctest"
     }
 
     links {

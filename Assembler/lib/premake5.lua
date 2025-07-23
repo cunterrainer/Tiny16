@@ -1,19 +1,11 @@
-project "Tiny16-Assembler"
-    kind "ConsoleApp"
+project "Tiny16-Assembler-Lib"
+    kind "StaticLib"
     language "C++"
     cppdialect "C++20"
 
     files {
         "src/**.cpp",
         "src/**.hpp"
-    }
-
-    includedirs {
-        "lib/src"
-    }
-
-    links {
-        "Tiny16-Assembler-Lib"
     }
 
     filter "configurations:Debug"
