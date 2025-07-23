@@ -21,12 +21,17 @@ std::vector<std::string> Tokenize(const std::string& line)
 
     while (stream >> token)
     {
-        if (token.ends_with(','))
+        if (token.ends_with(',')) // e.g. MOV $4, R0 | $4,
         {
             token.pop_back();
             tokens.push_back(token);
         }
-        else
+        else if (const size_t commaPos = token.find(','); commaPos != std::string::npos) // e.g. MOV $4,R0 | $4,R0
+        {
+            tokens.push_back(token.substr(0, commaPos));
+            tokens.push_back(token.substr(commaPos + 1));
+        }
+        else // e.g. HLT | HLT
         {
             tokens.push_back(token);
         }
