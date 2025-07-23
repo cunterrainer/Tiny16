@@ -14,7 +14,6 @@ struct Instruction
     std::string rhs;
 };
 
-std::vector<std::string> Tokenize(const std::string& line);
 std::optional<Instruction> ParseLine(std::string line, size_t lineNumber);
 std::vector<Instruction> ParseSourceCode(const std::vector<std::string>& lines);
 

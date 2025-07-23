@@ -1,94 +1,65 @@
+﻿#include <regex>
 #include <vector>
 #include <string>
-#include <cctype>
 #include <format>
-#include <ranges>
-#include <utility>
-#include <sstream>
-#include <cstring>
 #include <iostream>
 #include <optional>
-#include <algorithm>
 
 #include "Parser.hpp"
 #include "Utility.hpp"
 
-std::vector<std::string> Tokenize(const std::string& line)
-{
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream stream(line);
-
-    while (stream >> token)
-    {
-        if (token.ends_with(',')) // e.g. MOV $4, R0 | $4,
-        {
-            token.pop_back();
-            tokens.push_back(token);
-        }
-        else if (const size_t commaPos = token.find(','); commaPos != std::string::npos) // e.g. MOV $4,R0 | $4,R0
-        {
-            tokens.push_back(token.substr(0, commaPos));
-            tokens.push_back(token.substr(commaPos + 1));
-        }
-        else // e.g. HLT | HLT
-        {
-            tokens.push_back(token);
-        }
-    }
-    return tokens;
-}
-
 
 std::optional<Instruction> ParseLine(std::string line, size_t lineNumber)
 {
-    // Strip comment
-    const size_t commentPos = line.find('#');
-    if (commentPos != std::string::npos)
+    // Strip comments
+    if (const size_t commentPos = line.find('#'); commentPos != std::string::npos)
         line = line.substr(0, commentPos);
 
     line = Trim(line);
-    if (line.empty())
-        return std::nullopt;
+    if (line.empty()) return std::nullopt;
+   
+    // Matches assembly instructions with 0, 1, or 2 operands in the form:
+    //     OPCODE
+    //     OPCODE OPERAND
+    //     OPCODE OPERAND , OPERAND
+    // Spaces are allowed freely around operands and comma, but the comma must be present for 2 operands.
+    //
+    // Regex breakdown:
+    // ^\s*                      → Optional leading whitespace
+    // ([A-Za-z]+)              → Group 1: The instruction mnemonic (e.g., MOV, ADD)
+    // (?:                      → Begin optional operand group (non-capturing)
+    //     \s+([^,\s]+)         → Group 2: First operand (non-comma, non-space sequence), preceded by at least one space
+    //     (?:\s*,\s*([^,\s]+))?→ Optional Group 3: Second operand after comma, allowing spaces around the comma
+    // )?                       → End optional operand group
+    // \s*$                     → Optional trailing whitespace until end of line
+    static const std::regex instrRegex(R"(^\s*([A-Za-z]+)(?:\s+([^,\s]+)(?:\s*,\s*([^,\s]+))?)?\s*$)");
+    static const std::regex labelRegex(R"(^\s*([A-Za-z_][\w]*):\s*$)"); // Needs from Label: first letter can be A-Za-z or _
 
-    std::vector<std::string> tokens = Tokenize(line);
-    if (tokens.empty()) return std::nullopt;
-
-    constexpr size_t maxOpNum = 3;
-    if (tokens.size() > maxOpNum) // At max 3 tokens e.g. MOV R1, R0 T1: MOV T2 R1 T3 R0
-    {
-        std::cerr << std::format("Error: Too many instruction operands: '{}', Line {}, max number of operands: {}", line, lineNumber, maxOpNum) << std::endl;
-        return std::nullopt;
-    }
+    std::smatch match;
 
     Instruction instr;
     instr.lineNumber = lineNumber;
 
-    // TODO: When validating make sure there is no : in an instruction,
-    // Parser doesnt consider it e.g. IsEqual:Error would be an opcode in this case because it doesnt consider it as an invalid label
-    if (tokens.begin()->ends_with(':'))
+    if (std::regex_match(line, match, labelRegex))
     {
-        instr.label = tokens.begin()->substr(0, tokens.begin()->size() - 1);
-
-        if (tokens.size() == 1)
-        {
-            return instr;
-        }
-        else
-        {
-            std::cerr << std::format("Error: token found after Label: '{}', Line {}", instr.label, instr.lineNumber) << std::endl;
-            return std::nullopt;
-        }
+        instr.label = match[1].str();
+        instr.opcode = "";
+        instr.lhs = "";
+        instr.rhs = "";
+        return instr;
     }
 
-    instr.opcode = tokens[0];
+    if (std::regex_match(line, match, instrRegex))
+    {
+        instr.label = "";
+        instr.opcode = match[1].str();
+        if (match[2].matched) instr.lhs = match[2].str();
+        if (match[3].matched) instr.rhs = match[3].str();
+        return instr;
+    }
 
-    if (tokens.size() > 1)
-        instr.lhs = tokens[1];
-    if (tokens.size() > 2)
-        instr.rhs = tokens[2];
-
-    return instr;
+    std::cerr << std::format("Error: Could not parse line '{}', Line {}", line, lineNumber) << std::endl;
+    return std::nullopt;
 }
 
 
