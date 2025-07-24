@@ -221,6 +221,8 @@ TEST_CASE("IsValidImmediatie()")
         CHECK_FALSE(IsValidImmediate("$+0b"));          // no binary digits
         CHECK_FALSE(IsValidImmediate("$+0xG"));         // invalid hex digit
         CHECK_FALSE(IsValidImmediate("$0x+4"));         // misplaced sign
+        CHECK_FALSE(IsValidImmediate("$+00xF"));        // invalid hex digit
+        CHECK_FALSE(IsValidImmediate("$000b11"));       // invalid binary digit
 
         // Misplaced sign or multiple signs
         CHECK_FALSE(IsValidImmediate("$++0x4"));
