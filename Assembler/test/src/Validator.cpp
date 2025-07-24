@@ -52,16 +52,22 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK_FALSE(ValidateInstruction(ParseLine("ADD", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("SUB", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("CMP", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE", 0).value()).valid);
 
         // Only one operand
         CHECK_FALSE(ValidateInstruction(ParseLine("MOV R1", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("ADD R1", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("SUB R1", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("CMP R1", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE R1", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("MOV $1", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("ADD $1", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("SUB $1", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("CMP $1", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD $1", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE $1", 0).value()).valid);
 
         // Invalid opcode
         CHECK_FALSE(ValidateInstruction(ParseLine("XYZ R1, R2", 0).value()).valid);
@@ -113,5 +119,59 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("CMP R1, R0", 0).value()).valid);
         CHECK(ValidateInstruction(ParseLine("CMP R1, R7", 0).value()).valid);
         CHECK(ValidateInstruction(ParseLine("CMP R1, R7", 0).value()).valid);
+        
+        CHECK(ValidateInstruction(ParseLine("LOAD  $0x4, R0", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("LOAD $+0x4, R7", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("LOAD $-0x4, R7", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, R0", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, R7", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, R7", 0).value()).valid);
+        
+        CHECK(ValidateInstruction(ParseLine("STORE  $0x4, R0", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE $+0x4, R7", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE $-0x4, R7", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R0", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).value()).valid);
+    }
+}
+
+
+bool IsValidImmediate(std::string_view s);
+bool IsValidRegister(std::string_view s);
+TEST_CASE("Test IsValidRegister()")
+{
+    SUBCASE("Invalid")
+    {
+        CHECK_FALSE(IsValidRegister("R"));
+        CHECK_FALSE(IsValidRegister("AA"));
+        CHECK_FALSE(IsValidRegister(""));
+        CHECK_FALSE(IsValidRegister(" "));
+        CHECK_FALSE(IsValidRegister("RR"));
+        CHECK_FALSE(IsValidRegister("R8"));
+        CHECK_FALSE(IsValidRegister("R-1"));
+        CHECK_FALSE(IsValidRegister("R9"));
+    }
+    
+    
+    SUBCASE("Valid")
+    {
+        CHECK(IsValidRegister("R0"));
+        CHECK(IsValidRegister("R1"));
+        CHECK(IsValidRegister("R2"));
+        CHECK(IsValidRegister("R3"));
+        CHECK(IsValidRegister("R4"));
+        CHECK(IsValidRegister("R5"));
+        CHECK(IsValidRegister("R6"));
+        CHECK(IsValidRegister("R7"));
+        
+        CHECK(IsValidRegister("r0"));
+        CHECK(IsValidRegister("r1"));
+        CHECK(IsValidRegister("r2"));
+        CHECK(IsValidRegister("r3"));
+        CHECK(IsValidRegister("r4"));
+        CHECK(IsValidRegister("r5"));
+        CHECK(IsValidRegister("r6"));
+        CHECK(IsValidRegister("r7"));
     }
 }
