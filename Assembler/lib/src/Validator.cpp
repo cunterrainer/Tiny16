@@ -91,7 +91,7 @@ ValidationResult ValidateInstruction(const Instruction& instr)
             return { false, std::format("Instruction: {} {}, {}\nToo many operands, correct form: {} Label", instr.opcode, instr.lhs, instr.rhs, instr.opcode) };
         }
     }
-    else if (opcode == "MOV" || opcode == "ADD" || opcode == "SUB" || opcode == "CMP")
+    else if (opcode == "MOV" || opcode == "ADD" || opcode == "SUB" || opcode == "CMP" || opcode == "LOAD" || opcode == "STORE")
     {
         if (instr.lhs.empty() || instr.rhs.empty())
         {
