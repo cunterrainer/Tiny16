@@ -2,6 +2,9 @@
 .vs/
 .vscode/
 .idea/
+.codelite/
+.cache/
+.build-debug/
 
 BIN/
 
@@ -19,3 +22,12 @@ Makefile
 
 *.xcodeproj
 *.xcworkspace
+
+*.mk
+*.project
+*.workspace
+compile_commands.json
+Emulator/Tiny16-Emulator.txt
+Assembler/Tiny16-Assembler.txt
+Assembler/lib/Tiny16-Assembler-Lib.txt
+Assembler/test/Tiny16-Assembler-Tests.txt
