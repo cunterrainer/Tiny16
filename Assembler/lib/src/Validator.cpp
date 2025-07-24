@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include "Parser.hpp"
+#include "Utility.hpp"
 
 struct ValidationResult
 {
@@ -37,7 +38,7 @@ bool IsValidImmediate(std::string_view s)
     else if (s.starts_with("0b") || s.starts_with("0B"))
     {
         if (isNegative)
-            return false; // ❌ No negative binary allowed
+            return false; // No negative binary allowed
 
         s.remove_prefix(2);
         return !s.empty() && std::all_of(s.begin(), s.end(), [](char c) {
@@ -54,11 +55,13 @@ bool IsValidImmediate(std::string_view s)
 }
 
 
-
 bool IsValidRegister(std::string_view s)
 {
+    // including lower and uppercase R is easier than uppercasing every string
     return s == "R0" || s == "R1" || s == "R2" || s == "R3" ||
-        s == "R4" || s == "R5" || s == "R6" || s == "R7";
+        s == "R4" || s == "R5" || s == "R6" || s == "R7" ||
+        s == "r0" || s == "r1" || s == "r2" || s == "r3" ||
+        s == "r4" || s == "r5" || s == "r6" || s == "r7";
 }
 
 
@@ -105,7 +108,7 @@ ValidationResult ValidateInstruction(const Instruction& instr)
     }
     else
     {
-        return { false, std::format("Instruction {} {} {}\nUnknown instruction", instr.opcode, instr.lhs, instr.rhs) };
+        return { false, std::format("Instruction {} {} {}\nUnknown instruction: {}", instr.opcode, instr.lhs, instr.rhs, instr.opcode) };
     }
 
     return { true, "" };
