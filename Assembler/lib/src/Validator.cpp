@@ -17,29 +17,42 @@ bool IsValidImmediate(std::string_view s)
 {
     if (s.size() < 2 || s[0] != '$') return false;
 
-    s.remove_prefix(1); // remove the '$'
+    s.remove_prefix(1); // Remove '$'
+
+    // Remember if there's a leading '+' or '-'
+    bool isNegative = false;
+    if (!s.empty() && (s[0] == '+' || s[0] == '-'))
+    {
+        isNegative = (s[0] == '-');
+        s.remove_prefix(1);
+    }
 
     if (s.starts_with("0x") || s.starts_with("0X"))
     {
         s.remove_prefix(2);
         return !s.empty() && std::all_of(s.begin(), s.end(), [](char c) {
             return std::isxdigit(static_cast<unsigned char>(c));
-            });
+        });
     }
     else if (s.starts_with("0b") || s.starts_with("0B"))
     {
+        if (isNegative)
+            return false; // ❌ No negative binary allowed
+
         s.remove_prefix(2);
         return !s.empty() && std::all_of(s.begin(), s.end(), [](char c) {
             return c == '0' || c == '1';
-            });
+        });
     }
     else
     {
-        return std::all_of(s.begin(), s.end(), [](char c) {
+        // Decimal case
+        return !s.empty() && std::all_of(s.begin(), s.end(), [](char c) {
             return std::isdigit(static_cast<unsigned char>(c));
-            });
+        });
     }
 }
+
 
 
 bool IsValidRegister(std::string_view s)
@@ -74,6 +87,25 @@ ValidationResult ValidateInstruction(const Instruction& instr)
         {
             return { false, std::format("Instruction: {} {}, {}\nToo many operands, correct form: {} Label", instr.opcode, instr.lhs, instr.rhs, instr.opcode) };
         }
+    }
+    else if (opcode == "MOV" || opcode == "ADD" || opcode == "SUB" || opcode == "CMP")
+    {
+        if (instr.lhs.empty() || instr.rhs.empty())
+        {
+            return { false, std::format("Instruction: {} {}\nNot enought operands, correct form: {} {}, Register", instr.opcode, instr.lhs, instr.opcode, instr.lhs) };
+        }
+        if (!IsValidRegister(instr.rhs))
+        {
+            return { false, std::format("Instruction: {} {}, {}\nInvalid destination register: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
+        }
+        if (!IsValidImmediate(instr.lhs) && !IsValidRegister(instr.lhs))
+        {
+            return { false, std::format("Instruction: {} {}, {}\nInvalid source register or source intermediate value: {}", instr.opcode, instr.lhs, instr.rhs, instr.lhs) };
+        }
+    }
+    else
+    {
+        return { false, std::format("Instruction {} {} {}\nUnknown instruction", instr.opcode, instr.lhs, instr.rhs) };
     }
 
     return { true, "" };
