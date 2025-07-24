@@ -137,7 +137,6 @@ TEST_CASE("Test ValidateInstruction()")
 }
 
 
-bool IsValidImmediate(std::string_view s);
 bool IsValidRegister(std::string_view s);
 TEST_CASE("Test IsValidRegister()")
 {
@@ -173,5 +172,99 @@ TEST_CASE("Test IsValidRegister()")
         CHECK(IsValidRegister("r5"));
         CHECK(IsValidRegister("r6"));
         CHECK(IsValidRegister("r7"));
+    }
+}
+
+
+bool IsValidImmediate(std::string_view s);
+TEST_CASE("IsValidImmediatie()")
+{
+    SUBCASE("Invalid")
+    {
+        // Empty or whitespace
+        CHECK_FALSE(IsValidImmediate(""));
+        CHECK_FALSE(IsValidImmediate(" "));
+        CHECK_FALSE(IsValidImmediate("  "));
+
+        // Not starting with $
+        CHECK_FALSE(IsValidImmediate("R"));
+        CHECK_FALSE(IsValidImmediate("R1"));
+        CHECK_FALSE(IsValidImmediate("1"));
+        CHECK_FALSE(IsValidImmediate("99"));
+        CHECK_FALSE(IsValidImmediate("999"));
+        CHECK_FALSE(IsValidImmediate("0x99"));
+        CHECK_FALSE(IsValidImmediate("0x"));
+        CHECK_FALSE(IsValidImmediate("0x9"));
+        CHECK_FALSE(IsValidImmediate("0b01"));
+        CHECK_FALSE(IsValidImmediate("-0b01"));
+
+        // Malformed dollar-prefixed
+        CHECK_FALSE(IsValidImmediate("$"));             // only $
+        CHECK_FALSE(IsValidImmediate("$ "));            // $ with space
+        CHECK_FALSE(IsValidImmediate("$-"));            // $ minus nothing
+        CHECK_FALSE(IsValidImmediate("$--1"));          // double minus
+        CHECK_FALSE(IsValidImmediate("$++1"));          // double plus
+        CHECK_FALSE(IsValidImmediate("$+-1"));          // invalid mixed signs
+        CHECK_FALSE(IsValidImmediate("$-0b01"));        // binary cannot be signed
+        CHECK_FALSE(IsValidImmediate("$0x"));           // no digits
+        CHECK_FALSE(IsValidImmediate("$0xGHI"));        // invalid hex
+        CHECK_FALSE(IsValidImmediate("$0b"));           // no bits
+        CHECK_FALSE(IsValidImmediate("$0b012"));        // invalid binary
+        CHECK_FALSE(IsValidImmediate("$0b2"));          // binary with '2'
+        CHECK_FALSE(IsValidImmediate("$0b00a"));        // binary with letter
+        CHECK_FALSE(IsValidImmediate("$0x123Z"));       // invalid hex tail
+        CHECK_FALSE(IsValidImmediate("$10A"));          // decimal with letter
+        CHECK_FALSE(IsValidImmediate("$10.1"));         // floats not supported
+        CHECK_FALSE(IsValidImmediate("$+"));            // incomplete
+        CHECK_FALSE(IsValidImmediate("$-"));            // incomplete
+        CHECK_FALSE(IsValidImmediate("$-0x"));          // no hex digits
+        CHECK_FALSE(IsValidImmediate("$+0b"));          // no binary digits
+        CHECK_FALSE(IsValidImmediate("$+0xG"));         // invalid hex digit
+        CHECK_FALSE(IsValidImmediate("$0x+4"));         // misplaced sign
+
+        // Misplaced sign or multiple signs
+        CHECK_FALSE(IsValidImmediate("$++0x4"));
+        CHECK_FALSE(IsValidImmediate("$--0x4"));
+        CHECK_FALSE(IsValidImmediate("$0x-4"));  // sign must come before 0x
+    }
+    
+    
+    SUBCASE("Valid")
+    {
+        // Decimal
+        CHECK(IsValidImmediate("$0"));
+        CHECK(IsValidImmediate("$1"));
+        CHECK(IsValidImmediate("$42"));
+        CHECK(IsValidImmediate("$+123"));
+        CHECK(IsValidImmediate("$-999"));
+        CHECK(IsValidImmediate("$000123"));
+
+        // Hexadecimal
+        CHECK(IsValidImmediate("$0x0"));
+        CHECK(IsValidImmediate("$0x1"));
+        CHECK(IsValidImmediate("$0xFF"));
+        CHECK(IsValidImmediate("$0XdeadBEEF"));
+        CHECK(IsValidImmediate("$+0xABC"));
+        CHECK(IsValidImmediate("$-0x10"));
+
+        // Binary
+        CHECK(IsValidImmediate("$0b0"));
+        CHECK(IsValidImmediate("$0b1"));
+        CHECK(IsValidImmediate("$0b01"));
+        CHECK(IsValidImmediate("$0B101010"));
+        CHECK(IsValidImmediate("$+0b11"));  // '+' allowed even though not meaningful
+        CHECK(IsValidImmediate("$0b00001111"));
+
+        // Edge cases
+        CHECK(IsValidImmediate("$+0"));
+        CHECK(IsValidImmediate("$-0"));
+        CHECK(IsValidImmediate("$+0x0"));
+        CHECK(IsValidImmediate("$-0x0"));
+
+        // Upper and lower case consistency
+        CHECK(IsValidImmediate("$0XFF"));
+        CHECK(IsValidImmediate("$0xFF"));
+        CHECK(IsValidImmediate("$0B10"));
+        CHECK(IsValidImmediate("$0b10"));
     }
 }
