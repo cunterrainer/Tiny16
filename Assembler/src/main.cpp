@@ -26,5 +26,7 @@ int main()
             return -1;
         }
     }
+    
+    //Assembly(instructions);
     return 0;
 }
