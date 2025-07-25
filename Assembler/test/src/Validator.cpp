@@ -73,6 +73,22 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK_FALSE(ValidateInstruction(ParseLine("XYZ R1, R2", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("XYZ R1", 0).value()).valid);
         CHECK_FALSE(ValidateInstruction(ParseLine("XYZ", 0).value()).valid);
+        
+        // Load op1 has to be an address and op2 ahs to be a register
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, R7", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, R7", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, R0", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, $3", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, $0x20", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, $0b11", 0).value()).valid);
+
+        // Store op1 has to be a register and op2 has to be an address
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE  $0x4, R0", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE $+0x4, R7", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE $-0x4, R7", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE R1, R0", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE R1, R7", 0).value()).valid);
+        CHECK_FALSE(ValidateInstruction(ParseLine("STORE R1, R7", 0).value()).valid);
     }
 
 
@@ -123,16 +139,10 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("LOAD  $0x4, R0", 0).value()).valid);
         CHECK(ValidateInstruction(ParseLine("LOAD $+0x4, R7", 0).value()).valid);
         CHECK(ValidateInstruction(ParseLine("LOAD $-0x4, R7", 0).value()).valid);
-        CHECK(ValidateInstruction(ParseLine("LOAD R1, R0", 0).value()).valid);
-        CHECK(ValidateInstruction(ParseLine("LOAD R1, R7", 0).value()).valid);
-        CHECK(ValidateInstruction(ParseLine("LOAD R1, R7", 0).value()).valid);
         
-        CHECK(ValidateInstruction(ParseLine("STORE  $0x4, R0", 0).value()).valid);
-        CHECK(ValidateInstruction(ParseLine("STORE $+0x4, R7", 0).value()).valid);
-        CHECK(ValidateInstruction(ParseLine("STORE $-0x4, R7", 0).value()).valid);
-        CHECK(ValidateInstruction(ParseLine("STORE R1, R0", 0).value()).valid);
-        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).value()).valid);
-        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE R0, $0xFF", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE R7, $0x29", 0).value()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE R7, $0b11", 0).value()).valid);
     }
 }
 

@@ -91,7 +91,7 @@ ValidationResult ValidateInstruction(const Instruction& instr)
             return { false, std::format("Instruction: {} {}, {}\nToo many operands, correct form: {} Label", instr.opcode, instr.lhs, instr.rhs, instr.opcode) };
         }
     }
-    else if (opcode == "MOV" || opcode == "ADD" || opcode == "SUB" || opcode == "CMP" || opcode == "LOAD" || opcode == "STORE")
+    else if (opcode == "MOV" || opcode == "ADD" || opcode == "SUB" || opcode == "CMP")
     {
         if (instr.lhs.empty() || instr.rhs.empty())
         {
@@ -104,6 +104,36 @@ ValidationResult ValidateInstruction(const Instruction& instr)
         if (!IsValidImmediate(instr.lhs) && !IsValidRegister(instr.lhs))
         {
             return { false, std::format("Instruction: {} {}, {}\nInvalid source register or source intermediate value: {}", instr.opcode, instr.lhs, instr.rhs, instr.lhs) };
+        }
+    }
+    else if (opcode == "LOAD")
+    {
+        if (instr.lhs.empty() || instr.rhs.empty())
+        {
+            return { false, std::format("Instruction: {} {}\nNot enought operands, correct form: {} Address, Register", instr.opcode, instr.lhs, instr.opcode, instr.lhs) };
+        }
+        if (!IsValidImmediate(instr.lhs))
+        {
+            return { false, std::format("Instruction: {} {}, {}\nInvalid source address: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
+        }
+        if (!IsValidRegister(instr.rhs))
+        {
+            return { false, std::format("Instruction: {} {}, {}\nInvalid destination register: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
+        }
+    }
+    else if (opcode == "STORE")
+    {
+        if (instr.lhs.empty() || instr.rhs.empty())
+        {
+            return { false, std::format("Instruction: {} {}\nNot enought operands, correct form: {} Register, Address", instr.opcode, instr.lhs, instr.opcode, instr.lhs) };
+        }
+        if (!IsValidRegister(instr.lhs))
+        {
+            return { false, std::format("Instruction: {} {}, {}\nInvalid source register: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
+        }
+        if (!IsValidImmediate(instr.rhs))
+        {
+            return { false, std::format("Instruction: {} {}, {}\nInvalid destination address: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
         }
     }
     else
