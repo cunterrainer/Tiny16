@@ -1,5 +1,6 @@
 #include <format>
 #include <string>
+#include <ccytpe>
 #include <cstdint>
 #include <optional>
 #include <charconv>
@@ -105,6 +106,9 @@ std::optional<Operand> ParseOperand(const std::string& str)
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
 {
+    std::string opcode = parsedInstr.opcode;
+    std::transform(opcode.begin(), opcode.end(), opcode.begin(), std::toupper);
+    
     const std::optional<Operand> op1 = ParseOperand(parsedInstr.lhs);
     if (!op1)
     {
@@ -119,7 +123,7 @@ InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
     
     InstructionIR instruction;
     instruction.label = parsedInstr.label;
-    instruction.opcode = ToOpcode(parsedInstr.opcode);
+    instruction.opcode = ToOpcode(opcode);
     instruction.op1 = op1.value();
     instruction.op2 = op2.value();
     return instruction;
