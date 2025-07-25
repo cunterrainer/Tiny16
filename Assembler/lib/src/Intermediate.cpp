@@ -1,28 +1,34 @@
 #include <format>
 #include <string>
-#include <ccytpe>
+#include <cctype>
 #include <cstdint>
 #include <optional>
 #include <charconv>
 #include <stdexcept>
+#include <algorithm>
 #include <string_view>
 
 #include "Parser.hpp"
 #include "Intermediate.hpp"
 
-OpcodeIR ToOpcode(const std::string_view str)
+OpcodeIR ToOpcode(const std::string& str)
 {
-    if (str == "MOV")   return OpcodeIR::MOV;
-    if (str == "ADD")   return OpcodeIR::ADD;
-    if (str == "SUB")   return OpcodeIR::SUB;
-    if (str == "CMP")   return OpcodeIR::CMP;
-    if (str == "JMP")   return OpcodeIR::JMP;
-    if (str == "JE")    return OpcodeIR::JE;
-    if (str == "HLT")   return OpcodeIR::HLT;
-    if (str == "LOAD")  return OpcodeIR::LOAD;
-    if (str == "STORE") return OpcodeIR::STORE;
+    std::string opcode = str;
+    std::transform(opcode.begin(), opcode.end(), opcode.begin(), [](unsigned char c) {
+        return std::toupper(c);
+    });
     
-    throw std::logic_error(std::format("Unreachable code, check for errors in opcode validation code.\nOpcode: {}", str));
+    if (opcode == "MOV")   return OpcodeIR::MOV;
+    if (opcode == "ADD")   return OpcodeIR::ADD;
+    if (opcode == "SUB")   return OpcodeIR::SUB;
+    if (opcode == "CMP")   return OpcodeIR::CMP;
+    if (opcode == "JMP")   return OpcodeIR::JMP;
+    if (opcode == "JE")    return OpcodeIR::JE;
+    if (opcode == "HLT")   return OpcodeIR::HLT;
+    if (opcode == "LOAD")  return OpcodeIR::LOAD;
+    if (opcode == "STORE") return OpcodeIR::STORE;
+    
+    throw std::logic_error(std::format("Unreachable code, check for errors in opcode validation code.\nOpcode: {}", opcode));
 }
 
 
@@ -54,6 +60,11 @@ std::uint16_t ParseIntermediate(const std::string& operand)
     {
         base = 2;
         immStr = immStr.substr(2);
+    }
+    
+    if (base == 2 && sign == -1)
+    {
+        throw std::logic_error("Invalid binary number sign, check validation code");
     }
 
     // Parse into a temporary unsigned value (safest)
@@ -106,9 +117,6 @@ std::optional<Operand> ParseOperand(const std::string& str)
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
 {
-    std::string opcode = parsedInstr.opcode;
-    std::transform(opcode.begin(), opcode.end(), opcode.begin(), std::toupper);
-    
     const std::optional<Operand> op1 = ParseOperand(parsedInstr.lhs);
     if (!op1)
     {
@@ -123,7 +131,7 @@ InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
     
     InstructionIR instruction;
     instruction.label = parsedInstr.label;
-    instruction.opcode = ToOpcode(opcode);
+    instruction.opcode = ToOpcode(parsedInstr.opcode);
     instruction.op1 = op1.value();
     instruction.op2 = op2.value();
     return instruction;
