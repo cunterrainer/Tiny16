@@ -11,6 +11,6 @@ struct ValidationResult
     std::string errorMsg;
 };
 
-ValidationResult ValidateInstruction(const Instruction& instr);
+ValidationResult ValidateInstruction(const ParsedInstruction& instr);
 
 #endif // VALIDATOR_H

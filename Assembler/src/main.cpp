@@ -16,7 +16,7 @@ int main()
     if (!sourceLines)
         return 1;
 
-    std::vector<Instruction> instructions = ParseSourceCode(sourceLines.value());
+    std::vector<ParsedInstruction> instructions = ParseSourceCode(sourceLines.value());
     for (const auto& instr : instructions)
     {
         const ValidationResult result = ValidateInstruction(instr);

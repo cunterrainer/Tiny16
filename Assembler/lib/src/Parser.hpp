@@ -5,7 +5,7 @@
 #include <vector>
 #include <optional>
 
-struct Instruction
+struct ParsedInstruction
 {
     size_t lineNumber;
     std::string label;
@@ -14,7 +14,7 @@ struct Instruction
     std::string rhs;
 };
 
-std::optional<Instruction> ParseLine(std::string line, size_t lineNumber);
-std::vector<Instruction> ParseSourceCode(const std::vector<std::string>& lines);
+std::optional<ParsedInstruction> ParseLine(std::string line, size_t lineNumber);
+std::vector<ParsedInstruction> ParseSourceCode(const std::vector<std::string>& lines);
 
 #endif // PARSER_H

@@ -65,7 +65,7 @@ bool IsValidRegister(std::string_view s)
 }
 
 
-ValidationResult ValidateInstruction(const Instruction& instr)
+ValidationResult ValidateInstruction(const ParsedInstruction& instr)
 {
     const auto toUpperCase = [](unsigned char c) { return std::toupper(c); };
 
@@ -145,9 +145,9 @@ ValidationResult ValidateInstruction(const Instruction& instr)
 }
 
 
-ValidationResult ValidateInstructions(const std::vector<Instruction>& instructions, std::string_view filePath)
+ValidationResult ValidateInstructions(const std::vector<ParsedInstruction>& instructions, std::string_view filePath)
 {
-    for (const Instruction& i : instructions)
+    for (const ParsedInstruction& i : instructions)
     {
         ValidationResult result = ValidateInstruction(i);
         if (!result.valid)

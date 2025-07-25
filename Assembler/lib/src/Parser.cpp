@@ -10,7 +10,7 @@
 #include "Utility.hpp"
 
 
-std::optional<Instruction> ParseLine(std::string line, size_t lineNumber)
+std::optional<ParsedInstruction> ParseLine(std::string line, size_t lineNumber)
 {
     // Strip comments
     if (const size_t commentPos = line.find('#'); commentPos != std::string::npos)
@@ -38,7 +38,7 @@ std::optional<Instruction> ParseLine(std::string line, size_t lineNumber)
 
     std::smatch match;
 
-    Instruction instr;
+    ParsedInstruction instr;
     instr.lineNumber = lineNumber;
 
     if (std::regex_match(line, match, labelRegex))
@@ -64,13 +64,13 @@ std::optional<Instruction> ParseLine(std::string line, size_t lineNumber)
 }
 
 
-std::vector<Instruction> ParseSourceCode(const std::vector<std::string>& lines)
+std::vector<ParsedInstruction> ParseSourceCode(const std::vector<std::string>& lines)
 {
-    std::vector<Instruction> instructions;
+    std::vector<ParsedInstruction> instructions;
 
     for (size_t i = 0; i < lines.size(); i++)
     {
-        std::optional<Instruction> instr = ParseLine(lines[i], i);
+        std::optional<ParsedInstruction> instr = ParseLine(lines[i], i);
         std::cout << lines[i] << std::endl;
 
         if (!instr.has_value())
@@ -78,8 +78,8 @@ std::vector<Instruction> ParseSourceCode(const std::vector<std::string>& lines)
 
         if (!instructions.empty() && !instructions.back().label.empty() && instructions.back().opcode.empty())
         {
-            Instruction tmp = instr.value();
-            Instruction& a = instructions.back();
+            ParsedInstruction tmp = instr.value();
+            ParsedInstruction& a = instructions.back();
             a.opcode = tmp.opcode;
             a.lineNumber = tmp.lineNumber;
             a.lhs = tmp.lhs;
