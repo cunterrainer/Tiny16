@@ -113,6 +113,8 @@ TEST_CASE("Testing ParseOperand()")
 
         a = ParseOperand("R7").value();
         CHECK(a == Operand{ OperandType::Register, 7 });
+        
+        CHECK(ParseOperand("Label").has_value());
     }
 
     SUBCASE("Valid immediates")
