@@ -8,6 +8,10 @@ project "Tiny16-Assembler-Lib"
         "src/**.hpp"
     }
 
+    includedirs {
+        "../../Utility/include"
+    }
+
     filter "configurations:Debug"
         warnings "off"
         externalwarnings "off"
