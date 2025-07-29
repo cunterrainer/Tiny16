@@ -21,6 +21,9 @@ project "Tiny16-Assembler"
         externalwarnings "off"
 
     -- gcc* clang* msc*
+    filter "toolset:msc*"
+        buildoptions "/Zc:__cplusplus" -- enforce __cplusplus macro being set to actually C++ version, for some reason msvc sets it to C++98 for compatibility without this setting
+
     filter { "toolset:msc*", "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution" }
         warnings "High" -- High
         externalwarnings "off" -- Default
