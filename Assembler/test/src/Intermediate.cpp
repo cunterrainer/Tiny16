@@ -1,5 +1,7 @@
 #include "doctest/doctest.h"
 
+#include <stdexcept>
+
 #include "Intermediate.hpp"
 
 OpcodeIR ToOpcode(const std::string& str);
