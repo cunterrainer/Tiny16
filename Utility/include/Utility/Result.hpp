@@ -1,5 +1,6 @@
 ﻿/*
     Hint: User format string from C++20 std::format if you're on C++20 or above
+    Hint: All the functions have a Take variant e.g. OkTake() returning a movable T&&
 
     Example:
         Result<std::string> ReadFile(const char* p)
@@ -139,7 +140,7 @@ template <>
 class Error<void>
 {
 private:
-    std::string m_What;
+    mutable std::string m_What;
 public:
     #if HAS_STD_FORMAT
         // Compile-time format string overload (safe, fast)
@@ -184,6 +185,11 @@ public:
     inline const std::string& What() const noexcept
     {
         return m_What;
+    }
+
+    inline std::string&& WhatTake() const noexcept
+    {
+        return std::move(m_What);
     }
 };
 
@@ -261,8 +267,8 @@ class Result
 private:
     union
     {
-        T m_Data;
-        E m_Error;
+        mutable T m_Data;
+        mutable E m_Error;
     };
     bool m_Valid;
 public:
@@ -373,37 +379,28 @@ public:
             m_Error.~E();
     }
 
-    //T Ok() = delete;
-    //T Ok() const = delete;
-
-    //inline T& Ok() & noexcept
-    //{
-    //    assert(m_Valid && "Don't access the Ok() value if it is an error, use IsOk() to check beforehand!");
-    //    return m_Data;
-    //}
-
     inline const T& Ok() const noexcept
     {
         assert(m_Valid && "Don't access the Ok() value if it is an error, use IsOk() to check beforehand!");
         return m_Data;
     }
 
-    //inline T&& Ok() && noexcept
-    //{
-    //    assert(m_Valid && "Don't access the Ok() value if it is an error, use IsOk() to check beforehand!");
-    //    return std::move(m_Data);
-    //}
-    //
-    //inline const T&& Ok() const&& noexcept
-    //{
-    //    assert(m_Valid && "Don't access the Ok() value if it is an error, use IsOk() to check beforehand!");
-    //    return std::move(m_Data);
-    //}
+    inline T&& OkTake() const noexcept(std::is_nothrow_move_constructible<T>::value)
+    {
+        assert(m_Valid && "Don't access the Ok() value if it is an error, use IsOk() to check beforehand!");
+        return std::move(m_Data);
+    }
 
     inline const E& Err() const noexcept
     {
         assert(!m_Valid && "Don't access the Err() value if it is not an error, use IsErr() to check beforehand!");
         return m_Error;
+    }
+
+    inline E&& ErrTake() const noexcept(std::is_nothrow_move_constructible<E>::value)
+    {
+        assert(!m_Valid && "Don't access the Err() value if it is not an error, use IsErr() to check beforehand!");
+        return std::move(m_Error);
     }
 
     explicit operator bool() const noexcept
@@ -428,18 +425,40 @@ public:
         throw m_Error;
     }
 
-    inline const T& UnwrapOr(const T& t) const
+    inline T&& UnwrapTake() const
+    {
+        if (m_Valid)
+            return std::move(m_Data);
+        throw m_Error;
+    }
+
+    inline const T& UnwrapOr(const T& t) const noexcept
     {
         if (m_Valid)
             return m_Data;
         return t;
     }
 
+    inline T&& UnwrapOrTake(T&& t) const noexcept(std::is_nothrow_move_constructible<T>::value)
+    {
+        if (m_Valid)
+            return std::move(m_Data);
+        return std::move(t);
+    }
+
     template <typename U = T, typename std::enable_if<std::is_default_constructible<U>::value, int>::type = 0>
-    inline T UnwrapOrDefault() const
+    inline T UnwrapOrDefault() const noexcept(std::is_nothrow_constructible<T>::value)
     {
         if (m_Valid)
             return m_Data;
+        return T();
+    }
+
+    template <typename U = T, typename std::enable_if<std::is_default_constructible<U>::value, int>::type = 0>
+    inline T&& UnwrapOrDefaultTake() const noexcept(std::is_nothrow_constructible<T>::value && std::is_nothrow_move_constructible<T>::value)
+    {
+        if (m_Valid)
+            return std::move(m_Data);
         return T();
     }
 
@@ -451,11 +470,27 @@ public:
         return f(std::forward<Args>(args)...);
     }
 
+    template <typename Func, typename... Args>
+    inline T&& UnwrapOrElseTake(const Func& f, Args&&... args) const
+    {
+        if (m_Valid)
+            return std::move(m_Data);
+        return f(std::forward<Args>(args)...);
+    }
+
     template <typename U = E, typename = ResultUtil::VoidT<decltype(std::declval<U>().What())>>
     inline const T& Expect(const char* msg) const
     {
         if (m_Valid)
             return m_Data;
+        throw E(std::string(msg) + m_Error.what());
+    }
+
+    template <typename U = E, typename = ResultUtil::VoidT<decltype(std::declval<U>().What())>>
+    inline T&& ExpectTake(const char* msg) const
+    {
+        if (m_Valid)
+            return std::move(m_Data);
         throw E(std::string(msg) + m_Error.what());
     }
 };
@@ -469,7 +504,7 @@ class Result<void, E>
     static_assert(std::is_copy_constructible<E>::value, "Result<void>::Error type has to be copiable");
     static_assert(std::is_move_constructible<E>::value, "Result<void>::Error type has to be movable");
 private:
-    E m_Error;
+    mutable E m_Error;
     bool m_Valid;
 public:
     inline Result(const E& e) : m_Error(e), m_Valid(false) {}
@@ -507,6 +542,12 @@ public:
     inline const E& Err() const noexcept
     {
         return m_Error;
+    }
+
+    inline E&& ErrTake() const noexcept
+    {
+        assert(!m_Valid && "Don't access the Err() value if it is not an error, use IsErr() to check beforehand!");
+        return std::move(m_Error);
     }
 
     explicit operator bool() const noexcept
