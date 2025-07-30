@@ -9,7 +9,8 @@ project "Tiny16-Assembler"
     }
 
     includedirs {
-        "lib/src"
+        "lib/src",
+        "../Utility/include"
     }
 
     links {
