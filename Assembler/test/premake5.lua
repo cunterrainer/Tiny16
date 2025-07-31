@@ -9,6 +9,7 @@ project "Tiny16-Assembler-Tests"
     }
 
     includedirs {
+        "../../Utility/include",
         "Dependencies/doctest",
         "../lib/src"
     }
