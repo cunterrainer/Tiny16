@@ -16,23 +16,25 @@
 
 #include "Utility.hpp"
 
-std::optional<std::vector<std::string>> ReadFile(const std::string& path)
+#include "Utility/Result.hpp"
+
+Result<std::vector<std::string>> ReadFile(const std::string& path)
 {
     std::ifstream file(path);
 
     if (!file.is_open())
     {
         const char* const reason = std::strerror(errno);
-        std::cout << std::format("Failed to open file '{}', Reason: {}\n", path, reason) << std::endl;
-        return std::nullopt;
+        return Err("Failed to open file '{}', Reason: {}", path, reason);
     }
 
     std::vector<std::string> lines;
+    lines.reserve(200); // rough estimate
 
     std::string line;
     while (std::getline(file, line))
     {
-        lines.emplace_back(std::move(line));
+        lines.push_back(std::move(line));
     }
 
     return lines;
