@@ -9,15 +9,17 @@
 #include "Parser.hpp"
 #include "Utility.hpp"
 
+#include "Utility/Result.hpp"
 
-std::optional<ParsedInstruction> ParseLine(std::string line, size_t lineNumber)
+
+Result<ParsedInstruction> ParseLine(std::string line, size_t lineNumber)
 {
     // Strip comments
     if (const size_t commentPos = line.find('#'); commentPos != std::string::npos)
         line = line.substr(0, commentPos);
 
     line = Trim(line);
-    if (line.empty()) return std::nullopt;
+    if (line.empty()) return ParsedInstruction();
    
     // Matches assembly instructions with 0, 1, or 2 operands in the form:
     //     OPCODE
@@ -59,26 +61,31 @@ std::optional<ParsedInstruction> ParseLine(std::string line, size_t lineNumber)
         return instr;
     }
 
-    std::cerr << std::format("Error: Could not parse line '{}', Line {}", line, lineNumber) << std::endl;
-    return std::nullopt;
+    return Err("Error: Failed to parse line {}: '{}', unknown label or instruction structure", lineNumber, line);
 }
 
 
-std::vector<ParsedInstruction> ParseSourceCode(const std::vector<std::string>& lines)
+Result<std::vector<ParsedInstruction>> ParseSourceCode(const std::vector<std::string>& lines)
 {
     std::vector<ParsedInstruction> instructions;
 
     for (size_t i = 0; i < lines.size(); i++)
     {
-        std::optional<ParsedInstruction> instr = ParseLine(lines[i], i);
-        std::cout << lines[i] << std::endl;
+        Result<ParsedInstruction> instr = ParseLine(lines[i], i);
 
-        if (!instr.has_value())
+        if (instr.IsErr())
+        {
+            return instr.Err();
+        }
+
+        if (instr.Ok().label.empty() && instr.Ok().opcode.empty()) // Was a comment or empty line
+        {
             continue;
+        }
 
         if (!instructions.empty() && !instructions.back().label.empty() && instructions.back().opcode.empty())
         {
-            ParsedInstruction tmp = instr.value();
+            const ParsedInstruction& tmp = instr.Ok();
             ParsedInstruction& a = instructions.back();
             a.opcode = tmp.opcode;
             a.lineNumber = tmp.lineNumber;
@@ -87,14 +94,14 @@ std::vector<ParsedInstruction> ParseSourceCode(const std::vector<std::string>& l
         }
         else
         {
-            instructions.push_back(std::move(instr.value()));
+            instructions.emplace_back(std::move(instr.OkTake()));
         }
-#ifndef NDEBUG
-        std::cout << "Label: " << instructions.back().label
-            << " | Opcode: " << instructions.back().opcode
-            << " | Op1: " << instructions.back().lhs
-            << " | Op2: " << instructions.back().rhs << "\n";
-#endif
+//#ifndef NDEBUG
+//        std::cout << "Label: " << instructions.back().label
+//            << " | Opcode: " << instructions.back().opcode
+//            << " | Op1: " << instructions.back().lhs
+//            << " | Op2: " << instructions.back().rhs << "\n";
+//#endif
     }
 
     return instructions;
