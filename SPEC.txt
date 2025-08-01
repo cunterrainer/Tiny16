@@ -62,9 +62,12 @@ mov 1 r0 add 2 r0 sub 3 r0
 32: SUB imm16, reg
 33: SUB reg,   reg
 
-50: JMP addr16
-51: JE  addr16
+50: JMP reg
+51: JMP label
+52: JE  reg
+53: JE  label
 
-60: CMP imm16/reg, reg
+60: CMP imm16, reg
+61: CMP reg,   reg
 
 255: HLT
