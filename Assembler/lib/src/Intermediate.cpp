@@ -227,5 +227,6 @@ InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
 
     instrIr.opcode = GetOpcodeIR(instr.opcode, instrIr.op1.type);
     instrIr.label = parsedInstr.label;
+    instrIr.size = s_InstructionIRSizeMap.at(instrIr.opcode);
     return instrIr;
 }

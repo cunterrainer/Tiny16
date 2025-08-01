@@ -217,6 +217,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 4);
         CHECK(inst.label == "start");
         CHECK(inst.opcode == OpcodeIR::MOV_IMM_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Intermediate);
@@ -236,6 +237,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 3);
         CHECK(inst.label.empty());
         CHECK(inst.opcode == OpcodeIR::MOV_REG_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Register);
@@ -255,6 +257,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 4);
         CHECK(inst.opcode == OpcodeIR::ADD_IMM_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Intermediate);
         CHECK(inst.op2.type == OperandTypeIR::Register);
@@ -273,6 +276,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 3);
         CHECK(inst.label == "hello");
         CHECK(inst.opcode == OpcodeIR::ADD_REG_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Register);
@@ -292,6 +296,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 3);
         CHECK(inst.label == "loop");
         CHECK(inst.opcode == OpcodeIR::SUB_REG_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Register);
@@ -311,6 +316,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 4);
         CHECK(inst.label == "loop");
         CHECK(inst.opcode == OpcodeIR::SUB_IMM_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Intermediate);
@@ -330,6 +336,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 4);
         CHECK(inst.opcode == OpcodeIR::CMP_IMM_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Intermediate);
         CHECK(inst.op2.type == OperandTypeIR::Register);
@@ -348,6 +355,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 3);
         CHECK(inst.opcode == OpcodeIR::CMP_REG_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Register);
         CHECK(inst.op2.type == OperandTypeIR::Register);
@@ -366,6 +374,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 1);
         CHECK(inst.label == "end");
         CHECK(inst.opcode == OpcodeIR::HLT);
         CHECK(inst.op1.type == OperandTypeIR::None);
@@ -383,6 +392,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 3);
         CHECK(inst.opcode == OpcodeIR::JMP_LABEL);
         CHECK(inst.op1.type == OperandTypeIR::Label);
         CHECK(inst.op2.type == OperandTypeIR::None);
@@ -400,6 +410,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 2);
         CHECK(inst.opcode == OpcodeIR::JE_REG);
         CHECK(inst.op1.type == OperandTypeIR::Register);
         CHECK(inst.op2.type == OperandTypeIR::None);
@@ -417,6 +428,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 4);
         CHECK(inst.opcode == OpcodeIR::LOAD);
         CHECK(inst.op1.type == OperandTypeIR::Intermediate);
         CHECK(inst.op2.type == OperandTypeIR::Register);
@@ -435,6 +447,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         auto inst = LowerInstruction(pi);
 
+        CHECK(inst.size == 4);
         CHECK(inst.opcode == OpcodeIR::STORE);
         CHECK(inst.op1.type == OperandTypeIR::Register);
         CHECK(inst.op2.type == OperandTypeIR::Intermediate);

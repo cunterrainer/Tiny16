@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdint>
 #include <variant>
+#include <unordered_map>
 
 #include "Parser.hpp"
 
@@ -49,6 +50,25 @@ struct InstructionIR
     OpcodeIR opcode;
     OperandIR op1;
     OperandIR op2;
+    std::uint32_t size; // Instruction size in bytes
+};
+
+static const std::unordered_map<OpcodeIR, std::uint32_t> s_InstructionIRSizeMap = {
+    { OpcodeIR::MOV_IMM_TO_REG, 4 },
+    { OpcodeIR::ADD_IMM_TO_REG, 4 },
+    { OpcodeIR::SUB_IMM_TO_REG, 4 },
+    { OpcodeIR::CMP_IMM_TO_REG, 4 },
+    { OpcodeIR::MOV_REG_TO_REG, 3 },
+    { OpcodeIR::ADD_REG_TO_REG, 3 },
+    { OpcodeIR::SUB_REG_TO_REG, 3 },
+    { OpcodeIR::CMP_REG_TO_REG, 3 },
+    { OpcodeIR::JMP_REG       , 2 },
+    { OpcodeIR::JMP_LABEL     , 3 },
+    { OpcodeIR::JE_REG        , 2 },
+    { OpcodeIR::JE_LABEL      , 3 },
+    { OpcodeIR::HLT           , 1 },
+    { OpcodeIR::LOAD          , 4 },
+    { OpcodeIR::STORE         , 4 },
 };
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr);
