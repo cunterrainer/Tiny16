@@ -5,146 +5,213 @@
 
 #include "Utility/Result.hpp"
 
+Result<void> ValidateInstruction(const ParsedInstruction& instr, const std::unordered_set<std::string>& labels = {});
 TEST_CASE("Test ValidateInstruction()")
 {
     SUBCASE("Invalid instruction")
     {
         // HLT should not have any operands
-        CHECK_FALSE(ValidateInstruction(ParseLine("HLT R1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("HLT R1, R2", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("HLT R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("HLT R1, R2", 0).Ok()).IsErr());
 
         // JMP/JE require exactly one operand
-        CHECK_FALSE(ValidateInstruction(ParseLine("JMP", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("JE", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("JMP R1, R2", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("JE R1, R2", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("JMP", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("JE", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("JMP R1, R2", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("JE R1, R2", 0).Ok()).IsErr());
+
+        // JMP/JE only accepts register or label
+        CHECK(ValidateInstruction(ParseLine("JMP $0x99", 0).Ok(), { "123", "Test" }).IsErr());
 
         // Destination must be a valid register
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV R1, $4", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $0x6, $0x7", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $0x4, AA", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV 0x4, R1", 0).Ok()).valid);    // missing $
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $5, $6", 0).Ok()).valid);     // both immediates
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV R8, R1", 0).Ok()).valid);     // R8 invalid if only R0-R7 allowed
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $+4, R9", 0).Ok()).valid);    // R9 invalid
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $-2, X1", 0).Ok()).valid);    // invalid register name
+        CHECK(ValidateInstruction(ParseLine("MOV R1, $4", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("MOV $0x6, $0x7", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("MOV $0x4, AA", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("MOV 0x4, R1", 0).Ok()).IsErr());    // missing $
+        CHECK(ValidateInstruction(ParseLine("MOV $5, $6", 0).Ok()).IsErr());     // both immediates
+        CHECK(ValidateInstruction(ParseLine("MOV R8, R1", 0).Ok()).IsErr());     // R8 invalid if only R0-R7 allowed
+        CHECK(ValidateInstruction(ParseLine("MOV $+4, R9", 0).Ok()).IsErr());    // R9 invalid
+        CHECK(ValidateInstruction(ParseLine("MOV $-2, X1", 0).Ok()).IsErr());    // invalid register name
 
         // Source must be a valid register or immediate
-        CHECK_FALSE(ValidateInstruction(ParseLine("ADD foo, R1", 0).Ok()).valid);    // invalid source literal
-        CHECK_FALSE(ValidateInstruction(ParseLine("SUB #4, R1", 0).Ok()).valid);     // unsupported immediate syntax
-        CHECK_FALSE(ValidateInstruction(ParseLine("CMP 0x10, R2", 0).Ok()).valid);   // hex without $
-        CHECK_FALSE(ValidateInstruction(ParseLine("CMP $0z10, R2", 0).Ok()).valid);  // malformed hex
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $, R1", 0).Ok()).valid);      // empty immediate
+        CHECK(ValidateInstruction(ParseLine("ADD foo, R1", 0).Ok()).IsErr());    // invalid source literal
+        CHECK(ValidateInstruction(ParseLine("SUB #4, R1", 0).Ok()).IsErr());     // unsupported immediate syntax
+        CHECK(ValidateInstruction(ParseLine("CMP 0x10, R2", 0).Ok()).IsErr());   // hex without $
+        CHECK(ValidateInstruction(ParseLine("CMP $0z10, R2", 0).Ok()).IsErr());  // malformed hex
+        CHECK(ValidateInstruction(ParseLine("MOV $, R1", 0).Ok()).IsErr());      // empty immediate
 
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV  $0b4, R0", 0).Ok()).valid);  // 0b4 not valid binary
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $+0B4, R7", 0).Ok()).valid);  // 0b4 not valid binary
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $+0bFF, R7", 0).Ok()).valid); // 0bFF not valid binary
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $-0b01, R7", 0).Ok()).valid); // negative binary not allowed
+        CHECK(ValidateInstruction(ParseLine("MOV  $0b4, R0", 0).Ok()).IsErr());  // 0b4 not valid binary
+        CHECK(ValidateInstruction(ParseLine("MOV $+0B4, R7", 0).Ok()).IsErr());  // 0b4 not valid binary
+        CHECK(ValidateInstruction(ParseLine("MOV $+0bFF, R7", 0).Ok()).IsErr()); // 0bFF not valid binary
+        CHECK(ValidateInstruction(ParseLine("MOV $-0b01, R7", 0).Ok()).IsErr()); // negative binary not allowed
 
         // Completely malformed operands
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV R1, $", 0).Ok()).valid);      // empty immediate value
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $, $", 0).Ok()).valid);       // both sides empty
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $-0xZZ, R1", 0).Ok()).valid); // malformed signed hex
+        CHECK(ValidateInstruction(ParseLine("MOV R1, $", 0).Ok()).IsErr());      // empty immediate value
+        CHECK(ValidateInstruction(ParseLine("MOV $, $", 0).Ok()).IsErr());       // both sides empty
+        CHECK(ValidateInstruction(ParseLine("MOV $-0xZZ, R1", 0).Ok()).IsErr()); // malformed signed hex
 
         // Source must be valid (either immediate or register)
-        CHECK_FALSE(ValidateInstruction(ParseLine("ADD 4, R1", 0).Ok()).valid);   // missing $
+        CHECK(ValidateInstruction(ParseLine("ADD 4, R1", 0).Ok()).IsErr());   // missing $
 
         // Both operands missing
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("ADD", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("SUB", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("CMP", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("MOV", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("ADD", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("SUB", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("CMP", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("LOAD", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("STORE", 0).Ok()).IsErr());
 
         // Only one operand
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV R1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("ADD R1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("SUB R1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("CMP R1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE R1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("MOV $1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("ADD $1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("SUB $1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("CMP $1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD $1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE $1", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("MOV R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("ADD R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("SUB R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("CMP R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("LOAD R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("STORE R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("MOV $1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("ADD $1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("SUB $1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("CMP $1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("LOAD $1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("STORE $1", 0).Ok()).IsErr());
 
         // Invalid opcode
-        CHECK_FALSE(ValidateInstruction(ParseLine("XYZ R1, R2", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("XYZ R1", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("XYZ", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("XYZ R1, R2", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("XYZ R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("XYZ", 0).Ok()).IsErr());
         
         // Load op1 has to be an address and op2 ahs to be a register
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, R7", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, R7", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, R0", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, $3", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, $0x20", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("LOAD R1, $0b11", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, R7", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, R7", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, R0", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, $3", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, $0x20", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("LOAD R1, $0b11", 0).Ok()).IsErr());
 
         // Store op1 has to be a register and op2 has to be an address
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE  $0x4, R0", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE $+0x4, R7", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE $-0x4, R7", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE R1, R0", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).valid);
-        CHECK_FALSE(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE  $0x4, R0", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("STORE $+0x4, R7", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("STORE $-0x4, R7", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R0", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).IsErr());
     }
 
 
     SUBCASE("Valid Instruction")
     {
-        CHECK(ValidateInstruction(ParseLine("HLT", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("HLT", 0).Ok()).IsOk());
         
-        CHECK(ValidateInstruction(ParseLine("JMP Label", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("JE  Label", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("JMP 0x99", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("JE  0x99", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("JMP R1", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("JE  R1", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("JMP Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JE  Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JMP R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JE  R1", 0).Ok()).IsOk());
         
-        CHECK(ValidateInstruction(ParseLine("MOV  $0x4, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV $+0X4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV $-0x4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV R1, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV R1, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV R1, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV  $0b101, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV $+0B101, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV  $999, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV $+999, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("MOV $-999, R7", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("MOV  $0x4, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV $+0X4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV $-0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV R1, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV  $0b101, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV $+0B101, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV  $999, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV $+999, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MOV $-999, R7", 0).Ok()).IsOk());
         
-        CHECK(ValidateInstruction(ParseLine("ADD  $0x4, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("ADD $+0x4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("ADD $-0x4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("ADD R1, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("ADD R1, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("ADD R1, R7", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("ADD  $0x4, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("ADD $+0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("ADD $-0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("ADD R1, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("ADD R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("ADD R1, R7", 0).Ok()).IsOk());
         
-        CHECK(ValidateInstruction(ParseLine("SUB  $0x4, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("SUB $+0x4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("SUB $-0x4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("SUB R1, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("SUB R1, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("SUB R1, R7", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("SUB  $0x4, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("SUB $+0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("SUB $-0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("SUB R1, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("SUB R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("SUB R1, R7", 0).Ok()).IsOk());
         
-        CHECK(ValidateInstruction(ParseLine("CMP  $0x4, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("CMP $+0x4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("CMP $-0x4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("CMP R1, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("CMP R1, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("CMP R1, R7", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("CMP  $0x4, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("CMP $+0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("CMP $-0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("CMP R1, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("CMP R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("CMP R1, R7", 0).Ok()).IsOk());
         
-        CHECK(ValidateInstruction(ParseLine("LOAD  $0x4, R0", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("LOAD $+0x4, R7", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("LOAD $-0x4, R7", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("LOAD  $0x4, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("LOAD $+0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("LOAD $-0x4, R7", 0).Ok()).IsOk());
         
-        CHECK(ValidateInstruction(ParseLine("STORE R0, $0xFF", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("STORE R7, $0x29", 0).Ok()).valid);
-        CHECK(ValidateInstruction(ParseLine("STORE R7, $0b11", 0).Ok()).valid);
+        CHECK(ValidateInstruction(ParseLine("STORE R0, $0xFF", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STORE R7, $0x29", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STORE R7, $0b11", 0).Ok()).IsOk());
+    }
+}
+
+
+Result<void> ValidateOperand(OperandType, const std::string&, const ParsedInstruction&, std::string_view, const std::unordered_set<std::string>&);
+TEST_CASE("Test ValidateOperand()")
+{
+    SUBCASE("Invalid")
+    {
+        CHECK(ValidateOperand(OperandType::None,                   "R1", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::Register,               "$0x04", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::Register,               "R8", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::Intermediate,           "R1", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::Intermediate,           "0xFF", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::Intermediate,           "$0bFF", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::RegisterOrIntermediate, "Test", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::RegisterOrLabel,        "Multiply", {}, "", {}).IsErr());
+    }
+
+    SUBCASE("Valid")
+    {
+        CHECK(ValidateOperand(OperandType::None, "", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::Register, "R1", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::Register, "r7", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::Intermediate, "$0xFF", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::Intermediate, "$0XFF", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::Intermediate, "$0b01", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::Intermediate, "$0B01", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::Intermediate, "$000212", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrIntermediate, "$0xFF", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrIntermediate, "$0XFF", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrIntermediate, "$0b01", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrIntermediate, "R1", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrIntermediate, "R0", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrIntermediate, "R7", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrLabel, "R7", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrLabel, "Hello", {}, "", { "Hello" }).IsOk());
+        CHECK(ValidateOperand(OperandType::RegisterOrLabel, "Multiply", {}, "", { "Multiply" }).IsOk());
+    }
+}
+
+
+TEST_CASE("Test LookupOpcode()")
+{
+    SUBCASE("Invalid")
+    {
+        CHECK_FALSE(LookupOpcode("mov").has_value());
+        CHECK_FALSE(LookupOpcode("add").has_value());
+        CHECK_FALSE(LookupOpcode("sub").has_value());
+        CHECK_FALSE(LookupOpcode("cmp").has_value());
+        CHECK_FALSE(LookupOpcode("jmp").has_value());
+        CHECK_FALSE(LookupOpcode("hlt").has_value());
+    }
+
+    SUBCASE("Valid")
+    {
+        CHECK(LookupOpcode("MOV").has_value());
+        CHECK(LookupOpcode("ADD").has_value());
+        CHECK(LookupOpcode("SUB").has_value());
+        CHECK(LookupOpcode("CMP").has_value());
+        CHECK(LookupOpcode("HLT").has_value());
+        CHECK(LookupOpcode("JMP").has_value());
+        CHECK(LookupOpcode("JE").has_value());
+        CHECK(LookupOpcode("STORE").has_value());
+        CHECK(LookupOpcode("LOAD").has_value());
     }
 }
 
@@ -188,97 +255,97 @@ TEST_CASE("Test IsValidRegister()")
 }
 
 
-bool IsValidImmediate(std::string_view s);
+bool IsValidIntermediate(std::string_view s);
 TEST_CASE("IsValidImmediatie()")
 {
     SUBCASE("Invalid")
     {
         // Empty or whitespace
-        CHECK_FALSE(IsValidImmediate(""));
-        CHECK_FALSE(IsValidImmediate(" "));
-        CHECK_FALSE(IsValidImmediate("  "));
+        CHECK_FALSE(IsValidIntermediate(""));
+        CHECK_FALSE(IsValidIntermediate(" "));
+        CHECK_FALSE(IsValidIntermediate("  "));
 
         // Not starting with $
-        CHECK_FALSE(IsValidImmediate("R"));
-        CHECK_FALSE(IsValidImmediate("R1"));
-        CHECK_FALSE(IsValidImmediate("1"));
-        CHECK_FALSE(IsValidImmediate("99"));
-        CHECK_FALSE(IsValidImmediate("999"));
-        CHECK_FALSE(IsValidImmediate("0x99"));
-        CHECK_FALSE(IsValidImmediate("0x"));
-        CHECK_FALSE(IsValidImmediate("0x9"));
-        CHECK_FALSE(IsValidImmediate("0b01"));
-        CHECK_FALSE(IsValidImmediate("-0b01"));
+        CHECK_FALSE(IsValidIntermediate("R"));
+        CHECK_FALSE(IsValidIntermediate("R1"));
+        CHECK_FALSE(IsValidIntermediate("1"));
+        CHECK_FALSE(IsValidIntermediate("99"));
+        CHECK_FALSE(IsValidIntermediate("999"));
+        CHECK_FALSE(IsValidIntermediate("0x99"));
+        CHECK_FALSE(IsValidIntermediate("0x"));
+        CHECK_FALSE(IsValidIntermediate("0x9"));
+        CHECK_FALSE(IsValidIntermediate("0b01"));
+        CHECK_FALSE(IsValidIntermediate("-0b01"));
 
         // Malformed dollar-prefixed
-        CHECK_FALSE(IsValidImmediate("$"));             // only $
-        CHECK_FALSE(IsValidImmediate("$ "));            // $ with space
-        CHECK_FALSE(IsValidImmediate("$-"));            // $ minus nothing
-        CHECK_FALSE(IsValidImmediate("$--1"));          // double minus
-        CHECK_FALSE(IsValidImmediate("$++1"));          // double plus
-        CHECK_FALSE(IsValidImmediate("$+-1"));          // invalid mixed signs
-        CHECK_FALSE(IsValidImmediate("$-0b01"));        // binary cannot be signed
-        CHECK_FALSE(IsValidImmediate("$0x"));           // no digits
-        CHECK_FALSE(IsValidImmediate("$0xGHI"));        // invalid hex
-        CHECK_FALSE(IsValidImmediate("$0b"));           // no bits
-        CHECK_FALSE(IsValidImmediate("$0b012"));        // invalid binary
-        CHECK_FALSE(IsValidImmediate("$0b2"));          // binary with '2'
-        CHECK_FALSE(IsValidImmediate("$0b00a"));        // binary with letter
-        CHECK_FALSE(IsValidImmediate("$0x123Z"));       // invalid hex tail
-        CHECK_FALSE(IsValidImmediate("$10A"));          // decimal with letter
-        CHECK_FALSE(IsValidImmediate("$10.1"));         // floats not supported
-        CHECK_FALSE(IsValidImmediate("$+"));            // incomplete
-        CHECK_FALSE(IsValidImmediate("$-"));            // incomplete
-        CHECK_FALSE(IsValidImmediate("$-0x"));          // no hex digits
-        CHECK_FALSE(IsValidImmediate("$+0b"));          // no binary digits
-        CHECK_FALSE(IsValidImmediate("$+0xG"));         // invalid hex digit
-        CHECK_FALSE(IsValidImmediate("$0x+4"));         // misplaced sign
-        CHECK_FALSE(IsValidImmediate("$+00xF"));        // invalid hex digit
-        CHECK_FALSE(IsValidImmediate("$000b11"));       // invalid binary digit
+        CHECK_FALSE(IsValidIntermediate("$"));             // only $
+        CHECK_FALSE(IsValidIntermediate("$ "));            // $ with space
+        CHECK_FALSE(IsValidIntermediate("$-"));            // $ minus nothing
+        CHECK_FALSE(IsValidIntermediate("$--1"));          // double minus
+        CHECK_FALSE(IsValidIntermediate("$++1"));          // double plus
+        CHECK_FALSE(IsValidIntermediate("$+-1"));          // invalid mixed signs
+        CHECK_FALSE(IsValidIntermediate("$-0b01"));        // binary cannot be signed
+        CHECK_FALSE(IsValidIntermediate("$0x"));           // no digits
+        CHECK_FALSE(IsValidIntermediate("$0xGHI"));        // invalid hex
+        CHECK_FALSE(IsValidIntermediate("$0b"));           // no bits
+        CHECK_FALSE(IsValidIntermediate("$0b012"));        // invalid binary
+        CHECK_FALSE(IsValidIntermediate("$0b2"));          // binary with '2'
+        CHECK_FALSE(IsValidIntermediate("$0b00a"));        // binary with letter
+        CHECK_FALSE(IsValidIntermediate("$0x123Z"));       // invalid hex tail
+        CHECK_FALSE(IsValidIntermediate("$10A"));          // decimal with letter
+        CHECK_FALSE(IsValidIntermediate("$10.1"));         // floats not supported
+        CHECK_FALSE(IsValidIntermediate("$+"));            // incomplete
+        CHECK_FALSE(IsValidIntermediate("$-"));            // incomplete
+        CHECK_FALSE(IsValidIntermediate("$-0x"));          // no hex digits
+        CHECK_FALSE(IsValidIntermediate("$+0b"));          // no binary digits
+        CHECK_FALSE(IsValidIntermediate("$+0xG"));         // invalid hex digit
+        CHECK_FALSE(IsValidIntermediate("$0x+4"));         // misplaced sign
+        CHECK_FALSE(IsValidIntermediate("$+00xF"));        // invalid hex digit
+        CHECK_FALSE(IsValidIntermediate("$000b11"));       // invalid binary digit
 
         // Misplaced sign or multiple signs
-        CHECK_FALSE(IsValidImmediate("$++0x4"));
-        CHECK_FALSE(IsValidImmediate("$--0x4"));
-        CHECK_FALSE(IsValidImmediate("$0x-4"));  // sign must come before 0x
+        CHECK_FALSE(IsValidIntermediate("$++0x4"));
+        CHECK_FALSE(IsValidIntermediate("$--0x4"));
+        CHECK_FALSE(IsValidIntermediate("$0x-4"));  // sign must come before 0x
     }
     
     
     SUBCASE("Valid")
     {
         // Decimal
-        CHECK(IsValidImmediate("$0"));
-        CHECK(IsValidImmediate("$1"));
-        CHECK(IsValidImmediate("$42"));
-        CHECK(IsValidImmediate("$+123"));
-        CHECK(IsValidImmediate("$-999"));
-        CHECK(IsValidImmediate("$000123"));
+        CHECK(IsValidIntermediate("$0"));
+        CHECK(IsValidIntermediate("$1"));
+        CHECK(IsValidIntermediate("$42"));
+        CHECK(IsValidIntermediate("$+123"));
+        CHECK(IsValidIntermediate("$-999"));
+        CHECK(IsValidIntermediate("$000123"));
 
         // Hexadecimal
-        CHECK(IsValidImmediate("$0x0"));
-        CHECK(IsValidImmediate("$0x1"));
-        CHECK(IsValidImmediate("$0xFF"));
-        CHECK(IsValidImmediate("$0XdeadBEEF"));
-        CHECK(IsValidImmediate("$+0xABC"));
-        CHECK(IsValidImmediate("$-0x10"));
+        CHECK(IsValidIntermediate("$0x0"));
+        CHECK(IsValidIntermediate("$0x1"));
+        CHECK(IsValidIntermediate("$0xFF"));
+        CHECK(IsValidIntermediate("$0XdeadBEEF"));
+        CHECK(IsValidIntermediate("$+0xABC"));
+        CHECK(IsValidIntermediate("$-0x10"));
 
         // Binary
-        CHECK(IsValidImmediate("$0b0"));
-        CHECK(IsValidImmediate("$0b1"));
-        CHECK(IsValidImmediate("$0b01"));
-        CHECK(IsValidImmediate("$0B101010"));
-        CHECK(IsValidImmediate("$+0b11"));  // '+' allowed even though not meaningful
-        CHECK(IsValidImmediate("$0b00001111"));
+        CHECK(IsValidIntermediate("$0b0"));
+        CHECK(IsValidIntermediate("$0b1"));
+        CHECK(IsValidIntermediate("$0b01"));
+        CHECK(IsValidIntermediate("$0B101010"));
+        CHECK(IsValidIntermediate("$+0b11"));  // '+' allowed even though not meaningful
+        CHECK(IsValidIntermediate("$0b00001111"));
 
         // Edge cases
-        CHECK(IsValidImmediate("$+0"));
-        CHECK(IsValidImmediate("$-0"));
-        CHECK(IsValidImmediate("$+0x0"));
-        CHECK(IsValidImmediate("$-0x0"));
+        CHECK(IsValidIntermediate("$+0"));
+        CHECK(IsValidIntermediate("$-0"));
+        CHECK(IsValidIntermediate("$+0x0"));
+        CHECK(IsValidIntermediate("$-0x0"));
 
         // Upper and lower case consistency
-        CHECK(IsValidImmediate("$0XFF"));
-        CHECK(IsValidImmediate("$0xFF"));
-        CHECK(IsValidImmediate("$0B10"));
-        CHECK(IsValidImmediate("$0b10"));
+        CHECK(IsValidIntermediate("$0XFF"));
+        CHECK(IsValidIntermediate("$0xFF"));
+        CHECK(IsValidIntermediate("$0B10"));
+        CHECK(IsValidIntermediate("$0b10"));
     }
 }

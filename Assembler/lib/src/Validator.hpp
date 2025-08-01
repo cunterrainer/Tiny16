@@ -4,13 +4,9 @@
 #include <string>
 
 #include "Parser.hpp"
+#include "Instruction.hpp"
 
-struct ValidationResult
-{
-    bool valid;
-    std::string errorMsg;
-};
-
-ValidationResult ValidateInstruction(const ParsedInstruction& instr);
+std::optional<Instruction> LookupOpcode(const std::string& opcode);
+Result<void> ValidateInstruction(const ParsedInstruction& instr, const std::unordered_set<std::string>& labels);
 
 #endif // VALIDATOR_H

@@ -9,27 +9,15 @@
 #include <string_view>
 
 #include "Parser.hpp"
+#include "Validator.hpp"
+#include "Instruction.hpp"
 #include "Intermediate.hpp"
 
-OpcodeIR ToOpcode(const std::string& str)
-{
-    std::string opcode = str;
-    std::transform(opcode.begin(), opcode.end(), opcode.begin(), [](unsigned char c) {
-        return std::toupper(c);
-    });
-    
-    if (opcode == "MOV")   return OpcodeIR::MOV;
-    if (opcode == "ADD")   return OpcodeIR::ADD;
-    if (opcode == "SUB")   return OpcodeIR::SUB;
-    if (opcode == "CMP")   return OpcodeIR::CMP;
-    if (opcode == "JMP")   return OpcodeIR::JMP;
-    if (opcode == "JE")    return OpcodeIR::JE;
-    if (opcode == "HLT")   return OpcodeIR::HLT;
-    if (opcode == "LOAD")  return OpcodeIR::LOAD;
-    if (opcode == "STORE") return OpcodeIR::STORE;
-    
-    throw std::logic_error(std::format("Unreachable code, check for errors in opcode validation code.\nOpcode: {}", opcode));
-}
+#ifndef NDEBUG
+#define THROW_IF(cond, msg) if (cond) { throw std::logic_error(msg); }
+#else
+#define THROW_IF(cond, msg)
+#endif
 
 
 std::uint16_t ParseIntermediate(const std::string& operand)
@@ -72,7 +60,7 @@ std::uint16_t ParseIntermediate(const std::string& operand)
     auto result = std::from_chars(immStr.data(), immStr.data() + immStr.size(), value, base);
     if (result.ec != std::errc())
     {
-        throw std::logic_error("Invalid immediate value: " + operand + " check validation code");
+        throw std::logic_error("Invalid intermediate value: " + operand + " check validation code");
     }
 
     // Apply sign
@@ -95,44 +83,149 @@ std::uint16_t ParseIntermediate(const std::string& operand)
 }
 
 
-std::optional<Operand> ParseOperand(const std::string& str)
+OperandIR ParseOperand(const std::string& str)
 {
-    if (str.empty()) return std::nullopt;
-
+    THROW_IF(str.empty(), std::format("Unreachable code: Failed to parse operand, operand is empty!"));
+    
     if (str[0] == 'R' || str[0] == 'r')
     {
-        const int reg = std::stoi(str.substr(1));
-        return { { OperandType::Register, static_cast<uint16_t>(reg) } };
+        return { OperandTypeIR::Register, static_cast<std::uint8_t>(str[1] - '0')};
     }
 
     if (str[0] == '$')
-        {
-        uint16_t val = ParseIntermediate(str);
-        return { { OperandType::Immediate, val } };
+    {
+        const std::uint16_t val = ParseIntermediate(str);
+        return { OperandTypeIR::Intermediate, val };
     }
     
-    return std::nullopt;
+    throw std::logic_error(std::format("Unreachable code: Failed to parse operand, check validation code Operand: {}", str));
+}
+
+
+OperandIR ParseOperandJmp(const std::string& str)
+{
+    if (str.size() == 2 && (str[0] == 'R' || str[0] == 'r'))
+    {
+        const std::uint8_t reg = static_cast<std::uint8_t>(str[1] - '0');
+        if (reg <= 7)
+            return { OperandTypeIR::Register, reg };
+    }
+
+    return { OperandTypeIR::Label, str }; // It's a label
+}
+
+
+OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1)
+{
+    if (opcode == Opcode::MOV)
+    {
+        if (op1 == OperandTypeIR::Register)
+            return OpcodeIR::MOV_REG_TO_REG;
+        return OpcodeIR::MOV_IMM_TO_REG;
+    }
+
+    if (opcode == Opcode::ADD)
+    {
+        if (op1 == OperandTypeIR::Register)
+            return OpcodeIR::ADD_REG_TO_REG;
+        return OpcodeIR::ADD_IMM_TO_REG;
+    }
+
+    if (opcode == Opcode::SUB)
+    {
+        if (op1 == OperandTypeIR::Register)
+            return OpcodeIR::SUB_REG_TO_REG;
+        return OpcodeIR::SUB_IMM_TO_REG;
+    }
+
+    if (opcode == Opcode::CMP)
+    {
+        if (op1 == OperandTypeIR::Register)
+            return OpcodeIR::CMP_REG_TO_REG;
+        return OpcodeIR::CMP_IMM_TO_REG;
+    }
+
+    if (opcode == Opcode::HLT)
+    {
+        return OpcodeIR::HLT;
+    }
+
+    if (opcode == Opcode::JMP)
+    {
+        if (op1 == OperandTypeIR::Register)
+            return OpcodeIR::JMP_REG;
+        return OpcodeIR::JMP_LABEL;
+    }
+
+    if (opcode == Opcode::JE)
+    {
+        if (op1 == OperandTypeIR::Register)
+            return OpcodeIR::JE_REG;
+        return OpcodeIR::JE_LABEL;
+    }
+
+    if (opcode == Opcode::LOAD)
+    {
+        return OpcodeIR::LOAD;
+    }
+
+    if (opcode == Opcode::STORE)
+    {
+        return OpcodeIR::STORE;
+    }
+
+    throw std::logic_error(std::format("Unreachable code: GetOpcodeIR, check validation code Operand: {}", (int)opcode));
 }
 
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
 {
-    const std::optional<Operand> op1 = ParseOperand(parsedInstr.lhs);
-    if (!op1)
+    std::string opcode = parsedInstr.opcode;
+    std::transform(opcode.begin(), opcode.end(), opcode.begin(), [](unsigned char c) {
+        return std::toupper(c);
+        });
+
+    THROW_IF(!LookupOpcode(opcode).has_value(), std::format("LowerInstruction: Opcode '{}' not found, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.opcode, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
+    const Instruction& instr = s_InstructionMap.at(opcode);
+
+    InstructionIR instrIr;
+    switch (instr.op1)
     {
-        throw std::logic_error(std::format("Unreachable code: Failed to parse operand1, check validation code\nOpcode: {}, Operand1: {}, Operand2: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs));
+    case OperandType::Register:
+    case OperandType::Intermediate:
+    case OperandType::RegisterOrIntermediate:
+        instrIr.op1 = ParseOperand(parsedInstr.lhs);
+        THROW_IF(instrIr.op1.type == OperandTypeIR::Register && std::get<std::uint8_t>(instrIr.op1.value) > 7, std::format("LowerInstruction: Register '{}' not valid, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.lhs, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
+        break;
+    case OperandType::Label:
+    case OperandType::RegisterOrLabel:
+        instrIr.op1 = ParseOperandJmp(parsedInstr.lhs);
+        break;
+    case OperandType::None:
+        instrIr.op1.type = OperandTypeIR::None;
+        THROW_IF(!parsedInstr.lhs.empty(), std::format("LowerInstruction: Operand is not empty but type is none: {}, Line: {}", parsedInstr.lhs, parsedInstr.lineNumber));
+        break;
     }
-    
-    const std::optional<Operand> op2 = ParseOperand(parsedInstr.rhs);
-    if (!op2)
+
+    switch (instr.op2)
     {
-        throw std::logic_error(std::format("Unreachable code: Failed to parse operand2, check validation code\nOpcode: {}, Operand1: {}, Operand2: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs));
+    case OperandType::Register:
+    case OperandType::Intermediate:
+    case OperandType::RegisterOrIntermediate:
+        instrIr.op2 = ParseOperand(parsedInstr.rhs);
+        THROW_IF(instrIr.op2.type == OperandTypeIR::Register && std::get<std::uint8_t>(instrIr.op2.value) > 7, std::format("LowerInstruction: Register '{}' not valid, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.rhs, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
+        break;
+    case OperandType::Label:
+    case OperandType::RegisterOrLabel:
+        instrIr.op2 = ParseOperandJmp(parsedInstr.rhs);
+        break;
+    case OperandType::None:
+        instrIr.op2.type = OperandTypeIR::None;
+        THROW_IF(!parsedInstr.rhs.empty(), std::format("LowerInstruction: Operand is not empty but type is none: {}, Line: {}", parsedInstr.rhs, parsedInstr.lineNumber));
+        break;
     }
-    
-    InstructionIR instruction;
-    instruction.label = parsedInstr.label;
-    instruction.opcode = ToOpcode(parsedInstr.opcode);
-    instruction.op1 = op1.value();
-    instruction.op2 = op2.value();
-    return instruction;
+
+    instrIr.opcode = GetOpcodeIR(instr.opcode, instrIr.op1.type);
+    instrIr.label = parsedInstr.label;
+    return instrIr;
 }

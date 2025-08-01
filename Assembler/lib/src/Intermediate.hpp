@@ -2,41 +2,53 @@
 #define INTERMEDIATE_HPP
 #include <string>
 #include <cstdint>
+#include <variant>
 
 #include "Parser.hpp"
 
 enum class OpcodeIR
 {
-    MOV,
-    ADD,
-    SUB,
-    CMP,
-    JMP,
-    JE,
+    MOV_IMM_TO_REG,
+    ADD_IMM_TO_REG,
+    SUB_IMM_TO_REG,
+    CMP_IMM_TO_REG,
+
+    MOV_REG_TO_REG,
+    ADD_REG_TO_REG,
+    SUB_REG_TO_REG,
+    CMP_REG_TO_REG,
+
+    JMP_REG,
+    JMP_LABEL,
+    JE_REG,
+    JE_LABEL,
+
     HLT,
     LOAD,
     STORE
 };
 
 
-enum class OperandType
+enum class OperandTypeIR
 {
     Register,
-    Immediate
+    Intermediate,
+    Label,
+    None
 };
 
-struct Operand
+struct OperandIR
 {
-    OperandType type;
-    std::uint16_t value;
+    OperandTypeIR type;
+    std::variant<std::uint8_t, std::uint16_t, std::string> value;
 };
 
 struct InstructionIR
 {
     std::string label;
     OpcodeIR opcode;
-    Operand op1;
-    Operand op2;
+    OperandIR op1;
+    OperandIR op2;
 };
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr);

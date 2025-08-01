@@ -3,18 +3,16 @@
 #include <cctype>
 #include <algorithm>
 #include <string_view>
+#include <unordered_set>
 
 #include "Parser.hpp"
 #include "Utility.hpp"
+#include "Validator.hpp"
+#include "Instruction.hpp"
 
-struct ValidationResult
-{
-    bool valid;
-    std::string errorMsg;
-};
+#include "Utility/Result.hpp"
 
-
-bool IsValidImmediate(std::string_view s)
+bool IsValidIntermediate(std::string_view s)
 {
     if (s.size() < 2 || s[0] != '$') return false;
 
@@ -65,96 +63,68 @@ bool IsValidRegister(std::string_view s)
 }
 
 
-ValidationResult ValidateInstruction(const ParsedInstruction& instr)
+bool IsValidLabel(const std::string& label, const std::unordered_set<std::string>& labels)
 {
-    const auto toUpperCase = [](unsigned char c) { return std::toupper(c); };
-
-    std::string opcode = instr.opcode;
-    std::transform(opcode.begin(), opcode.end(), opcode.begin(), toUpperCase);
-
-    if (opcode == "HLT")
-    {
-        if (!instr.lhs.empty())
-        {
-            return { false, std::format("Instruction: {} {}, {}\nToo many operands, correct form: {}", instr.opcode, instr.lhs, instr.rhs, instr.opcode) };
-        }
-    }
-    // TODO Check if label exists
-    else if (opcode == "JMP" || opcode == "JE")
-    {
-        if (instr.lhs.empty())
-        {
-            return { false, std::format("Instruction: {}\nNot enough operands, correct form: {} Label", instr.opcode, instr.opcode) };
-        }
-        if (!instr.lhs.empty() && !instr.rhs.empty())
-        {
-            return { false, std::format("Instruction: {} {}, {}\nToo many operands, correct form: {} Label", instr.opcode, instr.lhs, instr.rhs, instr.opcode) };
-        }
-    }
-    else if (opcode == "MOV" || opcode == "ADD" || opcode == "SUB" || opcode == "CMP")
-    {
-        if (instr.lhs.empty() || instr.rhs.empty())
-        {
-            return { false, std::format("Instruction: {} {}\nNot enought operands, correct form: {} {}, Register", instr.opcode, instr.lhs, instr.opcode, instr.lhs) };
-        }
-        if (!IsValidRegister(instr.rhs))
-        {
-            return { false, std::format("Instruction: {} {}, {}\nInvalid destination register: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
-        }
-        if (!IsValidImmediate(instr.lhs) && !IsValidRegister(instr.lhs))
-        {
-            return { false, std::format("Instruction: {} {}, {}\nInvalid source register or source intermediate value: {}", instr.opcode, instr.lhs, instr.rhs, instr.lhs) };
-        }
-    }
-    else if (opcode == "LOAD")
-    {
-        if (instr.lhs.empty() || instr.rhs.empty())
-        {
-            return { false, std::format("Instruction: {} {}\nNot enought operands, correct form: {} Address, Register", instr.opcode, instr.lhs, instr.opcode, instr.lhs) };
-        }
-        if (!IsValidImmediate(instr.lhs))
-        {
-            return { false, std::format("Instruction: {} {}, {}\nInvalid source address: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
-        }
-        if (!IsValidRegister(instr.rhs))
-        {
-            return { false, std::format("Instruction: {} {}, {}\nInvalid destination register: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
-        }
-    }
-    else if (opcode == "STORE")
-    {
-        if (instr.lhs.empty() || instr.rhs.empty())
-        {
-            return { false, std::format("Instruction: {} {}\nNot enought operands, correct form: {} Register, Address", instr.opcode, instr.lhs, instr.opcode, instr.lhs) };
-        }
-        if (!IsValidRegister(instr.lhs))
-        {
-            return { false, std::format("Instruction: {} {}, {}\nInvalid source register: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
-        }
-        if (!IsValidImmediate(instr.rhs))
-        {
-            return { false, std::format("Instruction: {} {}, {}\nInvalid destination address: {}", instr.opcode, instr.lhs, instr.rhs, instr.rhs) };
-        }
-    }
-    else
-    {
-        return { false, std::format("Instruction {} {} {}\nUnknown instruction: {}", instr.opcode, instr.lhs, instr.rhs, instr.opcode) };
-    }
-
-    return { true, "" };
+    return labels.contains(label);
 }
 
 
-ValidationResult ValidateInstructions(const std::vector<ParsedInstruction>& instructions, std::string_view filePath)
+std::optional<Instruction> LookupOpcode(const std::string& opcode)
 {
-    for (const ParsedInstruction& i : instructions)
+    const auto& it = s_InstructionMap.find(opcode);
+    if (it == s_InstructionMap.end())
     {
-        ValidationResult result = ValidateInstruction(i);
-        if (!result.valid)
-        {
-            result.errorMsg = std::format("{}\nLine: {}, File: {}", result.errorMsg, i.lineNumber, filePath);
-        }
+        return std::nullopt;
+    }
+    return it->second;
+}
+
+
+Result<void> ValidateOperand(OperandType operand, const std::string& parsedOperand, const ParsedInstruction& parsedInstr, std::string_view sourceOrDest, const std::unordered_set<std::string>& labels)
+{
+    if (operand == OperandType::None && !parsedOperand.empty())
+    {
+        return Err("Instruction: {} {}, {}\nToo many operands", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs);
+    }
+    else if (operand == OperandType::Register && !IsValidRegister(parsedOperand))
+    {
+        return Err("Instruction: {} {}, {}\nInvalid {} register: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, parsedOperand);
+    }
+    else if (operand == OperandType::Intermediate && !IsValidIntermediate(parsedOperand))
+    {
+        return Err("Instruction: {} {}, {}\nInvalid {} value: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, parsedOperand);
+    }
+    else if (operand == OperandType::RegisterOrIntermediate && !IsValidIntermediate(parsedOperand) && !IsValidRegister(parsedOperand))
+    {
+        return Err("Instruction: {} {}, {}\nInvalid {} register or {} value: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, sourceOrDest, parsedOperand);
+    }
+    else if (operand == OperandType::RegisterOrLabel && !IsValidLabel(parsedOperand, labels) && !IsValidRegister(parsedOperand))
+    {
+        return Err("Instruction: {} {}, {}\nInvalid register or label: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedOperand);
+    }
+    return Ok();
+}
+
+
+Result<void> ValidateInstruction(const ParsedInstruction& parsedInstr, const std::unordered_set<std::string>& labels)
+{
+    const auto toUpperCase = [](unsigned char c) { return std::toupper(c); };
+
+    std::string opcode = parsedInstr.opcode;
+    std::transform(opcode.begin(), opcode.end(), opcode.begin(), toUpperCase);
+
+    const std::optional<Instruction> info = LookupOpcode(opcode);
+
+    if (!info.has_value())
+    {
+        return Err("Unknown instruction: {}\nLine: {}, {} {} {}", parsedInstr.opcode, parsedInstr.lineNumber, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs);
     }
 
-    return { };
+    const Instruction instrInfo = info.value();
+    const Result<void> op1Result = ValidateOperand(instrInfo.op1, parsedInstr.lhs, parsedInstr, "source", labels);
+    const Result<void> op2Result = ValidateOperand(instrInfo.op2, parsedInstr.rhs, parsedInstr, "destination", labels);
+
+    if (op1Result.IsErr()) return op1Result;
+    if (op2Result.IsErr()) return op2Result;
+    return Ok();
 }
