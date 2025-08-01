@@ -5,6 +5,7 @@
 #include <utility>
 #include <iostream>
 #include <optional>
+#include <unordered_set>
 
 #include "Parser.hpp"
 #include "Utility.hpp"
@@ -65,9 +66,10 @@ Result<ParsedInstruction> ParseLine(std::string line, size_t lineNumber)
 }
 
 
-Result<std::vector<ParsedInstruction>> ParseSourceCode(const std::vector<std::string>& lines)
+Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>> ParseSourceCode(const std::vector<std::string>& lines)
 {
     std::vector<ParsedInstruction> instructions;
+    std::unordered_set<std::string> labels;
 
     for (size_t i = 0; i < lines.size(); i++)
     {
@@ -91,6 +93,10 @@ Result<std::vector<ParsedInstruction>> ParseSourceCode(const std::vector<std::st
             a.lineNumber = tmp.lineNumber;
             a.lhs = tmp.lhs;
             a.rhs = tmp.rhs;
+
+            const auto res = labels.insert(a.label);
+            if (!res.second)
+                return Err("Line: {}, Label: '{}' already exists", a.lineNumber, a.label);
         }
         else
         {
@@ -104,5 +110,5 @@ Result<std::vector<ParsedInstruction>> ParseSourceCode(const std::vector<std::st
 //#endif
     }
 
-    return instructions;
+    return Ok<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>>(instructions, labels);
 }

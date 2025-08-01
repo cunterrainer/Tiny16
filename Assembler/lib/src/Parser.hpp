@@ -3,7 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 #include <optional>
+#include <unordered_set>
 
 #include "Utility/Result.hpp"
 
@@ -17,6 +19,6 @@ struct ParsedInstruction
 };
 
 Result<ParsedInstruction> ParseLine(std::string line, size_t lineNumber);
-Result<std::vector<ParsedInstruction>> ParseSourceCode(const std::vector<std::string>& lines);
+Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>> ParseSourceCode(const std::vector<std::string>& lines);
 
 #endif // PARSER_H
