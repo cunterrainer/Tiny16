@@ -10,7 +10,7 @@ main: # Program starts here, hint for assembler need to add a jmp instruction
     ADD  R1, R0
 
     JMP subtraction
-
+    
 subtraction:
     SUB $2, R0
     SUB R1, R0
@@ -21,14 +21,14 @@ subtraction:
     # Else block
 
 IsEqual:
-    LOAD RS, R0
+    LOAD $0xFF, R0
 
     # RS is not allowed to be modified
-    MOV RS, R2
+    MOV R1, R2
     SUB $4, R2
-    LOAD R2, R1
+    LOAD $0, R1
 
     MOV $9, R1
-    STORE R1, RS
+    STORE R1, $0xFF
 
     HLT # stop execution needs to exist
