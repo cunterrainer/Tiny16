@@ -7,26 +7,27 @@
 
 #include "Parser.hpp"
 
+// Opcode values from SPEC.txt
 enum class OpcodeIR
 {
-    MOV_IMM_TO_REG,
-    ADD_IMM_TO_REG,
-    SUB_IMM_TO_REG,
-    CMP_IMM_TO_REG,
+    MOV_IMM_TO_REG = 20,
+    ADD_IMM_TO_REG = 30,
+    SUB_IMM_TO_REG = 32,
+    CMP_IMM_TO_REG = 60,
 
-    MOV_REG_TO_REG,
-    ADD_REG_TO_REG,
-    SUB_REG_TO_REG,
-    CMP_REG_TO_REG,
+    MOV_REG_TO_REG = 21,
+    ADD_REG_TO_REG = 31,
+    SUB_REG_TO_REG = 33,
+    CMP_REG_TO_REG = 61,
 
-    JMP_REG,
-    JMP_LABEL,
-    JE_REG,
-    JE_LABEL,
+    JMP_REG = 50,
+    JMP_LABEL = 51,
+    JE_REG = 52,
+    JE_LABEL = 53,
 
-    HLT,
-    LOAD,
-    STORE
+    HLT = 0xFF,
+    LOAD = 10,
+    STORE = 11
 };
 
 
