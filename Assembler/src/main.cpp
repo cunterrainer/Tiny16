@@ -1,15 +1,44 @@
 #include <vector>
 #include <format>
 #include <string>
+#include <fstream>
 #include <iostream>
 #include <string_view>
 
 #include "Parser.hpp"
 #include "Utility.hpp"
+#include "Assembler.hpp"
 #include "Validator.hpp"
 #include "Intermediate.hpp"
 
 #include "Utility/Result.hpp"
+
+void WriteBinaryFile(const std::vector<InstructionMC>& instructions)
+{
+    std::ofstream file("a.tiny16", std::ios::out | std::ios::binary | std::ios::app);
+    
+    for (const auto& instr : instructions)
+    {
+        file << instr.opcode;
+        if (instr.op1.type == OperandTypeMC::Register)
+        {
+            file << std::get<std::uint8_t>(instr.op1.value);
+        }
+        else if (instr.op1.type == OperandTypeMC::Intermediate)
+        {
+            file << std::get<std::uint16_t>(instr.op1.value);
+        }
+
+        if (instr.op2.type == OperandTypeMC::Register)
+        {
+            file << std::get<std::uint8_t>(instr.op2.value);
+        }
+        else if (instr.op2.type == OperandTypeMC::Intermediate)
+        {
+            file << std::get<std::uint16_t>(instr.op2.value);
+        }
+    }
+}
 
 int main()
 {
@@ -22,10 +51,13 @@ int main()
         const std::vector<ParsedInstruction> parsedInstructions = parseResult.first;
         const std::unordered_set<std::string> labels = parseResult.second;
 
+        std::vector<InstructionIR> intermediateInstructions;
+        intermediateInstructions.reserve(parsedInstructions.size());
+
         for (const auto& instr : parsedInstructions)
         {
             ValidateInstruction(instr, labels).Unwrap();
-            LowerInstruction(instr);
+            intermediateInstructions.push_back(LowerInstruction(instr));
             //const ValidationResult result = ValidateInstruction(instr);
             //if (!result.valid)
             //{
@@ -33,6 +65,9 @@ int main()
             //    return -1;
             //}
         }
+
+        const std::vector<InstructionMC> assembledInstructions = AssembleInstructions(intermediateInstructions).Unwrap();
+        WriteBinaryFile(assembledInstructions);
     }
     catch (const Err& e)
     {
