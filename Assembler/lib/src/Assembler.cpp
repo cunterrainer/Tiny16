@@ -81,6 +81,10 @@ std::uint32_t ResolveLabelAddress(std::string_view label, const std::vector<Inst
     {
         if (label == i.label)
         {
+            if (address > std::numeric_limits<std::uint16_t>::max())
+            {
+                throw std::logic_error(std::format("ResolveLabelAddress: Address for label {} = {}, greater than allowed for 16 bit architecture", label, address));
+            }
             return address;
         }
         address += i.size;
