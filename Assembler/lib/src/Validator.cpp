@@ -54,7 +54,7 @@ bool IsValidIntermediate(std::string_view s)
 }
 
 
-bool IsValidRegister(std::string_view s)
+bool IsValidRegister(const std::string_view s)
 {
     // including lower and uppercase R is easier than uppercasing every string
     return s == "R0" || s == "R1" || s == "R2" || s == "R3" ||
