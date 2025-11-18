@@ -22,6 +22,7 @@ TEST_CASE("Test ValidateInstruction()")
 
         // JMP/JE only accepts register or label
         CHECK(ValidateInstruction(ParseLine("JMP $0x99", 0).Ok(), { "123", "Test" }).IsErr());
+        CHECK(ValidateInstruction(ParseLine("JE  $0x99", 0).Ok(), { "123", "Test" }).IsErr());
 
         // Destination must be a valid register
         CHECK(ValidateInstruction(ParseLine("MOV R1, $4", 0).Ok()).IsErr());
