@@ -1,3 +1,5 @@
+// TODO: Write Assembler tests
+
 #include <vector>
 #include <format>
 #include <string>
@@ -15,27 +17,34 @@
 
 void WriteBinaryFile(const std::vector<InstructionMC>& instructions)
 {
-    std::ofstream file("a.tiny16", std::ios::out | std::ios::binary | std::ios::app);
+    std::ofstream file("a.tiny16", std::ofstream::binary);
     
     for (const auto& instr : instructions)
     {
+        // TODO: Write endianess properly
         file << instr.opcode;
         if (instr.op1.type == OperandTypeMC::Register)
         {
-            file << std::get<std::uint8_t>(instr.op1.value);
+            file.put(std::get<std::uint8_t>(instr.op1.value));
         }
         else if (instr.op1.type == OperandTypeMC::Intermediate)
         {
-            file << std::get<std::uint16_t>(instr.op1.value);
+            // writes it in little endian order
+            const std::uint16_t v = std::get<std::uint16_t>(instr.op1.value);
+            file.put(static_cast<std::uint8_t>(v & 0xFF));
+            file.put(static_cast<std::uint8_t>((v >> 8) & 0xFF));
         }
 
         if (instr.op2.type == OperandTypeMC::Register)
         {
-            file << std::get<std::uint8_t>(instr.op2.value);
+            file.put(std::get<std::uint8_t>(instr.op2.value));
         }
         else if (instr.op2.type == OperandTypeMC::Intermediate)
         {
-            file << std::get<std::uint16_t>(instr.op2.value);
+            // writes it in little endian order
+            const std::uint16_t v = std::get<std::uint16_t>(instr.op2.value);
+            file.put(static_cast<std::uint8_t>(v & 0xFF));
+            file.put(static_cast<std::uint8_t>((v >> 8) & 0xFF));
         }
     }
 }
