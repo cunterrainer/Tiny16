@@ -107,6 +107,14 @@ TEST_CASE("Testing ParseLine() Instructions")
         CHECK(ins.Ok().lhs == "R1");
         CHECK(ins.Ok().rhs == "R2");
         CHECK(ins.Ok().lineNumber == 0xFF);
+
+        ins = ParseLine("MOV R1, R2 # Comment", 0xFF);
+        CHECK(ins.IsOk() == true);
+        CHECK(ins.Ok().label == "");
+        CHECK(ins.Ok().opcode == "MOV");
+        CHECK(ins.Ok().lhs == "R1");
+        CHECK(ins.Ok().rhs == "R2");
+        CHECK(ins.Ok().lineNumber == 0xFF);
     }
 }
 
@@ -138,7 +146,8 @@ TEST_CASE("Testing ParseLine() Labels and Commas")
         CHECK(ParseLine("IsEqual:Test"        , 0).IsErr());
         CHECK(ParseLine("123IsEqual: Test"    , 0).IsErr());
         CHECK(ParseLine("123IsEqual:Test"     , 0).IsErr());
-        CHECK(ParseLine("   IsEqual:  Test   ", 0).IsErr());
+        CHECK(ParseLine("   IsEqual:  Test"   , 0).IsErr());
+        CHECK(ParseLine("Label: MOV R1, R2"   , 0).IsErr()); // A label with an instruction is NOT allowed, that's not an error
     }
     
     
