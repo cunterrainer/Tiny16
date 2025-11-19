@@ -1,6 +1,10 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <unordered_map>
+
+#include "../../Assembler/lib/src/Assembler.hpp"
+#include "../../Assembler/lib/src/Intermediate.hpp"
 
 #include "CPU.hpp"
 #include "Log.hpp"
@@ -236,6 +240,119 @@ inline std::uint16_t CPU::GetImmediate16(const std::uint8_t* ptr) const noexcept
 //        }
 //    }
 //}
+
+
+void CPU::Instruction_MOV_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    m_Registers[reg] = imm;
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_ADD_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    m_Registers[reg] += imm;
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_SUB_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    m_Registers[reg] -= imm;
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_CMP_IMM_TO_REG(OpcodeMC opcode)
+{
+    // TODO implement
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_MOV_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register regSrc = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register regDst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[regDst] = m_Registers[regSrc];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_ADD_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register regSrc = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register regDst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[regDst] += m_Registers[regSrc];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_SUB_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register regSrc = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register regDst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[regDst] -= m_Registers[regSrc];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_CMP_REG_TO_REG(OpcodeMC opcode)
+{
+    // TODO Implement
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JMP_REG(OpcodeMC)
+{
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    m_ProgramCounter = m_Registers[reg];
+}
+
+void CPU::Instruction_JMP_LABEL(OpcodeMC)
+{
+    const std::uint16_t addr = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    m_ProgramCounter = addr;
+}
+
+void CPU::Instruction_JE_REG(OpcodeMC opcode)
+{
+    // TODO
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JE_LABEL(OpcodeMC opcode)
+{
+    // TODO
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_HLT(OpcodeMC)
+{
+    m_ExecutionMode = false; // Stay stuck at this instructions, NOT a bug
+}
+
+void CPU::Instruction_LOAD(OpcodeMC opcode)
+{
+    // TODO
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_STORE(OpcodeMC opcode)
+{
+    // TODO
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+
+void CPU::Clock2()
+{
+    // TODO error checking if opcode exists
+    const OpcodeMC opcode = (OpcodeMC)m_Prom.Read(m_ProgramCounter);
+    (this->*m_InstructionFunctionTable.at(opcode))(opcode);
+}
 
 
 std::string CPU::Clock() noexcept
