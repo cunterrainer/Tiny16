@@ -1,4 +1,4 @@
-#include <vector>
+﻿#include <vector>
 #include <cstdint>
 #include <cstdlib>
 #include <utility>
@@ -17,7 +17,7 @@
 
 int main()
 {
-    std::optional<std::vector<std::uint8_t>> e = LoadFile("examples/c.ty"); // TODO add error message in release
+    std::optional<std::vector<std::uint8_t>> e = LoadFile("examples/a.tiny16"); // TODO add error message in release
     if (!e.has_value())
         return EXIT_FAILURE;
 
@@ -107,7 +107,7 @@ int main()
                     for (int column = 0; column < 16; column++)
                     {
                         ImGui::TableSetColumnIndex(column + 1);
-                        ImGui::Text("0x%04X", ram.GetMemory(row + column));
+                        ImGui::Text("0x%02X", ram.GetMemory(row + column));
                     }
                 }
                 ImGui::EndTable();
@@ -136,9 +136,8 @@ int main()
             {
                 if (instr.first == cpu.GetProgramCounter())
                 {
-                    // TODO text colored
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 43, 255));
-                    ImGui::LabelText("##InstructionLabel", "%s", instr.second.c_str());
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+                    ImGui::LabelText("##InstructionLabel", "-> %s", instr.second.c_str());
                     ImGui::PopStyleColor();
                 }
                 else
