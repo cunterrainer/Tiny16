@@ -1,4 +1,5 @@
-﻿#include <vector>
+﻿#include <cstdio>
+#include <vector>
 #include <cstdint>
 #include <cstdlib>
 #include <utility>
@@ -76,7 +77,8 @@ int main()
         ImGui::SetNextWindowPos({ 20, 140 });
         ImGui::Begin("Memory", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
         {
-            if (true && ImGui::BeginTable("##Memory View", 17, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame))
+            ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
+            if (ImGui::BeginTable("##Memory View", 17, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame))
             {
                 ImGui::TableSetupColumn("Offset");
                 ImGui::TableSetupColumn("00");
@@ -107,11 +109,32 @@ int main()
                     for (int column = 0; column < 16; column++)
                     {
                         ImGui::TableSetColumnIndex(column + 1);
-                        ImGui::Text("0x%02X", ram.GetMemory(row + column));
+
+                        char buf[5] = { 0 };
+                        std::snprintf(buf, 5, "0x%02X", ram.GetMemory(row + column));
+
+                        ImGui::PushID(row + column);
+                        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0)); // normal
+                        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0, 0, 0, 0)); // hover
+                        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 0)); // active (blue)
+
+                        ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
+                        if (ImGui::InputText("##MemoryCellText", buf, 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue))
+                        {
+                            int num;
+                            const int result = std::sscanf(buf, "%x", &num);
+                            if (result != 0 && result != EOF)
+                            {
+                                ram.SetMemory(row + column, num);
+                            }
+                        }
+                        ImGui::PopStyleColor(3);
+                        ImGui::PopID();
                     }
                 }
                 ImGui::EndTable();
             }
+            ImGui::PopStyleVar();
         }
         ImGui::End();
 
