@@ -5,6 +5,7 @@
 #include <utility>
 #include <optional>
 #include <algorithm>
+#include <iostream>
 
 #include "imgui.h"
 #include "raygui.h"
@@ -15,6 +16,8 @@
 #include "Core/RAM.hpp"
 #include "File.hpp"
 #include "Core/PROM.hpp"
+#include "UI/Emulator.hpp"
+#include "UI/ScriptIDE.hpp"
 #include "Disassembler/Disassembler.hpp"
 
 int main()
@@ -29,188 +32,46 @@ int main()
     CPU cpu(prom, ram);
 
     InitWindow(1280, 720, "Tiny16-Emulator");
-    rlImGuiSetup(true);
+    SetExitKey(KEY_NULL);
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
 
-    bool execute = false;
-    bool step = false;
-    std::string ins;
+    rlImGuiSetup(true);
 
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr;
 
+    UI::ScriptIDE f;
+    UI::Emulator emu(cpu, ram, dism);
     while (!WindowShouldClose())
     {
-        if (cpu.IsExecuting() && (execute || step))
+        if (cpu.IsExecuting() && (emu.ExecuteClicked() || emu.StepClicked()))
         {
            cpu.Clock();
-           step = false;
+           emu.SetStep(false);
         }
 
         BeginDrawing();
-        ClearBackground({ 14, 14, 14, 255 });
-
         rlImGuiBegin();
-        
-        float width = 900;
-        ImGui::SetNextWindowSize({ width, 100 });
-        ImGui::SetNextWindowPos({ 20, 20 });
-        ImGui::Begin("Register", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+        ImGui::SetNextWindowPos({ 0, 0 });
+        ImGui::SetNextWindowSize({ (float)GetScreenWidth(), (float)GetScreenHeight()});
+        ImGui::Begin("##MainWindow", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar);
         {
-            float item_width = 100;
-
-            ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R0Label", "R0: 0x%04X", cpu.GetRegister(CPU::Register::R0));
-            ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R3Label", "R3: 0x%04X", cpu.GetRegister(CPU::Register::R3));
-            ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R6Label", "R6: 0x%04X", cpu.GetRegister(CPU::Register::R6));
-            ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##PCLabel", "PC: 0x%04X", cpu.GetProgramCounter());
-
-            ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R1Label", "R1: 0x%04X", cpu.GetRegister(CPU::Register::R1));
-            ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R4Label", "R4: 0x%04X", cpu.GetRegister(CPU::Register::R4));
-            ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R7Label", "R7: 0x%04X", cpu.GetRegister(CPU::Register::R7));
-
-            ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R2Label", "R2: 0x%04X", cpu.GetRegister(CPU::Register::R2));
-            ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R5Label", "R5: 0x%04X", cpu.GetRegister(CPU::Register::R5));
-            ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RFLabel", "RF: 0x%04X", cpu.GetRegister(CPU::Register::RF));
-
-        }
-        ImGui::End();
-
-        ImGui::SetNextWindowSize({ width, 400 });
-        ImGui::SetNextWindowPos({ 20, 140 });
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-        ImGui::Begin("Memory", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-        {
-            static std::uint16_t memoryViewStartAddress = 0;
-            static std::int32_t memoryViewSearchedAddress = -1;
-            constexpr int pageSize = 288;
-
-            ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
-            if (ImGui::BeginTable("##Memory View", 17, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame))
+            ImGui::BeginTabBar("EmulatorTabs");
             {
-                ImGui::TableSetupColumn("Offset");
-                ImGui::TableSetupColumn("00");
-                ImGui::TableSetupColumn("01");
-                ImGui::TableSetupColumn("02");
-                ImGui::TableSetupColumn("03");
-                ImGui::TableSetupColumn("04");
-                ImGui::TableSetupColumn("05");
-                ImGui::TableSetupColumn("06");
-                ImGui::TableSetupColumn("07");
-                ImGui::TableSetupColumn("08");
-                ImGui::TableSetupColumn("09");
-                ImGui::TableSetupColumn("0A");
-                ImGui::TableSetupColumn("0B");
-                ImGui::TableSetupColumn("0C");
-                ImGui::TableSetupColumn("0D");
-                ImGui::TableSetupColumn("0E");
-                ImGui::TableSetupColumn("0F");
-                ImGui::TableHeadersRow();
-
-                for (int row = memoryViewStartAddress; row < (int)ram.GetSize() && row < memoryViewStartAddress + pageSize; row += 16)
+                if (ImGui::BeginTabItem("Emulator"))
                 {
-                    ImGui::TableNextRow();
-
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextDisabled("0x%04X", row);
-
-                    for (int column = 0; column < 16; column++)
-                    {
-                        ImGui::TableSetColumnIndex(column + 1);
-                        const std::uint16_t addressofCell = static_cast<std::uint16_t>(row + column);
-
-                        char buf[5] = { 0 };
-                        std::snprintf(buf, 5, "0x%02X", ram.GetMemory(addressofCell));
-
-                        ImGui::PushID(addressofCell);
-
-                        int colors = 0;
-                        if (addressofCell != memoryViewSearchedAddress)
-                        {
-                            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0)); // normal
-                            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0, 0, 0, 0)); // hover
-                            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 0)); // active (blue)
-                            colors = 3;
-                        }
-
-                        ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
-                        if (ImGui::InputText("##MemoryCellText", buf, 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue))
-                        {
-                            int num;
-                            const int result = std::sscanf(buf, "%x", &num);
-                            if (result != 0 && result != EOF)
-                            {
-                                ram.SetMemory(addressofCell, static_cast<std::uint8_t>(num));
-                            }
-                        }
-                        ImGui::PopStyleColor(colors);
-                        ImGui::PopID();
-                    }
+                    emu.Show();
+                    ImGui::EndTabItem();
                 }
-                ImGui::EndTable();
-            }
-            ImGui::PopStyleVar();
 
-
-            static char buf[7] = "Search";
-            if (ImGui::InputText("##SearchInput", buf, 7, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue))
-            {
-                int address;
-                const int result = std::sscanf(buf, "%x", &address);
-                if (result == EOF)
+                if (ImGui::BeginTabItem("Editor"))
                 {
-                    memoryViewSearchedAddress = -1;
-                }
-                else if (result != 0)
-                {
-                    memoryViewSearchedAddress = address;
-                    memoryViewStartAddress = static_cast<std::uint16_t>(address - (address % 16));
+                    f.Show();
+                    ImGui::EndTabItem();
                 }
             }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Previous Page", { 145, 0 }))
-            {
-                memoryViewStartAddress = static_cast<std::uint16_t>(std::max(0, memoryViewStartAddress - pageSize / 2));
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Next Page", { 145, 0 }))
-            {
-                memoryViewStartAddress = static_cast<std::uint16_t>(std::min(65520, memoryViewStartAddress + pageSize / 2));
-            }
-        }
-        ImGui::End();
-        ImGui::PopStyleVar();
-
-        ImGui::SetNextWindowSize({ width, 100 });
-        ImGui::SetNextWindowPos({ 20, 560 });
-        ImGui::Begin("ButtonWindow", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration);
-        {
-            ImGui::SameLine(); if (ImGui::Button("Execute", { 100, 30 })) execute = !execute;
-            ImGui::SameLine(); if (ImGui::Button("Pause", { 100, 30 })) execute = false;
-            ImGui::SameLine(); ImGui::Button("Stop", { 100, 30 });
-            ImGui::SameLine(); if (ImGui::Button("Step", { 100, 30 })) step = true;
-        }
-        ImGui::End();
-
-        ImGui::SetNextWindowSize({ 300, 640 });
-        ImGui::SetNextWindowPos({ width + 40, 20 });
-        ImGui::Begin("Instructions", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-        {
-            const auto& sourceInstructions = dism.GetSourceInstructions();
-
-            for (auto& instr : sourceInstructions)
-            {
-                if (instr.first == cpu.GetProgramCounter())
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-                    ImGui::LabelText("##InstructionLabel", "-> %s", instr.second.c_str());
-                    ImGui::PopStyleColor();
-                }
-                else
-                {
-                    ImGui::LabelText("##InstructionLabel", "%s", instr.second.c_str());
-                }
-            }
-
+            ImGui::EndTabBar();
         }
         ImGui::End();
 
