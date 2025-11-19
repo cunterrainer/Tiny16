@@ -8,6 +8,7 @@ project "Tiny16-Emulator"
     }
 
     includedirs {
+        "../Utility/include",
         RaylibDir .. "/src",
         "../Dependencies/raygui",
         "../Dependencies/rlImGui",
@@ -56,6 +57,9 @@ project "Tiny16-Emulator"
     filter "configurations:Debug"
         warnings "off"
         externalwarnings "off"
+
+    filter "toolset:msc*"
+        buildoptions "/Zc:__cplusplus" -- enforce __cplusplus macro being set to actually C++ version, for some reason msvc sets it to C++98 for compatibility without this setting
 
     -- gcc* clang* msc*
     filter { "toolset:msc*", "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution" }
