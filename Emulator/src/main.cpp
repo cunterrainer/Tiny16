@@ -10,6 +10,7 @@
 #include "rlImGui.h"
 
 #include "CPU.hpp"
+#include "RAM.hpp"
 #include "File.hpp"
 #include "PROM.hpp"
 #include "Disassembler.hpp"
@@ -22,6 +23,7 @@ int main()
 
     Disassembler dism(e.value());
     PROM prom(e.value());
+    RAM ram;
     CPU cpu(prom);
 
     InitWindow(1280, 720, "Tiny16-Emulator");
@@ -73,6 +75,44 @@ int main()
         ImGui::SetNextWindowSize({ width, 400 });
         ImGui::SetNextWindowPos({ 20, 140 });
         ImGui::Begin("Memory", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+        {
+            if (true && ImGui::BeginTable("##Memory View", 17, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame))
+            {
+                ImGui::TableSetupColumn("Offset");
+                ImGui::TableSetupColumn("00");
+                ImGui::TableSetupColumn("01");
+                ImGui::TableSetupColumn("02");
+                ImGui::TableSetupColumn("03");
+                ImGui::TableSetupColumn("04");
+                ImGui::TableSetupColumn("05");
+                ImGui::TableSetupColumn("06");
+                ImGui::TableSetupColumn("07");
+                ImGui::TableSetupColumn("08");
+                ImGui::TableSetupColumn("09");
+                ImGui::TableSetupColumn("0A");
+                ImGui::TableSetupColumn("0B");
+                ImGui::TableSetupColumn("0C");
+                ImGui::TableSetupColumn("0D");
+                ImGui::TableSetupColumn("0E");
+                ImGui::TableSetupColumn("0F");
+                ImGui::TableHeadersRow();
+
+                for (int row = 0; row < ram.GetSize() && row < 512; row += 16)
+                {
+                    ImGui::TableNextRow();
+
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::TextDisabled("0x%04X", row);
+
+                    for (int column = 0; column < 16; column++)
+                    {
+                        ImGui::TableSetColumnIndex(column + 1);
+                        ImGui::Text("0x%04X", ram.GetMemory(row + column));
+                    }
+                }
+                ImGui::EndTable();
+            }
+        }
         ImGui::End();
 
         ImGui::SetNextWindowSize({ width, 100 });
@@ -96,6 +136,7 @@ int main()
             {
                 if (instr.first == cpu.GetProgramCounter())
                 {
+                    // TODO text colored
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 43, 255));
                     ImGui::LabelText("##InstructionLabel", "%s", instr.second.c_str());
                     ImGui::PopStyleColor();
