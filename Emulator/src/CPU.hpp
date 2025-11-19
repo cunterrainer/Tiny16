@@ -17,21 +17,6 @@ private:
     constexpr static std::uint16_t OpcodeOffset    = 1;
     constexpr static std::uint16_t RegisterOffset  = 1;
 public:
-    enum class Instruction
-    {
-        MOVI = 20,
-        MOVR = 21,
-        ADDI = 30,
-        ADDR = 31,
-        SUBI = 32,
-        SUBR = 33,
-        JMP  = 50,
-        JE   = 51,
-        CMPI = 60,
-        CMPR = 61,
-        HLT  = 0xFF
-    };
-
     enum Register
     {
         R0,
@@ -47,6 +32,7 @@ public:
 
     enum Flags
     {
+        // TODO implement carry and borrow
         Less    = 0b00000001,
         Equal   = 0b00000010,
         Greater = 0b00000100,
@@ -99,8 +85,7 @@ private:
     void Instruction_STORE         (OpcodeMC opcode);
 public:
     explicit CPU(PROM& prom) : m_Prom(prom) {};
-    void Clock2();
-    std::string Clock() noexcept;
+    void Clock();
 
     constexpr bool IsExecuting() const noexcept { return m_ExecutionMode; }
     constexpr std::uint16_t GetRegister(Register reg) const noexcept { return m_Registers[reg]; }
