@@ -206,7 +206,7 @@ public:
         inline explicit Error(ErrorType type, std::format_string<Args...> what, Args&&... args) : Error<void>(std::format(what, std::forward<Args>(args)...)), m_Type(type) {}
     #else
         template <typename... Args>
-        inline explicit Error(Type type, const char* what, Args&&... args) : Error<void>(what, std::forward<Args>(args)...), m_Type(type) {}
+        inline explicit Error(ErrorType type, const char* what, Args&&... args) : Error<void>(what, std::forward<Args>(args)...), m_Type(type) {}
     #endif
 
     inline explicit Error(ErrorType type, const char* what) : Error<void>(what), m_Type(type) {}
