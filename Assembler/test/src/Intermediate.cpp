@@ -190,8 +190,8 @@ TEST_CASE("Test GetOpcodeIR()")
 
     SUBCASE("LOAD")
     {
-        CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Register) == OpcodeIR::LOAD);
-        CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Intermediate) == OpcodeIR::LOAD);
+        CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Register) == OpcodeIR::LOAD_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Intermediate) == OpcodeIR::LOAD_ADD_TO_REG);
     }
 
     SUBCASE("STORE")
@@ -429,10 +429,29 @@ TEST_CASE("Testing LowerInstruction() Valid")
         auto inst = LowerInstruction(pi);
 
         CHECK(inst.size == 4);
-        CHECK(inst.opcode == OpcodeIR::LOAD);
+        CHECK(inst.opcode == OpcodeIR::LOAD_ADD_TO_REG);
         CHECK(inst.op1.type == OperandTypeIR::Intermediate);
         CHECK(inst.op2.type == OperandTypeIR::Register);
         CHECK(std::get<std::uint16_t>(inst.op1.value) == 0xFF);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 0);
+    }
+
+    SUBCASE("LOAD from address in register to register")
+    {
+        ParsedInstruction pi{
+            .label = "",
+            .opcode = "LOAD",
+            .lhs = "R1",
+            .rhs = "R0"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 3);
+        CHECK(inst.opcode == OpcodeIR::LOAD_REG_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
         CHECK(std::get<std::uint8_t>(inst.op2.value) == 0);
     }
 

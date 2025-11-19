@@ -124,13 +124,23 @@ void CPU::Instruction_HLT(OpcodeMC)
     m_ExecutionMode = false; // Stay stuck at this instructions, NOT a bug
 }
 
-void CPU::Instruction_LOAD(OpcodeMC opcode)
+void CPU::Instruction_LOAD_ADD_TO_REG(OpcodeMC opcode)
 {
     const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
     const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
 
     // We work in little endian
     m_Registers[reg] = (m_Ram.GetMemory(imm + 1) << 8) | m_Ram.GetMemory(imm);
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_LOAD_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register regSrcAddr = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register regDst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    // We work in little endian
+    m_Registers[regDst] = (m_Ram.GetMemory(m_Registers[regSrcAddr] + 1) << 8) | m_Ram.GetMemory(m_Registers[regSrcAddr]);
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 

@@ -15,11 +15,11 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
 
     switch (instrIr.opcode)
     {
-    case OpcodeIR::LOAD:
     case OpcodeIR::MOV_IMM_TO_REG:
     case OpcodeIR::ADD_IMM_TO_REG:
     case OpcodeIR::SUB_IMM_TO_REG:
     case OpcodeIR::CMP_IMM_TO_REG:
+    case OpcodeIR::LOAD_ADD_TO_REG:
         instrMc.op1.type = OperandTypeMC::Intermediate;
         instrMc.op1.value = std::get<std::uint16_t>(instrIr.op1.value);
         break;
@@ -30,6 +30,7 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::ADD_REG_TO_REG:
     case OpcodeIR::SUB_REG_TO_REG:
     case OpcodeIR::CMP_REG_TO_REG:
+    case OpcodeIR::LOAD_REG_TO_REG:
         instrMc.op1.type = OperandTypeMC::Register;
         instrMc.op1.value = std::get<std::uint8_t>(instrIr.op1.value);
         break;
@@ -45,7 +46,6 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
 
     switch (instrIr.opcode)
     {
-    case OpcodeIR::LOAD:
     case OpcodeIR::MOV_IMM_TO_REG:
     case OpcodeIR::ADD_IMM_TO_REG:
     case OpcodeIR::SUB_IMM_TO_REG:
@@ -54,6 +54,8 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::ADD_REG_TO_REG:
     case OpcodeIR::SUB_REG_TO_REG:
     case OpcodeIR::CMP_REG_TO_REG:
+    case OpcodeIR::LOAD_ADD_TO_REG:
+    case OpcodeIR::LOAD_REG_TO_REG:
         instrMc.op2.type = OperandTypeMC::Register;
         instrMc.op2.value = std::get<std::uint8_t>(instrIr.op2.value);
         break;

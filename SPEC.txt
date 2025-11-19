@@ -1,13 +1,13 @@
 === INSTRUCTIONS ===
-0:  LOAD  addr16, reg    -> reg = *addr16
-1:  STORE reg, addr16    -> *addr16 = reg
-2:  MOV  imm16/reg, reg  -> reg = imm16/reg
-3:  ADD  imm16/reg, reg  -> reg = reg + imm16/reg
-4:  SUB  imm16/reg, reg  -> reg = reg - imm16/reg
-5:  JMP  addr16          -> PC = addr16
-4:  JE   addr16          -> PC = addr16 if RF (Flag register) == 0 else NOP
-7:  CMP  imm16/reg, reg  -> Set flag (RF) if equal / greater / less (reg - imm16/reg)
-8:  HLT                  -> Halt execution effectively exit the program
+0:  LOAD  reg/addr16, reg -> reg = *addr16/*reg
+1:  STORE reg, addr16     -> *addr16 = reg
+2:  MOV  imm16/reg, reg   -> reg = imm16/reg
+3:  ADD  imm16/reg, reg   -> reg = reg + imm16/reg
+4:  SUB  imm16/reg, reg   -> reg = reg - imm16/reg
+5:  JMP  reg/addr16       -> PC = reg/addr16
+4:  JE   reg/addr16       -> PC = reg/addr16 if RF (Flag register) == 0 else NOP
+7:  CMP  imm16/reg, reg   -> Set flag (RF) if equal / greater / less (reg - imm16/reg)
+8:  HLT                   -> Halt execution effectively exit the program
 
 * imm16 are the bytes immediately following the instruction byte in memory
 

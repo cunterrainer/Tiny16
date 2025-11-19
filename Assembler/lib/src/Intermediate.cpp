@@ -166,7 +166,9 @@ OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1)
 
     if (opcode == Opcode::LOAD)
     {
-        return OpcodeIR::LOAD;
+        if (op1 == OperandTypeIR::Register)
+            return OpcodeIR::LOAD_REG_TO_REG;
+        return OpcodeIR::LOAD_ADD_TO_REG;
     }
 
     if (opcode == Opcode::STORE)
