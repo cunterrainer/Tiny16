@@ -11,13 +11,13 @@ private:
 public:
     explicit PROM(const std::vector<std::uint8_t>& code) : m_SourceCode(code) {}
 
-    std::uint8_t Read(std::uint16_t address)
+    inline std::uint8_t Read(std::uint16_t address) const noexcept
     {
         return m_SourceCode[address];
     }
 
     // Reads at address and address + 1
-    std::uint16_t Read16(std::uint16_t address)
+    inline std::uint16_t Read16(std::uint16_t address) const noexcept
     {
         // Reminder: Little endian architecture
         return (m_SourceCode[address + 1] << 8) | m_SourceCode[address];
