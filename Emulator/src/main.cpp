@@ -16,7 +16,7 @@
 
 int main()
 {
-    std::optional<std::vector<std::uint8_t>> e = LoadFile("examples/a.ty"); // TODO add error message in release
+    std::optional<std::vector<std::uint8_t>> e = LoadFile("examples/c.ty"); // TODO add error message in release
     if (!e.has_value())
         return EXIT_FAILURE;
 
@@ -38,7 +38,7 @@ int main()
     {
         if (cpu.IsExecuting() && (execute || step))
         {
-           cpu.Clock2();
+           cpu.Clock();
            step = false;
         }
 
@@ -53,20 +53,19 @@ int main()
         ImGui::Begin("Register", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
         
         float item_width = 100;
+
                            ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R0Label", "R0: 0x%04X", cpu.GetRegister(CPU::Register::R0));
-        ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R1Label", "R1: 0x%04X", cpu.GetRegister(CPU::Register::R1));
-        ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R2Label", "R2: 0x%04X", cpu.GetRegister(CPU::Register::R2));
         ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R3Label", "R3: 0x%04X", cpu.GetRegister(CPU::Register::R3));
-        
-                           ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R4Label", "R4: 0x%04X", cpu.GetRegister(CPU::Register::R4));
-        ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R5Label", "R5: 0x%04X", cpu.GetRegister(CPU::Register::R5));
         ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R6Label", "R6: 0x%04X", cpu.GetRegister(CPU::Register::R6));
+        ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##PCLabel", "PC: 0x%04X", cpu.GetProgramCounter());
+
+                           ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R1Label", "R1: 0x%04X", cpu.GetRegister(CPU::Register::R1));
+        ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R4Label", "R4: 0x%04X", cpu.GetRegister(CPU::Register::R4));
         ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R7Label", "R7: 0x%04X", cpu.GetRegister(CPU::Register::R7));
         
-                           ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R8Label", "R8: 0x%04X", cpu.GetRegister(CPU::Register::R8));
-        ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R9Label", "R9: 0x%04X", cpu.GetRegister(CPU::Register::R9));
+                           ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R2Label", "R2: 0x%04X", cpu.GetRegister(CPU::Register::R2));
+        ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R5Label", "R5: 0x%04X", cpu.GetRegister(CPU::Register::R5));
         ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RFLabel", "RF: 0x%04X", cpu.GetRegister(CPU::Register::RF));
-        ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##PCLabel", "PC: 0x%04X", cpu.GetProgramCounter());
         ImGui::End();
 
         ImGui::SetNextWindowSize({ width, 400 });
@@ -86,8 +85,7 @@ int main()
         ImGui::SetNextWindowSize({ 300, 640 });
         ImGui::SetNextWindowPos({ width + 40, 20 });
         ImGui::Begin("Instructions", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-        ImGui::LabelText("##CurrentInstructionLabel", "%d", cpu.GetProgramCounter());
-        
+
         const auto& sourceInstructions = dism.GetSourceInstructions();
 
         for (auto& instr : sourceInstructions)
