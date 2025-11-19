@@ -3,3 +3,25 @@ Add a new Register:
 -> Emulator/src/main.cpp -> Add to rendering code
 -> Assembler/lib/Validator.cpp -> Add to IsValidRegister()
 -> Assembler/lib/Intermediate.cpp -> Check if ParseOperand() is valid
+-> Assembler/test/Validator.cpp -> Add tests
+-> Assembler/test/Intermediate.cpp -> Add tests
+-> Add to SPEC.txt
+
+Add a new Instructions:
+-> Check if Assembler/lib/Parser.cpp can handle it
+-> Add to Assembler/lib/Instruction.hpp -> Add to s_InstructionMap
+-> Add to Assembler/lib/Intermediate.hpp -> Add to OpcodeIR & Add to s_InstructionIRSizeMap
+-> Add to Assembler/lib/Intermediate.cpp -> Add to GetOpcodeIR()
+-> Add to Assembler/lib/Assembler.cpp -> Add to AssembleInstruction()
+-> Add to Assembler/test/src/Intermediate.cpp -> Add tests
+-> Add to Assembler/test/src/Parser.cpp -> Add tests
+-> Add to Assembler/test/src/Validator.cpp -> Add tests
+-> Consider all test cases but these are the most important
+-> Fix tests that might be broken
+-> Emulator/src/CPU.hpp -> Add to m_InstructionFunctionTable & Add an instruction function
+-> Emulator/src/CPU.cpp -> Add to instruction function
+-> Emulator/src/Disassembler.hpp -> Add to m_OpcodeToStringMap
+-> Emulator/src/Disassembler.cpp -> Add to DisassembleOperands
+-> Add to SPEC.txt
+
+Always after changing anything write a little test program and verify using the emulator
