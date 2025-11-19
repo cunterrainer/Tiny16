@@ -53,7 +53,7 @@ int main()
 {
     try
     {
-        const std::string file = "examples/example2.s";
+        const std::string file = "examples/example3.s";
         const std::vector<std::string> sourceLines = ReadFile(file).Unwrap();
 
         const auto parseResult = ParseSourceCode(sourceLines).Unwrap();
