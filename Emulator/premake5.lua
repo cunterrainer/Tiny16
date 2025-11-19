@@ -9,17 +9,23 @@ project "Tiny16-Emulator"
 
     includedirs {
         RaylibDir .. "/src",
-        "../Dependencies/raygui"
+        "../Dependencies/raygui",
+        "../Dependencies/rlImGui",
+        "../Dependencies/ImGui"
     }
 
     externalincludedirs {
         RaylibDir .. "/src",
         "../Dependencies/raygui",
-        "../Dependencies/raygui/src"
+        "../Dependencies/raygui/src",
+        "../Dependencies/rlImGui",
+        "../Dependencies/ImGui"
     }
 
     links {
-        "raylib"
+        "raylib",
+        "raygui",
+        "rlImGui"
     }
 
     filter "system:windows"
