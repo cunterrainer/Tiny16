@@ -42,8 +42,6 @@ public:
         R5,
         R6,
         R7,
-        R8,
-        R9,
         RF  // Reserved for flags can't be used
     };
 

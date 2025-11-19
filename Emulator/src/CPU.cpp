@@ -271,7 +271,16 @@ void CPU::Instruction_SUB_IMM_TO_REG(OpcodeMC opcode)
 
 void CPU::Instruction_CMP_IMM_TO_REG(OpcodeMC opcode)
 {
-    // TODO implement
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    if (m_Registers[reg] == imm)
+        m_Registers[RF] = Flags::Equal;
+    else if (imm > m_Registers[reg])
+        m_Registers[RF] = Flags::Greater;
+    else if (imm < m_Registers[reg])
+        m_Registers[RF] = Flags::Less;
+
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
@@ -301,7 +310,16 @@ void CPU::Instruction_SUB_REG_TO_REG(OpcodeMC opcode)
 
 void CPU::Instruction_CMP_REG_TO_REG(OpcodeMC opcode)
 {
-    // TODO Implement
+    const Register reg1 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register reg2 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    if (m_Registers[reg1] == m_Registers[reg2])
+        m_Registers[RF] = Flags::Equal;
+    else if (m_Registers[reg1] > m_Registers[reg2])
+        m_Registers[RF] = Flags::Greater;
+    else if (m_Registers[reg1] < m_Registers[reg2])
+        m_Registers[RF] = Flags::Less;
+
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
@@ -319,14 +337,17 @@ void CPU::Instruction_JMP_LABEL(OpcodeMC)
 
 void CPU::Instruction_JE_REG(OpcodeMC opcode)
 {
-    // TODO
-    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+    if (m_Registers[RF] == Flags::Equal)
+    {
+        const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+        m_ProgramCounter = m_Registers[reg];
+    }
 }
 
 void CPU::Instruction_JE_LABEL(OpcodeMC opcode)
 {
-    // TODO
-    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+    if (m_Registers[RF] == Flags::Equal)
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
 }
 
 void CPU::Instruction_HLT(OpcodeMC)
