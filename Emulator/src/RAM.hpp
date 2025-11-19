@@ -15,6 +15,11 @@ public:
         return m_Memory[address];
     }
 
+    inline void SetMemory(std::uint16_t address, std::uint16_t value) noexcept
+    {
+        m_Memory[address] = value;
+    }
+
     inline size_t GetSize() const noexcept
     {
         return m_Memory.size();
