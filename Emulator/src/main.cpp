@@ -21,10 +21,10 @@ int main()
     if (!e.has_value())
         return EXIT_FAILURE;
 
-    Disassembler dism(e.value());
-    PROM prom(e.value());
+    const Disassembler dism(e.value());
+    const PROM prom(e.value());
     RAM ram;
-    CPU cpu(prom);
+    CPU cpu(prom, ram);
 
     InitWindow(1280, 720, "Tiny16-Emulator");
     rlImGuiSetup(true);

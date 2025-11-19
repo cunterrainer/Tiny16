@@ -8,6 +8,7 @@
 
 #include "../../Assembler/lib/src/Assembler.hpp"
 
+#include "RAM.hpp"
 #include "PROM.hpp"
 
 class CPU
@@ -40,7 +41,8 @@ public:
         Borrow  = 0b00010000
     };
 private:
-    PROM& m_Prom;
+    const PROM& m_Prom;
+    RAM& m_Ram;
     bool m_ExecutionMode = true;
     std::uint16_t m_ProgramCounter = 0;
     std::array<std::uint16_t, static_cast<std::size_t>(Register::RF) + 1> m_Registers = { 0 };
@@ -83,7 +85,7 @@ private:
     void Instruction_LOAD          (OpcodeMC opcode);
     void Instruction_STORE         (OpcodeMC opcode);
 public:
-    explicit CPU(PROM& prom) : m_Prom(prom) {};
+    explicit CPU(const PROM& prom, RAM& ram) : m_Prom(prom), m_Ram(ram) {};
     void Clock();
 
     constexpr bool IsExecuting() const noexcept { return m_ExecutionMode; }
