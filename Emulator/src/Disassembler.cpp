@@ -63,7 +63,7 @@ Disassembler::Disassembler(const std::vector<std::uint8_t>& machineCode)
             const std::string opcodeStr(m_OpcodeToStringMap.at(opcode));
             const std::string operands = DisassembleOperands(opcode, machineCode, i);
 
-            m_SourceCode.emplace_back(opcodeStr + operands);
+            m_SourceCode.emplace_back(std::format("0x{:04X}: {}", i, opcodeStr + operands));
             i += s_InstructionIRSizeMap.at(opcode);
         }
         catch (const std::out_of_range&)
