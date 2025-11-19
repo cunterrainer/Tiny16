@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <utility>
 #include <unordered_map>
 
 #include "../../Assembler/lib/src/Assembler.hpp"
@@ -11,7 +12,7 @@
 class Disassembler
 {
 private:
-    std::vector<std::string> m_SourceCode;
+    std::vector<std::pair<std::uint16_t, std::string>> m_SourceCode;
 
     const std::unordered_map<OpcodeMC, std::string_view> m_OpcodeToStringMap = {
         { OpcodeMC::MOV_IMM_TO_REG, "MOV" },
@@ -36,7 +37,7 @@ public:
     explicit Disassembler(const std::vector<std::uint8_t>& machineCode);
 
 
-    inline const std::vector<std::string>& GetSourceInstructions() const noexcept
+    inline const std::vector<std::pair<std::uint16_t, std::string>>& GetSourceInstructions() const noexcept
     {
         return m_SourceCode;
     }

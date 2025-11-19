@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <utility>
 #include <unordered_map>
 
 #include "../../Assembler/lib/src/Assembler.hpp"
@@ -63,7 +64,7 @@ Disassembler::Disassembler(const std::vector<std::uint8_t>& machineCode)
             const std::string opcodeStr(m_OpcodeToStringMap.at(opcode));
             const std::string operands = DisassembleOperands(opcode, machineCode, i);
 
-            m_SourceCode.emplace_back(std::format("0x{:04X}: {}", i, opcodeStr + operands));
+            m_SourceCode.emplace_back(i, std::format("0x{:04X}: {}", i, opcodeStr + operands));
             i += s_InstructionIRSizeMap.at(opcode);
         }
         catch (const std::out_of_range&)
