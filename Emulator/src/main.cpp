@@ -1,5 +1,6 @@
 #include <vector>
 #include <cstdint>
+#include <cstdlib>
 #include <optional>
 
 #include "imgui.h"
@@ -10,20 +11,21 @@
 #include "CPU.hpp"
 #include "File.hpp"
 #include "PROM.hpp"
+#include "Disassembler.hpp"
 
 int main()
 {
-    std::optional<std::vector<std::uint8_t>> e = LoadFile("examples/example2.ty");
+    std::optional<std::vector<std::uint8_t>> e = LoadFile("examples/a.ty"); // TODO add error message in release
     if (!e.has_value())
         return EXIT_FAILURE;
 
+    Disassembler dism(e.value());
     PROM prom(e.value());
     CPU cpu(prom);
 
     InitWindow(1280, 720, "Tiny16-Emulator");
     rlImGuiSetup(true);
 
-    Rectangle button = { 10, 150, 100, 50 };
     bool execute = false;
     bool step = false;
     std::string ins;
@@ -84,6 +86,14 @@ int main()
         ImGui::SetNextWindowPos({ width + 40, 20 });
         ImGui::Begin("Instructions", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
         ImGui::LabelText("##CurrentInstructionLabel", "%s", ins.c_str());
+        
+        const auto& sourceInstructions = dism.GetSourceInstructions();
+
+        for (auto& instr : sourceInstructions)
+        {
+            ImGui::LabelText("##InstructionLabel", "%s", instr.c_str());
+        }
+
         ImGui::End();
 
         rlImGuiEnd();
