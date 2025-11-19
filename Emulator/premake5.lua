@@ -9,6 +9,7 @@ project "Tiny16-Emulator"
     }
 
     includedirs {
+        "src",
         "../Utility/include",
         RaylibDir .. "/src",
         "../Dependencies/raygui",

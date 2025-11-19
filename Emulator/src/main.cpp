@@ -11,11 +11,11 @@
 #include "raylib.h"
 #include "rlImGui.h"
 
-#include "CPU.hpp"
-#include "RAM.hpp"
+#include "Core/CPU.hpp"
+#include "Core/RAM.hpp"
 #include "File.hpp"
-#include "PROM.hpp"
-#include "Disassembler.hpp"
+#include "Core/PROM.hpp"
+#include "Disassembler/Disassembler.hpp"
 
 int main()
 {
