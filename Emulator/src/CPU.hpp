@@ -48,7 +48,6 @@ private:
     using InstructionFunction = void (CPU::*) (OpcodeMC);
     const std::unordered_map<OpcodeMC, InstructionFunction> m_InstructionFunctionTable = {
         { OpcodeIR::MOV_IMM_TO_REG, &CPU::Instruction_MOV_IMM_TO_REG },
-
         { OpcodeIR::ADD_IMM_TO_REG, &CPU::Instruction_ADD_IMM_TO_REG },
         { OpcodeIR::SUB_IMM_TO_REG, &CPU::Instruction_SUB_IMM_TO_REG },
         { OpcodeIR::CMP_IMM_TO_REG, &CPU::Instruction_CMP_IMM_TO_REG },
