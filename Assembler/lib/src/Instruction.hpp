@@ -45,7 +45,7 @@ static const std::unordered_map<std::string_view, Instruction> s_InstructionMap 
     { "CMP",   { Opcode::CMP, OperandType::RegisterOrIntermediate, OperandType::Register } },
 
     { "LOAD",  { Opcode::LOAD,  OperandType::RegisterOrIntermediate, OperandType::Register } },
-    { "STORE", { Opcode::STORE, OperandType::Register,               OperandType::Intermediate } },
+    { "STORE", { Opcode::STORE, OperandType::Register,               OperandType::RegisterOrIntermediate } },
     { "HLT",   { Opcode::HLT,   OperandType::None,                   OperandType::None } },
     { "JMP",   { Opcode::JMP,   OperandType::RegisterOrLabel,        OperandType::None } },
     { "JE",    { Opcode::JE,    OperandType::RegisterOrLabel,        OperandType::None } }

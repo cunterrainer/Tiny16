@@ -144,7 +144,7 @@ void CPU::Instruction_LOAD_REG_TO_REG(OpcodeMC opcode)
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
-void CPU::Instruction_STORE(OpcodeMC opcode)
+void CPU::Instruction_STORE_REG_TO_ADD(OpcodeMC opcode)
 {
     const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
     const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset + RegisterOffset);
@@ -155,6 +155,20 @@ void CPU::Instruction_STORE(OpcodeMC opcode)
 
     m_Ram.SetMemory(imm, lowerHalf);
     m_Ram.SetMemory(imm + 1, upperHalf);
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_STORE_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register regValue = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register regDstAddr = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    // We work in little endian
+    const std::uint8_t lowerHalf = static_cast<std::uint8_t>(m_Registers[regValue]);
+    const std::uint8_t upperHalf = static_cast<std::uint8_t>(m_Registers[regValue] >> 8);
+
+    m_Ram.SetMemory(m_Registers[regDstAddr], lowerHalf);
+    m_Ram.SetMemory(m_Registers[regDstAddr] + 1, upperHalf);
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 

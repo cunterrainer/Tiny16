@@ -86,13 +86,10 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("LOAD R1, $0x20", 0).Ok()).IsErr());
         CHECK(ValidateInstruction(ParseLine("LOAD R1, $0b11", 0).Ok()).IsErr());
 
-        // Store op1 has to be a register and op2 has to be an address
+        // Store op1 has to be a register and op2 has to be an address or a register
         CHECK(ValidateInstruction(ParseLine("STORE  $0x4, R0", 0).Ok()).IsErr());
         CHECK(ValidateInstruction(ParseLine("STORE $+0x4, R7", 0).Ok()).IsErr());
         CHECK(ValidateInstruction(ParseLine("STORE $-0x4, R7", 0).Ok()).IsErr());
-        CHECK(ValidateInstruction(ParseLine("STORE R1, R0", 0).Ok()).IsErr());
-        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).IsErr());
-        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).IsErr());
     }
 
 
@@ -148,6 +145,9 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("STORE R0, $0xFF", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("STORE R7, $0x29", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("STORE R7, $0b11", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).IsOk());
     }
 }
 

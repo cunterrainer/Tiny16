@@ -144,63 +144,63 @@ TEST_CASE("Testing ParseOperandJmp()")
 }
 
 
-OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1);
+OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1, OperandTypeIR op2);
 TEST_CASE("Test GetOpcodeIR()")
 {
     SUBCASE("MOV")
     {
-        CHECK(GetOpcodeIR(Opcode::MOV, OperandTypeIR::Register) == OpcodeIR::MOV_REG_TO_REG);
-        CHECK(GetOpcodeIR(Opcode::MOV, OperandTypeIR::Intermediate) == OpcodeIR::MOV_IMM_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::MOV, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::MOV_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::MOV, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::MOV_IMM_TO_REG);
     }
 
     SUBCASE("ADD")
     {
-        CHECK(GetOpcodeIR(Opcode::ADD, OperandTypeIR::Register) == OpcodeIR::ADD_REG_TO_REG);
-        CHECK(GetOpcodeIR(Opcode::ADD, OperandTypeIR::Intermediate) == OpcodeIR::ADD_IMM_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::ADD, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::ADD_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::ADD, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::ADD_IMM_TO_REG);
     }
 
     SUBCASE("SUB")
     {
-        CHECK(GetOpcodeIR(Opcode::SUB, OperandTypeIR::Register) == OpcodeIR::SUB_REG_TO_REG);
-        CHECK(GetOpcodeIR(Opcode::SUB, OperandTypeIR::Intermediate) == OpcodeIR::SUB_IMM_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::SUB, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::SUB_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::SUB, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::SUB_IMM_TO_REG);
     }
 
     SUBCASE("CMP")
     {
-        CHECK(GetOpcodeIR(Opcode::CMP, OperandTypeIR::Register) == OpcodeIR::CMP_REG_TO_REG);
-        CHECK(GetOpcodeIR(Opcode::CMP, OperandTypeIR::Intermediate) == OpcodeIR::CMP_IMM_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::CMP, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::CMP_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::CMP, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::CMP_IMM_TO_REG);
     }
 
     SUBCASE("HLT")
     {
-        CHECK(GetOpcodeIR(Opcode::HLT, OperandTypeIR::None) == OpcodeIR::HLT);
+        CHECK(GetOpcodeIR(Opcode::HLT, OperandTypeIR::None, OperandTypeIR::Register) == OpcodeIR::HLT);
     }
 
     SUBCASE("JMP")
     {
-        CHECK(GetOpcodeIR(Opcode::JMP, OperandTypeIR::Register) == OpcodeIR::JMP_REG);
-        CHECK(GetOpcodeIR(Opcode::JMP, OperandTypeIR::Label) == OpcodeIR::JMP_LABEL);
+        CHECK(GetOpcodeIR(Opcode::JMP, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::JMP_REG);
+        CHECK(GetOpcodeIR(Opcode::JMP, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JMP_LABEL);
     }
 
     SUBCASE("JE")
     {
-        CHECK(GetOpcodeIR(Opcode::JE, OperandTypeIR::Register) == OpcodeIR::JE_REG);
-        CHECK(GetOpcodeIR(Opcode::JE, OperandTypeIR::Label) == OpcodeIR::JE_LABEL);
+        CHECK(GetOpcodeIR(Opcode::JE, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::JE_REG);
+        CHECK(GetOpcodeIR(Opcode::JE, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JE_LABEL);
     }
 
     SUBCASE("LOAD")
     {
-        CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Register) == OpcodeIR::LOAD_REG_TO_REG);
-        CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Intermediate) == OpcodeIR::LOAD_ADD_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::LOAD_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::LOAD_ADD_TO_REG);
     }
 
     SUBCASE("STORE")
     {
-        CHECK(GetOpcodeIR(Opcode::STORE, OperandTypeIR::Register) == OpcodeIR::STORE);
-        CHECK(GetOpcodeIR(Opcode::STORE, OperandTypeIR::Intermediate) == OpcodeIR::STORE);
+        CHECK(GetOpcodeIR(Opcode::STORE, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::STORE_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::STORE, OperandTypeIR::Register, OperandTypeIR::Intermediate) == OpcodeIR::STORE_REG_TO_ADD);
     }
 
-    CHECK_THROWS_AS(GetOpcodeIR((Opcode)100, (OperandTypeIR)100), std::logic_error);
+    CHECK_THROWS_AS(GetOpcodeIR((Opcode)100, (OperandTypeIR)100, (OperandTypeIR)100), std::logic_error);
 }
 
 
@@ -467,11 +467,30 @@ TEST_CASE("Testing LowerInstruction() Valid")
         auto inst = LowerInstruction(pi);
 
         CHECK(inst.size == 4);
-        CHECK(inst.opcode == OpcodeIR::STORE);
+        CHECK(inst.opcode == OpcodeIR::STORE_REG_TO_ADD);
         CHECK(inst.op1.type == OperandTypeIR::Register);
         CHECK(inst.op2.type == OperandTypeIR::Intermediate);
         CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
         CHECK(std::get<std::uint16_t>(inst.op2.value) == 0xFF);
+    }
+
+    SUBCASE("STORE from register to address in register")
+    {
+        ParsedInstruction pi{
+            .label = "",
+            .opcode = "STORE",
+            .lhs = "R1",
+            .rhs = "R7"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 3);
+        CHECK(inst.opcode == OpcodeIR::STORE_REG_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 7);
     }
 }
 

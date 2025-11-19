@@ -49,43 +49,45 @@ private:
 
     using InstructionFunction = void (CPU::*) (OpcodeMC);
     const std::unordered_map<OpcodeMC, InstructionFunction> m_InstructionFunctionTable = {
-        { OpcodeIR::MOV_IMM_TO_REG , &CPU::Instruction_MOV_IMM_TO_REG  },
-        { OpcodeIR::ADD_IMM_TO_REG , &CPU::Instruction_ADD_IMM_TO_REG  },
-        { OpcodeIR::SUB_IMM_TO_REG , &CPU::Instruction_SUB_IMM_TO_REG  },
-        { OpcodeIR::CMP_IMM_TO_REG , &CPU::Instruction_CMP_IMM_TO_REG  },
-        { OpcodeIR::MOV_REG_TO_REG , &CPU::Instruction_MOV_REG_TO_REG  },
-        { OpcodeIR::ADD_REG_TO_REG , &CPU::Instruction_ADD_REG_TO_REG  },
-        { OpcodeIR::SUB_REG_TO_REG , &CPU::Instruction_SUB_REG_TO_REG  },
-        { OpcodeIR::CMP_REG_TO_REG , &CPU::Instruction_CMP_REG_TO_REG  },
-        { OpcodeIR::JMP_REG        , &CPU::Instruction_JMP_REG         },
-        { OpcodeIR::JMP_LABEL      , &CPU::Instruction_JMP_LABEL       },
-        { OpcodeIR::JE_REG         , &CPU::Instruction_JE_REG          },
-        { OpcodeIR::JE_LABEL       , &CPU::Instruction_JE_LABEL        },
-        { OpcodeIR::HLT            , &CPU::Instruction_HLT             },
-        { OpcodeIR::LOAD_ADD_TO_REG, &CPU::Instruction_LOAD_ADD_TO_REG },
-        { OpcodeIR::LOAD_REG_TO_REG, &CPU::Instruction_LOAD_REG_TO_REG },
-        { OpcodeIR::STORE          , &CPU::Instruction_STORE           },
+        { OpcodeIR::MOV_IMM_TO_REG  , &CPU::Instruction_MOV_IMM_TO_REG   },
+        { OpcodeIR::ADD_IMM_TO_REG  , &CPU::Instruction_ADD_IMM_TO_REG   },
+        { OpcodeIR::SUB_IMM_TO_REG  , &CPU::Instruction_SUB_IMM_TO_REG   },
+        { OpcodeIR::CMP_IMM_TO_REG  , &CPU::Instruction_CMP_IMM_TO_REG   },
+        { OpcodeIR::MOV_REG_TO_REG  , &CPU::Instruction_MOV_REG_TO_REG   },
+        { OpcodeIR::ADD_REG_TO_REG  , &CPU::Instruction_ADD_REG_TO_REG   },
+        { OpcodeIR::SUB_REG_TO_REG  , &CPU::Instruction_SUB_REG_TO_REG   },
+        { OpcodeIR::CMP_REG_TO_REG  , &CPU::Instruction_CMP_REG_TO_REG   },
+        { OpcodeIR::JMP_REG         , &CPU::Instruction_JMP_REG          },
+        { OpcodeIR::JMP_LABEL       , &CPU::Instruction_JMP_LABEL        },
+        { OpcodeIR::JE_REG          , &CPU::Instruction_JE_REG           },
+        { OpcodeIR::JE_LABEL        , &CPU::Instruction_JE_LABEL         },
+        { OpcodeIR::HLT             , &CPU::Instruction_HLT              },
+        { OpcodeIR::LOAD_ADD_TO_REG , &CPU::Instruction_LOAD_ADD_TO_REG  },
+        { OpcodeIR::LOAD_REG_TO_REG , &CPU::Instruction_LOAD_REG_TO_REG  },
+        { OpcodeIR::STORE_REG_TO_ADD, &CPU::Instruction_STORE_REG_TO_ADD },
+        { OpcodeIR::STORE_REG_TO_REG, &CPU::Instruction_STORE_REG_TO_REG },
     };
 private:
     inline std::uint16_t GetImmediate16(const std::uint8_t* ptr) const noexcept;
 
     // Instruction functions
-    void Instruction_MOV_IMM_TO_REG (OpcodeMC opcode);
-    void Instruction_ADD_IMM_TO_REG (OpcodeMC opcode);
-    void Instruction_SUB_IMM_TO_REG (OpcodeMC opcode);
-    void Instruction_CMP_IMM_TO_REG (OpcodeMC opcode);
-    void Instruction_MOV_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_ADD_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_SUB_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_CMP_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_JMP_REG        (OpcodeMC opcode);
-    void Instruction_JMP_LABEL      (OpcodeMC opcode);
-    void Instruction_JE_REG         (OpcodeMC opcode);
-    void Instruction_JE_LABEL       (OpcodeMC opcode);
-    void Instruction_HLT            (OpcodeMC opcode);
-    void Instruction_LOAD_ADD_TO_REG(OpcodeMC opcode);
-    void Instruction_LOAD_REG_TO_REG(OpcodeMC opcode);
-    void Instruction_STORE          (OpcodeMC opcode);
+    void Instruction_MOV_IMM_TO_REG  (OpcodeMC opcode);
+    void Instruction_ADD_IMM_TO_REG  (OpcodeMC opcode);
+    void Instruction_SUB_IMM_TO_REG  (OpcodeMC opcode);
+    void Instruction_CMP_IMM_TO_REG  (OpcodeMC opcode);
+    void Instruction_MOV_REG_TO_REG  (OpcodeMC opcode);
+    void Instruction_ADD_REG_TO_REG  (OpcodeMC opcode);
+    void Instruction_SUB_REG_TO_REG  (OpcodeMC opcode);
+    void Instruction_CMP_REG_TO_REG  (OpcodeMC opcode);
+    void Instruction_JMP_REG         (OpcodeMC opcode);
+    void Instruction_JMP_LABEL       (OpcodeMC opcode);
+    void Instruction_JE_REG          (OpcodeMC opcode);
+    void Instruction_JE_LABEL        (OpcodeMC opcode);
+    void Instruction_HLT             (OpcodeMC opcode);
+    void Instruction_LOAD_ADD_TO_REG (OpcodeMC opcode);
+    void Instruction_LOAD_REG_TO_REG (OpcodeMC opcode);
+    void Instruction_STORE_REG_TO_ADD(OpcodeMC opcode);
+    void Instruction_STORE_REG_TO_REG(OpcodeMC opcode);
 public:
     explicit CPU(const PROM& prom, RAM& ram) : m_Prom(prom), m_Ram(ram) {};
     void Clock();

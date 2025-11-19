@@ -9,7 +9,7 @@ Add a new Register:
 
 Add a new Instructions:
 -> Check if Assembler/lib/Parser.cpp can handle it
--> Add to Assembler/lib/Instruction.hpp -> Add to s_InstructionMap
+-> Add to Assembler/lib/Instruction.hpp -> Add to Opcode & s_InstructionMap
 -> Add to Assembler/lib/Intermediate.hpp -> Add to OpcodeIR & Add to s_InstructionIRSizeMap
 -> Add to Assembler/lib/Intermediate.cpp -> Add to GetOpcodeIR()
 -> Add to Assembler/lib/Assembler.cpp -> Add to AssembleInstruction()

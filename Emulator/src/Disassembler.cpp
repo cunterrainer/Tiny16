@@ -31,6 +31,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::SUB_REG_TO_REG:
     case OpcodeMC::CMP_REG_TO_REG:
     case OpcodeMC::LOAD_REG_TO_REG:
+    case OpcodeMC::STORE_REG_TO_REG:
         return std::format(" R{}, R{}", machineCode.at(index + 1), machineCode.at(index + 2));
     case OpcodeMC::JE_REG:
     case OpcodeMC::JMP_REG:
@@ -41,7 +42,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
         const std::uint16_t immediateValue = (machineCode.at(index + 2) << 8) | machineCode.at(index + 1);
         return std::format(" $0x{:04X}", immediateValue);
     }
-    case OpcodeMC::STORE:
+    case OpcodeMC::STORE_REG_TO_ADD:
     {
         const std::uint16_t immediateValue = (machineCode.at(index + 3) << 8) | machineCode.at(index + 2);
         return std::format(" R{}, $0x{:04X}", machineCode.at(index + 1), immediateValue);

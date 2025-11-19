@@ -115,7 +115,7 @@ OperandIR ParseOperandJmp(const std::string& str)
 }
 
 
-OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1)
+OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1, OperandTypeIR op2)
 {
     if (opcode == Opcode::MOV)
     {
@@ -173,7 +173,9 @@ OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1)
 
     if (opcode == Opcode::STORE)
     {
-        return OpcodeIR::STORE;
+        if (op2 == OperandTypeIR::Register)
+            return OpcodeIR::STORE_REG_TO_REG;
+        return OpcodeIR::STORE_REG_TO_ADD;
     }
 
     throw std::logic_error(std::format("Unreachable code: GetOpcodeIR, check validation code Operand: {}", (int)opcode));
@@ -227,7 +229,7 @@ InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
         break;
     }
 
-    instrIr.opcode = GetOpcodeIR(instr.opcode, instrIr.op1.type);
+    instrIr.opcode = GetOpcodeIR(instr.opcode, instrIr.op1.type, instrIr.op2.type);
     instrIr.label = parsedInstr.label;
     instrIr.size = s_InstructionIRSizeMap.at(instrIr.opcode);
     return instrIr;

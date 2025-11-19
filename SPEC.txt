@@ -1,6 +1,6 @@
 === INSTRUCTIONS ===
 0:  LOAD  reg/addr16, reg -> reg = *addr16/*reg
-1:  STORE reg, addr16     -> *addr16 = reg
+1:  STORE reg, reg/addr16 -> *addr16/*reg = reg
 2:  MOV  imm16/reg, reg   -> reg = imm16/reg
 3:  ADD  imm16/reg, reg   -> reg = reg + imm16/reg
 4:  SUB  imm16/reg, reg   -> reg = reg - imm16/reg
