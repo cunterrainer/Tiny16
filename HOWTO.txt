@@ -1,0 +1,5 @@
+Add a new Register:
+-> Emulator/src/CPU.hpp -> Add to enum
+-> Emulator/src/main.cpp -> Add to rendering code
+-> Assembler/lib/Validator.cpp -> Add to IsValidRegister()
+-> Assembler/lib/Intermediate.cpp -> Check if ParseOperand() is valid
