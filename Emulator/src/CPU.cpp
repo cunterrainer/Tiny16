@@ -126,13 +126,19 @@ void CPU::Instruction_HLT(OpcodeMC)
 
 void CPU::Instruction_LOAD(OpcodeMC opcode)
 {
-    // TODO
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    m_Registers[reg] = m_Ram.GetMemory(imm);
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
 void CPU::Instruction_STORE(OpcodeMC opcode)
 {
-    // TODO
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    m_Ram.SetMemory(imm, m_Registers[reg]);
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
