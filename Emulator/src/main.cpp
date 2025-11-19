@@ -1,6 +1,7 @@
 #include <vector>
 #include <cstdint>
 #include <cstdlib>
+#include <utility>
 #include <optional>
 
 #include "imgui.h"
@@ -35,9 +36,9 @@ int main()
 
     while (!WindowShouldClose())
     {
-        if (ins != "HLT" && (execute || step))
+        if (cpu.IsExecuting() && (execute || step))
         {
-           ins = cpu.Clock();
+           cpu.Clock2();
            step = false;
         }
 
@@ -85,13 +86,22 @@ int main()
         ImGui::SetNextWindowSize({ 300, 640 });
         ImGui::SetNextWindowPos({ width + 40, 20 });
         ImGui::Begin("Instructions", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-        ImGui::LabelText("##CurrentInstructionLabel", "%s", ins.c_str());
+        ImGui::LabelText("##CurrentInstructionLabel", "%d", cpu.GetProgramCounter());
         
         const auto& sourceInstructions = dism.GetSourceInstructions();
 
         for (auto& instr : sourceInstructions)
         {
-            ImGui::LabelText("##InstructionLabel", "%s", instr.c_str());
+            if (instr.first == cpu.GetProgramCounter())
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 43, 255));
+                ImGui::LabelText("##InstructionLabel", "%s", instr.second.c_str());
+                ImGui::PopStyleColor();
+            }
+            else
+            {
+                ImGui::LabelText("##InstructionLabel", "%s", instr.second.c_str());
+            }
         }
 
         ImGui::End();
