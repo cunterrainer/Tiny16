@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <utility>
 #include <optional>
+#include <algorithm>
 
 #include "imgui.h"
 #include "raygui.h"
@@ -75,8 +76,13 @@ int main()
 
         ImGui::SetNextWindowSize({ width, 400 });
         ImGui::SetNextWindowPos({ 20, 140 });
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
         ImGui::Begin("Memory", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
         {
+            static std::uint16_t memoryViewStartAddress = 0;
+            static std::int32_t memoryViewSearchedAddress = -1;
+            constexpr int pageSize = 288;
+
             ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0, 0 });
             if (ImGui::BeginTable("##Memory View", 17, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame))
             {
@@ -99,7 +105,7 @@ int main()
                 ImGui::TableSetupColumn("0F");
                 ImGui::TableHeadersRow();
 
-                for (int row = 0; row < ram.GetSize() && row < 512; row += 16)
+                for (int row = memoryViewStartAddress; row < ram.GetSize() && row < memoryViewStartAddress + pageSize; row += 16)
                 {
                     ImGui::TableNextRow();
 
@@ -114,9 +120,15 @@ int main()
                         std::snprintf(buf, 5, "0x%02X", ram.GetMemory(row + column));
 
                         ImGui::PushID(row + column);
-                        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0)); // normal
-                        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0, 0, 0, 0)); // hover
-                        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 0)); // active (blue)
+
+                        int colors = 0;
+                        if (row + column != memoryViewSearchedAddress)
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0)); // normal
+                            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0, 0, 0, 0)); // hover
+                            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0, 0, 0, 0)); // active (blue)
+                            colors = 3;
+                        }
 
                         ImGui::SetNextItemWidth(ImGui::GetColumnWidth());
                         if (ImGui::InputText("##MemoryCellText", buf, 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue))
@@ -128,15 +140,44 @@ int main()
                                 ram.SetMemory(row + column, num);
                             }
                         }
-                        ImGui::PopStyleColor(3);
+                        ImGui::PopStyleColor(colors);
                         ImGui::PopID();
                     }
                 }
                 ImGui::EndTable();
             }
             ImGui::PopStyleVar();
+
+
+            static char buf[7] = "Search";
+            if (ImGui::InputText("##SearchInput", buf, 7, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue))
+            {
+                int address;
+                const int result = std::sscanf(buf, "%x", &address);
+                if (result == EOF)
+                {
+                    memoryViewSearchedAddress = -1;
+                }
+                else if (result != 0)
+                {
+                    memoryViewSearchedAddress = address;
+                    memoryViewStartAddress = address - (address % 16);
+                }
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Previous Page", { 145, 0 }))
+            {
+                memoryViewStartAddress = std::max(0, memoryViewStartAddress - pageSize / 2);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Next Page", { 145, 0 }))
+            {
+                memoryViewStartAddress = std::min(65520, memoryViewStartAddress + pageSize / 2);
+            }
         }
         ImGui::End();
+        ImGui::PopStyleVar();
 
         ImGui::SetNextWindowSize({ width, 100 });
         ImGui::SetNextWindowPos({ 20, 560 });
