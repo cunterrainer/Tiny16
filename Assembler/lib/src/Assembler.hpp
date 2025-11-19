@@ -10,6 +10,8 @@
 
 #include "Utility/Result.hpp"
 
+using OpcodeMC = OpcodeIR;
+
 enum class OperandTypeMC
 {
     None,
