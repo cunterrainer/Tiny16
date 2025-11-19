@@ -2,6 +2,7 @@ project "Tiny16-Assembler-Tests"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
+    defines "_CRT_SECURE_NO_WARNINGS"
 
     files {
         "src/**.cpp",

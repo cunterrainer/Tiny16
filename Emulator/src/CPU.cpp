@@ -104,7 +104,7 @@ void CPU::Instruction_JMP_LABEL(OpcodeMC)
     m_ProgramCounter = addr;
 }
 
-void CPU::Instruction_JE_REG(OpcodeMC opcode)
+void CPU::Instruction_JE_REG(OpcodeMC)
 {
     if (m_Registers[RF] == Flags::Equal)
     {
@@ -113,7 +113,7 @@ void CPU::Instruction_JE_REG(OpcodeMC opcode)
     }
 }
 
-void CPU::Instruction_JE_LABEL(OpcodeMC opcode)
+void CPU::Instruction_JE_LABEL(OpcodeMC)
 {
     if (m_Registers[RF] == Flags::Equal)
         m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);

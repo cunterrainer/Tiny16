@@ -9,13 +9,13 @@
 #include "Log.hpp"
 #include "Disassembler.hpp"
 
-std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector<std::uint8_t>& machineCode, size_t index) const
+std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector<std::uint8_t>& machineCode, std::uint16_t index) const
 {
     switch (opcode)
     {
     case OpcodeMC::LOAD_ADD_TO_REG:
     {
-        const std::uint16_t immediateValue = (machineCode.at(index + 2) << 8) | machineCode.at(index + 1);
+        const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 2) << 8) | machineCode.at(index + 1));
         return std::format(" $0x{:04X}, R{}", immediateValue, machineCode.at(index + 3));
     }
     case OpcodeMC::MOV_IMM_TO_REG:
@@ -23,7 +23,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::SUB_IMM_TO_REG:
     case OpcodeMC::CMP_IMM_TO_REG:
     {
-        const std::uint16_t immediateValue = (machineCode.at(index + 2) << 8) | machineCode.at(index + 1);
+        const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 2) << 8) | machineCode.at(index + 1));
         return std::format(" $0x{:X}, R{}", immediateValue, machineCode.at(index + 3));
     }
     case OpcodeMC::MOV_REG_TO_REG:
@@ -39,12 +39,12 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::JE_LABEL:
     case OpcodeMC::JMP_LABEL:
     {
-        const std::uint16_t immediateValue = (machineCode.at(index + 2) << 8) | machineCode.at(index + 1);
+        const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 2) << 8) | machineCode.at(index + 1));
         return std::format(" $0x{:04X}", immediateValue);
     }
     case OpcodeMC::STORE_REG_TO_ADD:
     {
-        const std::uint16_t immediateValue = (machineCode.at(index + 3) << 8) | machineCode.at(index + 2);
+        const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 3) << 8) | machineCode.at(index + 2));
         return std::format(" R{}, $0x{:04X}", machineCode.at(index + 1), immediateValue);
     }
     case OpcodeMC::HLT:
@@ -58,7 +58,7 @@ Disassembler::Disassembler(const std::vector<std::uint8_t>& machineCode)
 {
     m_SourceCode.reserve(machineCode.size());
 
-    for (size_t i = 0; i < machineCode.size();)
+    for (std::uint16_t i = 0; i < machineCode.size();)
     {
         try
         {

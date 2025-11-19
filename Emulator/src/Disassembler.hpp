@@ -34,7 +34,7 @@ private:
         { OpcodeMC::STORE_REG_TO_REG, "STORE" },
     };
 private:
-    std::string DisassembleOperands(OpcodeMC opcode, const std::vector<std::uint8_t>& machineCode, size_t index) const;
+    std::string DisassembleOperands(OpcodeMC opcode, const std::vector<std::uint8_t>& machineCode, std::uint16_t index) const;
 public:
     explicit Disassembler(const std::vector<std::uint8_t>& machineCode);
 

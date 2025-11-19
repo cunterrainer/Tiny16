@@ -1,6 +1,7 @@
 project "Tiny16-Emulator"
     language "C++"
     cppdialect "C++20"
+    defines "_CRT_SECURE_NO_WARNINGS"
 
     files {
         "src/**.cpp",

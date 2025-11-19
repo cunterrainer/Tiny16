@@ -105,7 +105,7 @@ int main()
                 ImGui::TableSetupColumn("0F");
                 ImGui::TableHeadersRow();
 
-                for (int row = memoryViewStartAddress; row < ram.GetSize() && row < memoryViewStartAddress + pageSize; row += 16)
+                for (int row = memoryViewStartAddress; row < (int)ram.GetSize() && row < memoryViewStartAddress + pageSize; row += 16)
                 {
                     ImGui::TableNextRow();
 
@@ -115,14 +115,15 @@ int main()
                     for (int column = 0; column < 16; column++)
                     {
                         ImGui::TableSetColumnIndex(column + 1);
+                        const std::uint16_t addressofCell = static_cast<std::uint16_t>(row + column);
 
                         char buf[5] = { 0 };
-                        std::snprintf(buf, 5, "0x%02X", ram.GetMemory(row + column));
+                        std::snprintf(buf, 5, "0x%02X", ram.GetMemory(addressofCell));
 
-                        ImGui::PushID(row + column);
+                        ImGui::PushID(addressofCell);
 
                         int colors = 0;
-                        if (row + column != memoryViewSearchedAddress)
+                        if (addressofCell != memoryViewSearchedAddress)
                         {
                             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0)); // normal
                             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0, 0, 0, 0)); // hover
@@ -137,7 +138,7 @@ int main()
                             const int result = std::sscanf(buf, "%x", &num);
                             if (result != 0 && result != EOF)
                             {
-                                ram.SetMemory(row + column, num);
+                                ram.SetMemory(addressofCell, static_cast<std::uint8_t>(num));
                             }
                         }
                         ImGui::PopStyleColor(colors);
@@ -161,19 +162,19 @@ int main()
                 else if (result != 0)
                 {
                     memoryViewSearchedAddress = address;
-                    memoryViewStartAddress = address - (address % 16);
+                    memoryViewStartAddress = static_cast<std::uint16_t>(address - (address % 16));
                 }
             }
 
             ImGui::SameLine();
             if (ImGui::Button("Previous Page", { 145, 0 }))
             {
-                memoryViewStartAddress = std::max(0, memoryViewStartAddress - pageSize / 2);
+                memoryViewStartAddress = static_cast<std::uint16_t>(std::max(0, memoryViewStartAddress - pageSize / 2));
             }
             ImGui::SameLine();
             if (ImGui::Button("Next Page", { 145, 0 }))
             {
-                memoryViewStartAddress = std::min(65520, memoryViewStartAddress + pageSize / 2);
+                memoryViewStartAddress = static_cast<std::uint16_t>(std::min(65520, memoryViewStartAddress + pageSize / 2));
             }
         }
         ImGui::End();

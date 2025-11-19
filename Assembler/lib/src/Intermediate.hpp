@@ -53,10 +53,10 @@ struct InstructionIR
     OpcodeIR opcode;
     OperandIR op1;
     OperandIR op2;
-    std::uint32_t size; // Instruction size in bytes
+    std::uint16_t size; // Instruction size in bytes
 };
 
-static const std::unordered_map<OpcodeIR, std::uint32_t> s_InstructionIRSizeMap = {
+static const std::unordered_map<OpcodeIR, std::uint16_t> s_InstructionIRSizeMap = {
     { OpcodeIR::MOV_IMM_TO_REG  , 4 },
     { OpcodeIR::ADD_IMM_TO_REG  , 4 },
     { OpcodeIR::SUB_IMM_TO_REG  , 4 },
