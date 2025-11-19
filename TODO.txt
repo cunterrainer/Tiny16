@@ -1,0 +1,16 @@
+.bss section
+.data section
+
+multiple assembly files
+
+maybe 32 bit?
+
+how does my emulator/app render?
+how to do error reporting?
+how can my custom programs output something?
+
+develope and compile in my emulator?
+
+progress bars / error reporting?
+
+do the entire emulating process on a different thread
