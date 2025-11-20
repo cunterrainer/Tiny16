@@ -18,8 +18,3 @@ project "rlImGui"
 		"*.h",
 		"extras/**.h"
 	}
-
-	defines {
-		"IMGUI_DISABLE_OBSOLETE_FUNCTIONS",
-		"IMGUI_DISABLE_OBSOLETE_KEYIO"
-	}

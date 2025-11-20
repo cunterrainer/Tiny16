@@ -14,7 +14,8 @@ project "Tiny16-Emulator"
         RaylibDir .. "/src",
         "../Dependencies/raygui",
         "../Dependencies/rlImGui",
-        "../Dependencies/ImGui"
+        "../Dependencies/ImGui",
+        "../Dependencies/ImGuiColorTextEdit"
     }
 
     externalincludedirs {
@@ -22,13 +23,15 @@ project "Tiny16-Emulator"
         "../Dependencies/raygui",
         "../Dependencies/raygui/src",
         "../Dependencies/rlImGui",
-        "../Dependencies/ImGui"
+        "../Dependencies/ImGui",
+        "../Dependencies/ImGuiColorTextEdit"
     }
 
     links {
         "raylib",
         "raygui",
-        "rlImGui"
+        "rlImGui",
+        "ImGuiColorTextEdit"
     }
 
     filter "system:windows"

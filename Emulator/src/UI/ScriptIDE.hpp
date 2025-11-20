@@ -5,6 +5,7 @@
 
 #include "imgui.h"
 #include "imgui_stdlib.h"
+#include "TextEditor.h"
 
 namespace UI
 {
@@ -12,16 +13,26 @@ namespace UI
     {
     private:
         std::string m_Content;
+        TextEditor m_TextEditor;
     public:
         void Show()
         {
             ImGui::BeginChild("Editor", { 0, 0 });
             {
+                if (ImGui::Button("Undo"))
+                {
+                    m_TextEditor.Undo();
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Redo"))
+                {
+                    m_TextEditor.Redo();
+                }
+
+                ImGui::SameLine();
                 ImGui::Button("Compile"); ImGui::SameLine(); ImGui::Button("Compile and Run"); ImGui::SameLine(); ImGui::Button("Compile and Debug");
-                
-                const ImVec2 childWindowSize = ImGui::GetWindowSize();
-                const float editorHeight = childWindowSize.y - ImGui::GetCursorPosY();
-                ImGui::InputTextMultiline("##Editor", &m_Content, { childWindowSize.x, editorHeight });
+                m_TextEditor.Render("Title");
             }
             ImGui::EndChild();
         }
