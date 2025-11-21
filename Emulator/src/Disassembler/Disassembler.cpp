@@ -72,7 +72,8 @@ void Disassembler::Disassemble(const std::vector<std::uint8_t>& machineCode)
         }
         catch (const std::out_of_range&)
         {
-            ERR("Failed to disassemble source code, instruction: {} | 0x{:X}, at address: {} | 0x{:04X}", (int)machineCode[i], (int)machineCode[i], i, i);
+            m_ErrorMsg = std::format("Failed to disassemble machine code, instruction: {} | 0x{:X}, at address: {} | 0x{:04X}", (int)machineCode[i], (int)machineCode[i], i, i);
         }
     }
+    m_ErrorMsg.clear();
 }

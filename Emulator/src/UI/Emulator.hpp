@@ -207,6 +207,13 @@ namespace UI
             ImGui::SetCursorPos({ ImGui::GetWindowWidth() - instrWidth, cursorY});
             ImGui::BeginChild("Instructions", { 0, 0 }, ImGuiChildFlags_Borders);
             {
+                if (!m_Disassembler.GetErrorMsg().empty())
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+                    ImGui::TextWrapped("%s", m_Disassembler.GetErrorMsg().c_str());
+                    ImGui::PopStyleColor();
+                }
+
                 if (!m_CPU->GetErrorMsg().empty())
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));

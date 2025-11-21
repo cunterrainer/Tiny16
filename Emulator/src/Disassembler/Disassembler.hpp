@@ -12,6 +12,7 @@
 class Disassembler
 {
 private:
+    std::string m_ErrorMsg;
     std::vector<std::pair<std::uint16_t, std::string>> m_SourceCode;
 
     const std::unordered_map<OpcodeMC, std::string_view> m_OpcodeToStringMap = {
@@ -42,6 +43,12 @@ public:
     inline const std::vector<std::pair<std::uint16_t, std::string>>& GetSourceInstructions() const noexcept
     {
         return m_SourceCode;
+    }
+
+
+    inline const std::string& GetErrorMsg() const noexcept
+    {
+        return m_ErrorMsg;
     }
 };
 
