@@ -26,6 +26,7 @@ namespace UI
 
         bool m_Step = false;
         bool m_Execute = false;
+        bool m_ShouldReset = false;
         bool m_ProgramLoaded = false;
     public:
         void LoadProgram(const std::vector<std::uint8_t>& machineCode)
@@ -38,6 +39,16 @@ namespace UI
             
             m_CPU = std::make_unique<CPU>(m_PROM, m_RAM);
             m_ProgramLoaded = true;
+        }
+
+        inline bool ShouldReset() const noexcept
+        {
+            return m_ShouldReset;
+        }
+
+        inline void SetShouldReset(bool value) noexcept
+        {
+            m_ShouldReset = value;
         }
 
         inline void SetStep(bool value) noexcept
@@ -200,6 +211,7 @@ namespace UI
             {
                 ImGui::SameLine(); if (ImGui::Button(!m_Execute ? "Execute" : "Pause", {100, 30})) m_Execute = !m_Execute;
                 ImGui::SameLine(); if (ImGui::Button("Step", { 100, 30 })) m_Step = true;
+                ImGui::SameLine(); if (ImGui::Button("Reload", { 100, 30 })) m_ShouldReset = true;
             }
             ImGui::EndChild();
 

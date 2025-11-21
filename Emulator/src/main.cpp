@@ -34,6 +34,12 @@ int main()
                 {
                     emu.Render();
                     ImGui::EndTabItem();
+
+                    if (emu.ShouldReset())
+                    {
+                        emu.LoadProgram(f.GetMachineCode()); // TODO add other option if loaded in by external file, but works for now
+                        emu.SetShouldReset(false);
+                    }
                 }
 
                 if (ImGui::BeginTabItem("Editor"))
