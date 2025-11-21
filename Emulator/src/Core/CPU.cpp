@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <stdexcept>
 #include <unordered_map>
 
 #include "../../Assembler/lib/src/Assembler.hpp"
@@ -175,9 +176,16 @@ void CPU::Instruction_STORE_REG_TO_REG(OpcodeMC opcode)
 
 void CPU::Clock()
 {
-    // TODO error checking if opcode exists
-    const OpcodeMC opcode = (OpcodeMC)m_Prom.Read(m_ProgramCounter);
-    (this->*m_InstructionFunctionTable.at(opcode))(opcode);
+    try
+    {
+        const OpcodeMC opcode = (OpcodeMC)m_Prom.Read(m_ProgramCounter);
+        (this->*m_InstructionFunctionTable.at(opcode))(opcode);
+    }
+    catch (const std::out_of_range&)
+    {
+        m_ErrorMsg = "Execution failed, either instruction is unknown or error reading instruction from memory. Did you miss a HLT instruction?";
+        m_ExecutionMode = false;
+    }
 }
 
 

@@ -43,6 +43,7 @@ public:
 private:
     const PROM& m_Prom;
     RAM& m_Ram;
+    std::string m_ErrorMsg;
     bool m_ExecutionMode = true;
     std::uint16_t m_ProgramCounter = 0;
     std::array<std::uint16_t, static_cast<std::size_t>(Register::RF) + 1> m_Registers = { 0 };
@@ -100,6 +101,7 @@ public:
     constexpr bool IsExecuting() const noexcept { return m_ExecutionMode; }
     constexpr std::uint16_t GetRegister(Register reg) const noexcept { return m_Registers[reg]; }
     constexpr std::uint16_t GetProgramCounter() const noexcept { return m_ProgramCounter; }
+    const std::string& GetErrorMsg() const noexcept { return m_ErrorMsg; }
 };
 
 #endif // CPU_H

@@ -207,13 +207,21 @@ namespace UI
             ImGui::SetCursorPos({ ImGui::GetWindowWidth() - instrWidth, cursorY});
             ImGui::BeginChild("Instructions", { 0, 0 }, ImGuiChildFlags_Borders);
             {
+                if (!m_CPU->GetErrorMsg().empty())
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+                    ImGui::TextWrapped("%s", m_CPU->GetErrorMsg().c_str());
+                    ImGui::PopStyleColor();
+                }
+
                 const auto& sourceInstructions = m_Disassembler.GetSourceInstructions();
             
                 for (auto& instr : sourceInstructions)
                 {
                     if (instr.first == m_CPU->GetProgramCounter())
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+                        const ImU32 color = m_CPU->GetErrorMsg().empty() ? IM_COL32(0, 255, 0, 255) : IM_COL32(255, 0, 0, 255);
+                        ImGui::PushStyleColor(ImGuiCol_Text, color);
                         ImGui::LabelText("##InstructionLabel", "-> %s", instr.second.c_str());
                         ImGui::PopStyleColor();
                     }
@@ -222,7 +230,6 @@ namespace UI
                         ImGui::LabelText("##InstructionLabel", "%s", instr.second.c_str());
                     }
                 }
-            
             }
             ImGui::EndChild();
         }
