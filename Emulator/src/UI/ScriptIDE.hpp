@@ -12,6 +12,7 @@
 #include "imgui_stdlib.h"
 #include "TextEditor.h"
 
+#include "Assembler/lib/src/Error.hpp"
 #include "Assembler/lib/src/Parser.hpp"
 #include "Assembler/lib/src/Validator.hpp"
 #include "Assembler/lib/src/Assembler.hpp"
@@ -39,6 +40,8 @@ namespace UI
         TextEditor m_TextEditor;
 
         State m_State;
+        std::string m_ErrorMsg;
+        std::int64_t m_ErrorLine = -1;
         std::vector<std::uint8_t> m_MachineCode;
     private:
         TextEditor::LanguageDefinition GetLanguageDefinition() const
@@ -80,22 +83,28 @@ namespace UI
                 const std::vector<InstructionMC> assembledInstructions = AssembleInstructions(intermediateInstructions).Unwrap();
                 m_MachineCode = GenerateMachineCode(assembledInstructions);
                 m_State = newState;
+                m_ErrorMsg.clear();
+            }
+            catch (const ASMError& e)
+            {
+                m_ErrorLine = (std::int64_t)e.LineNumber();
+                m_ErrorMsg = "Error in line: " + std::to_string(m_ErrorLine) + ", " + e.What();
             }
             catch (const Err& e)
             {
-                std::cerr << e.What() << std::endl;
+                m_ErrorMsg = e.What();
             }
             catch (const std::logic_error& e)
             {
-                std::cerr << "Logic error occured: " << e.what() << std::endl;
+                m_ErrorMsg = "Internal assembler error occured: " + std::string(e.what());
             }
             catch (const std::exception& e)
             {
-                std::cerr << "Unhandled exception occured: " << e.what() << std::endl;
+                m_ErrorMsg = "Unhandled error occured: " + std::string(e.what());
             }
             catch (...)
             {
-                std::cerr << "Unknown exception occured" << std::endl;
+                m_ErrorMsg = "Unknown error occured:";
             }
         }
     public:
@@ -136,6 +145,23 @@ namespace UI
                 if (ImGui::Button("Compile and Debug") || ImGui::Shortcut(ImGuiKey_F5))
                 {
                     CompileProgram(State::CompiledAndDebug);
+                }
+
+                if (!m_ErrorMsg.empty())
+                {
+                    ImGui::TextColored({ 255, 0, 0, 255 }, "%s", m_ErrorMsg.c_str());
+                }
+
+                if (m_ErrorLine != -1)
+                {
+                    m_TextEditor.SetCursorPosition({ (int)m_ErrorLine, 0 });
+
+                    const size_t firstCharacter = m_TextEditor.GetCurrentLineText().find_first_not_of(" \t");
+                    if (firstCharacter != std::string::npos)
+                    {
+                        m_TextEditor.SetCursorPosition({ (int)m_ErrorLine, (int)firstCharacter });
+                    }
+                    m_ErrorLine = -1;
                 }
                 m_TextEditor.Render("TextEditor");
             }
