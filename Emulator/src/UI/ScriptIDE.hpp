@@ -14,29 +14,39 @@ namespace UI
     private:
         std::string m_Content;
         TextEditor m_TextEditor;
-    public:
-        ScriptIDE()
+    private:
+        TextEditor::LanguageDefinition GetLangugeDefiniton() const
         {
-            TextEditor::LanguageDefinition langDef = m_TextEditor.GetLanguageDefinition();
-            const char* const cppKeywords[] = {
-                "mov", "add", "sub", "jmp", "je", "cmp", "hlt", "load", "store", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-                "MOV", "ADD", "SUB", "JMP", "JE", "CMP", "HLT", "LOAD", "STORE", "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7"
+            TextEditor::LanguageDefinition langDef;
+
+            constexpr const char* const keywords[] = {
+                "mov", "add", "sub", "jmp", "je", "cmp", "hlt", "load", "store",
+                "MOV", "ADD", "SUB", "JMP", "JE", "CMP", "HLT", "LOAD", "STORE"
             };
-            for (auto& k : cppKeywords)
-                langDef.mKeywords.insert(k);
+            for (const char* k : keywords)
+                langDef.mKeywords.emplace(k);
 
-            langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("\\$[+-]?[0-9]+", TextEditor::PaletteIndex::Number));
-            langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("\\$0[bB][01]+", TextEditor::PaletteIndex::Number));
-            langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("\\$[+-]?0[xX][0-9a-fA-F]+", TextEditor::PaletteIndex::Number));
-            langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("[a-zA-Z_][a-zA-Z0-9_]*:", TextEditor::PaletteIndex::Identifier));
+            langDef.mTokenRegexStrings.emplace_back("[+-]?0[xX][0-9a-fA-F]+", TextEditor::PaletteIndex::Number);
+            langDef.mTokenRegexStrings.emplace_back("0[bB][01]+", TextEditor::PaletteIndex::Number);
+            langDef.mTokenRegexStrings.emplace_back("[+-]?[0-9]+", TextEditor::PaletteIndex::Number);
+            langDef.mTokenRegexStrings.emplace_back("[rR][0-7]", TextEditor::PaletteIndex::KnownIdentifier);
+            langDef.mTokenRegexStrings.emplace_back("[a-zA-Z_][a-zA-Z0-9_:]*", TextEditor::PaletteIndex::Identifier);
+            langDef.mTokenRegexStrings.emplace_back("[\\$,]", TextEditor::PaletteIndex::Punctuation);
 
+            langDef.mCommentStart = "/*";
+            langDef.mCommentEnd = "*/";
             langDef.mSingleLineComment = "#";
             langDef.mCaseSensitive = true;
             langDef.mAutoIndentation = true;
 
             langDef.mName = "TASM";
-
-            m_TextEditor.SetLanguageDefinition(langDef);
+            return langDef;
+        }
+    public:
+        ScriptIDE()
+        {
+            m_TextEditor.SetLanguageDefinition(GetLangugeDefiniton());
+            m_TextEditor.SetShowWhitespaces(false);
         }
 
         void Show()
