@@ -59,7 +59,8 @@ project "Tiny16-Emulator"
         disablewarnings { "sign-conversion" }
 
     filter "system:emscripten"
-        linkoptions { "-sUSE_GLFW=3", "-sASYNCIFY", "-sMIN_WEBGL_VERSION=2", "-sMAX_WEBGL_VERSION=2", "-sALLOW_MEMORY_GROWTH=1", "-sUSE_PTHREADS=1" }
+        buildoptions { "-fexceptions" }
+        linkoptions { "-sUSE_GLFW=3", "-sASYNCIFY", "-sMIN_WEBGL_VERSION=2", "-sMAX_WEBGL_VERSION=2", "-sALLOW_MEMORY_GROWTH=1", "-sUSE_PTHREADS=0", "-fexceptions" } -- Hint: USE_PTHREADS used to be 1 but we had to disable it due to TextEditor.o
 
     filter "configurations:Debug"
         warnings "off"
