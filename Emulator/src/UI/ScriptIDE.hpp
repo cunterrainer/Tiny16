@@ -121,19 +121,19 @@ namespace UI
                 }
 
                 ImGui::SameLine();
-                if (ImGui::Button("Compile"))
+                if (ImGui::Button("Compile") || ImGui::Shortcut(ImGuiKey_F5 | ImGuiMod_Ctrl | ImGuiMod_Shift))
                 {
                     CompileProgram(State::Compiled);
                 }
 
                 ImGui::SameLine();
-                if (ImGui::Button("Compile and Run"))
+                if (ImGui::Button("Compile and Run") || ImGui::Shortcut(ImGuiKey_F5 | ImGuiMod_Ctrl))
                 {
                     CompileProgram(State::CompiledAndRun);
                 }
 
                 ImGui::SameLine();
-                if (ImGui::Button("Compile and Debug"))
+                if (ImGui::Button("Compile and Debug") || ImGui::Shortcut(ImGuiKey_F5))
                 {
                     CompileProgram(State::CompiledAndDebug);
                 }
