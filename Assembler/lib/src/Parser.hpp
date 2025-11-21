@@ -7,6 +7,8 @@
 #include <optional>
 #include <unordered_set>
 
+#include "Error.hpp"
+
 #include "Utility/Result.hpp"
 
 struct ParsedInstruction
@@ -18,7 +20,7 @@ struct ParsedInstruction
     std::string rhs;
 };
 
-Result<ParsedInstruction> ParseLine(std::string line, size_t lineNumber);
-Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>> ParseSourceCode(const std::vector<std::string>& lines);
+Result<ParsedInstruction, ASMError> ParseLine(std::string line, size_t lineNumber);
+Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>, ASMError> ParseSourceCode(const std::vector<std::string>& lines);
 
 #endif // PARSER_H

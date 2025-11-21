@@ -6,6 +6,7 @@
 #include <string_view>
 #include <unordered_set>
 
+#include "Error.hpp"
 #include "Parser.hpp"
 #include "Utility.hpp"
 #include "Validator.hpp"
@@ -81,33 +82,33 @@ std::optional<Instruction> LookupOpcode(const std::string& opcode)
 }
 
 
-Result<void> ValidateOperand(OperandType operand, const std::string& parsedOperand, const ParsedInstruction& parsedInstr, std::string_view sourceOrDest, const std::unordered_set<std::string>& labels)
+Result<void, ASMError> ValidateOperand(OperandType operand, const std::string& parsedOperand, const ParsedInstruction& parsedInstr, std::string_view sourceOrDest, const std::unordered_set<std::string>& labels)
 {
     if (operand == OperandType::None && !parsedOperand.empty())
     {
-        return Err("Instruction: {} {}, {}\nToo many operands", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs);
+        return ASMError(parsedInstr.lineNumber, "Instruction: {} {}, {}\nToo many operands", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs);
     }
     else if (operand == OperandType::Register && !IsValidRegister(parsedOperand))
     {
-        return Err("Instruction: {} {}, {}\nInvalid {} register: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, parsedOperand);
+        return ASMError(parsedInstr.lineNumber, "Instruction: {} {}, {}\nInvalid {} register: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, parsedOperand);
     }
     else if (operand == OperandType::Intermediate && !IsValidIntermediate(parsedOperand))
     {
-        return Err("Instruction: {} {}, {}\nInvalid {} value: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, parsedOperand);
+        return ASMError(parsedInstr.lineNumber, "Instruction: {} {}, {}\nInvalid {} value: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, parsedOperand);
     }
     else if (operand == OperandType::RegisterOrIntermediate && !IsValidIntermediate(parsedOperand) && !IsValidRegister(parsedOperand))
     {
-        return Err("Instruction: {} {}, {}\nInvalid {} register or {} value: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, sourceOrDest, parsedOperand);
+        return ASMError(parsedInstr.lineNumber, "Instruction: {} {}, {}\nInvalid {} register or {} value: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, sourceOrDest, parsedOperand);
     }
     else if (operand == OperandType::RegisterOrLabel && !IsValidLabel(parsedOperand, labels) && !IsValidRegister(parsedOperand))
     {
-        return Err("Instruction: {} {}, {}\nInvalid register or label: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedOperand);
+        return ASMError(parsedInstr.lineNumber, "Instruction: {} {}, {}\nInvalid register or label: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedOperand);
     }
-    return Ok();
+    return Ok<ASMError>();
 }
 
 
-Result<void> ValidateInstruction(const ParsedInstruction& parsedInstr, const std::unordered_set<std::string>& labels)
+Result<void, ASMError> ValidateInstruction(const ParsedInstruction& parsedInstr, const std::unordered_set<std::string>& labels)
 {
     const auto toUpperCase = [](unsigned char c) { return std::toupper(c); };
 
@@ -118,29 +119,29 @@ Result<void> ValidateInstruction(const ParsedInstruction& parsedInstr, const std
 
     if (!info.has_value())
     {
-        return Err("Unknown instruction: {}\nLine: {}, {} {} {}", parsedInstr.opcode, parsedInstr.lineNumber, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs);
+        return ASMError(parsedInstr.lineNumber, "Unknown instruction: {} in {} {} {}", parsedInstr.opcode, parsedInstr.lineNumber, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs);
     }
 
     const Instruction instrInfo = info.value();
-    const Result<void> op1Result = ValidateOperand(instrInfo.op1, parsedInstr.lhs, parsedInstr, "source", labels);
-    const Result<void> op2Result = ValidateOperand(instrInfo.op2, parsedInstr.rhs, parsedInstr, "destination", labels);
+    const Result<void, ASMError> op1Result = ValidateOperand(instrInfo.op1, parsedInstr.lhs, parsedInstr, "source", labels);
+    const Result<void, ASMError> op2Result = ValidateOperand(instrInfo.op2, parsedInstr.rhs, parsedInstr, "destination", labels);
 
     if (op1Result.IsErr()) return op1Result;
     if (op2Result.IsErr()) return op2Result;
-    return Ok();
+    return Ok<ASMError>();
 }
 
 
-Result<void> ValidateAllInstructions(const std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>& parseResult)
+Result<void, ASMError> ValidateAllInstructions(const std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>& parseResult)
 {
     const std::vector<ParsedInstruction> parsedInstructions = parseResult.first;
     const std::unordered_set<std::string> labels = parseResult.second;
 
     for (const auto& instr : parsedInstructions)
     {
-        const Result<void> result = ValidateInstruction(instr, labels);
+        const Result<void, ASMError> result = ValidateInstruction(instr, labels);
         if (result.IsErr())
             return result;
     }
-    return Ok();
+    return Ok<ASMError>();
 }

@@ -1,11 +1,12 @@
 #include "doctest/doctest.h"
 
+#include "Error.hpp"
 #include "Parser.hpp"
 #include "Validator.hpp"
 
 #include "Utility/Result.hpp"
 
-Result<void> ValidateInstruction(const ParsedInstruction& instr, const std::unordered_set<std::string>& labels = {});
+Result<void, ASMError> ValidateInstruction(const ParsedInstruction& instr, const std::unordered_set<std::string>& labels = {});
 TEST_CASE("Test ValidateInstruction()")
 {
     SUBCASE("Invalid instruction")
@@ -152,7 +153,7 @@ TEST_CASE("Test ValidateInstruction()")
 }
 
 
-Result<void> ValidateOperand(OperandType, const std::string&, const ParsedInstruction&, std::string_view, const std::unordered_set<std::string>&);
+Result<void, ASMError> ValidateOperand(OperandType, const std::string&, const ParsedInstruction&, std::string_view, const std::unordered_set<std::string>&);
 TEST_CASE("Test ValidateOperand()")
 {
     SUBCASE("Invalid")

@@ -78,6 +78,10 @@ int main()
         const std::vector<InstructionMC> assembledInstructions = AssembleInstructions(intermediateInstructions).Unwrap();
         WriteBinaryFile(assembledInstructions);
     }
+    catch (const ASMError& e)
+    {
+        std::cerr << "Error in line: " << e.LineNumber() << ' ' << e.What() << std::endl;
+    }
     catch (const Err& e)
     {
         std::cerr << e.What() << std::endl;

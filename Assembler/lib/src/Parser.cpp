@@ -7,13 +7,14 @@
 #include <optional>
 #include <unordered_set>
 
+#include "Error.hpp"
 #include "Parser.hpp"
 #include "Utility.hpp"
 
 #include "Utility/Result.hpp"
 
 
-Result<ParsedInstruction> ParseLine(std::string line, size_t lineNumber)
+Result<ParsedInstruction, ASMError> ParseLine(std::string line, size_t lineNumber)
 {
     // Strip comments
     if (const size_t commentPos = line.find('#'); commentPos != std::string::npos)
@@ -62,18 +63,18 @@ Result<ParsedInstruction> ParseLine(std::string line, size_t lineNumber)
         return instr;
     }
 
-    return Err("Error: Failed to parse line {}: '{}', unknown label or instruction structure", lineNumber, line);
+    return ASMError(lineNumber, "Failed to parse line: '{}', unknown label or instruction structure", line);
 }
 
 
-Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>> ParseSourceCode(const std::vector<std::string>& lines)
+Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>, ASMError> ParseSourceCode(const std::vector<std::string>& lines)
 {
     std::vector<ParsedInstruction> instructions;
     std::unordered_set<std::string> labels;
 
     for (size_t i = 0; i < lines.size(); i++)
     {
-        Result<ParsedInstruction> instr = ParseLine(lines[i], i);
+        Result<ParsedInstruction, ASMError> instr = ParseLine(lines[i], i);
 
         if (instr.IsErr())
         {
@@ -96,7 +97,7 @@ Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>
 
             const auto res = labels.insert(a.label);
             if (!res.second)
-                return Err("Line: {}, Label: '{}' already exists", a.lineNumber, a.label);
+                return ASMError(a.lineNumber, "Label: '{}' already exists", a.lineNumber, a.label);
         }
         else
         {
@@ -110,5 +111,5 @@ Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>
 //#endif
     }
 
-    return Ok<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>>(instructions, labels);
+    return Ok<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>, ASMError>(instructions, labels);
 }
