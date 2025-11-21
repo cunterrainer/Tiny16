@@ -99,7 +99,7 @@
         Example:
         struct IOError : Err
         {
-            using Err::Err;
+            using Err::Error;
         };
 
         Result<std::string, IOError> str = ReadFile("test.txt");
