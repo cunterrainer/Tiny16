@@ -1,19 +1,45 @@
 #ifndef SCRIPT_IDE_HPP
 #define SCRIPT_IDE_HPP
 
+#include <vector>
 #include <string>
+#include <cstdint>
+#include <iostream>
+#include <exception>
+#include <stdexcept>
 
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "TextEditor.h"
 
+#include "Assembler/lib/src/Parser.hpp"
+#include "Assembler/lib/src/Validator.hpp"
+#include "Assembler/lib/src/Assembler.hpp"
+#include "Assembler/lib/src/Intermediate.hpp"
+#include "Assembler/lib/src/MachineCodeGenerator.hpp"
+
+#include "UI/Emulator.hpp"
+
+#include "Utility/Result.hpp"
+
 namespace UI
 {
     class ScriptIDE
     {
+    public:
+        enum class State
+        {
+            None,
+                Compiled,
+                CompiledAndRun,
+                CompiledAndDebug
+        };
     private:
         std::string m_Content;
         TextEditor m_TextEditor;
+
+        State m_State;
+        std::vector<std::uint8_t> m_MachineCode;
     private:
         TextEditor::LanguageDefinition GetLanguageDefinition() const
         {
@@ -42,8 +68,38 @@ namespace UI
             langDef.mName = "TASM";
             return langDef;
         }
+
+
+        void CompileProgram(State newState)
+        {
+            try
+            {
+                const auto parseResult = ParseSourceCode(m_TextEditor.GetTextLines()).Unwrap();
+                ValidateAllInstructions(parseResult).Unwrap();
+                const std::vector<InstructionIR> intermediateInstructions = LowerAllInstructions(parseResult.first);
+                const std::vector<InstructionMC> assembledInstructions = AssembleInstructions(intermediateInstructions).Unwrap();
+                m_MachineCode = GenerateMachineCode(assembledInstructions);
+                m_State = newState;
+            }
+            catch (const Err& e)
+            {
+                std::cerr << e.What() << std::endl;
+            }
+            catch (const std::logic_error& e)
+            {
+                std::cerr << "Logic error occured: " << e.what() << std::endl;
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "Unhandled exception occured: " << e.what() << std::endl;
+            }
+            catch (...)
+            {
+                std::cerr << "Unknown exception occured" << std::endl;
+            }
+        }
     public:
-        ScriptIDE()
+        explicit ScriptIDE()
         {
             m_TextEditor.SetLanguageDefinition(GetLanguageDefinition());
             m_TextEditor.SetShowWhitespaces(false);
@@ -65,10 +121,43 @@ namespace UI
                 }
 
                 ImGui::SameLine();
-                ImGui::Button("Compile"); ImGui::SameLine(); ImGui::Button("Compile and Run"); ImGui::SameLine(); ImGui::Button("Compile and Debug");
-                m_TextEditor.Render("Title");
+                if (ImGui::Button("Compile"))
+                {
+                    CompileProgram(State::Compiled);
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Compile and Run"))
+                {
+                    CompileProgram(State::CompiledAndRun);
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Compile and Debug"))
+                {
+                    CompileProgram(State::CompiledAndDebug);
+                }
+                m_TextEditor.Render("TextEditor");
             }
             ImGui::EndChild();
+        }
+
+
+        inline State GetState() const noexcept
+        {
+            return m_State;
+        }
+
+
+        inline void ResetState() noexcept
+        {
+            m_State = State::None;
+        }
+
+
+        inline std::vector<std::uint8_t> GetMachineCode() const noexcept
+        {
+            return m_MachineCode;
         }
     };
 }

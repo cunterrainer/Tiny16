@@ -40,6 +40,16 @@ namespace UI
             m_ProgramLoaded = true;
         }
 
+        inline void SetStep(bool value) noexcept
+        {
+            m_Step = value;
+        }
+
+        inline void SetExecute(bool value) noexcept
+        {
+            m_Execute = value;
+        }
+
         void Render()
         {
             if (m_ProgramLoaded && m_CPU->IsExecuting() && (m_Execute || m_Step))

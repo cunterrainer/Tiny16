@@ -40,6 +40,38 @@ int main()
                 {
                     f.Show();
                     ImGui::EndTabItem();
+
+                    switch (f.GetState())
+                    {
+                    case UI::ScriptIDE::State::CompiledAndRun:
+                    {
+                        emu.SetStep(false);
+                        emu.SetExecute(true);
+                        emu.LoadProgram(f.GetMachineCode());
+
+                        f.ResetState();
+                        ImGui::SetTabItemClosed("Editor");
+                        break;
+                    }
+                    case UI::ScriptIDE::State::CompiledAndDebug:
+                    {
+                        emu.SetStep(false);
+                        emu.SetExecute(false);
+                        emu.LoadProgram(f.GetMachineCode());
+
+                        f.ResetState();
+                        ImGui::SetTabItemClosed("Editor");
+                        break;
+                    }
+                    case UI::ScriptIDE::State::Compiled:
+                    {
+                        emu.LoadProgram(f.GetMachineCode());
+                        f.ResetState();
+                        break;
+                    }
+                    case UI::ScriptIDE::State::None:
+                        break;
+                    }
                 }
             }
             ImGui::EndTabBar();

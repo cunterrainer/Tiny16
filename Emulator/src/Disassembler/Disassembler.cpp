@@ -56,6 +56,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
 
 void Disassembler::Disassemble(const std::vector<std::uint8_t>& machineCode)
 {
+    m_SourceCode.clear();
     m_SourceCode.reserve(machineCode.size());
 
     for (std::uint16_t i = 0; i < machineCode.size();)

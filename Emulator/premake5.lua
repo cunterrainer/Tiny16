@@ -9,6 +9,7 @@ project "Tiny16-Emulator"
     }
 
     includedirs {
+        "..", -- Assembler
         "src",
         "../Utility/include",
         RaylibDir .. "/src",
@@ -31,7 +32,8 @@ project "Tiny16-Emulator"
         "raylib",
         "raygui",
         "rlImGui",
-        "ImGuiColorTextEdit"
+        "ImGuiColorTextEdit",
+        "Tiny16-Assembler-Lib"
     }
 
     filter "system:windows"
