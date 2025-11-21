@@ -8,5 +8,6 @@
 
 std::optional<Instruction> LookupOpcode(const std::string& opcode);
 Result<void> ValidateInstruction(const ParsedInstruction& instr, const std::unordered_set<std::string>& labels);
+Result<void> ValidateAllInstructions(const std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>& parseResult);
 
 #endif // VALIDATOR_H

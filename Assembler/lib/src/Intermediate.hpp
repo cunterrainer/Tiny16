@@ -77,5 +77,6 @@ static const std::unordered_map<OpcodeIR, std::uint16_t> s_InstructionIRSizeMap 
 };
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr);
+std::vector<InstructionIR> LowerAllInstructions(const std::vector<ParsedInstruction>& parsedInstructions);
 
 #endif // INTERMEDIATE_HPP

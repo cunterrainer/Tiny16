@@ -129,3 +129,18 @@ Result<void> ValidateInstruction(const ParsedInstruction& parsedInstr, const std
     if (op2Result.IsErr()) return op2Result;
     return Ok();
 }
+
+
+Result<void> ValidateAllInstructions(const std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>& parseResult)
+{
+    const std::vector<ParsedInstruction> parsedInstructions = parseResult.first;
+    const std::unordered_set<std::string> labels = parseResult.second;
+
+    for (const auto& instr : parsedInstructions)
+    {
+        const Result<void> result = ValidateInstruction(instr, labels);
+        if (result.IsErr())
+            return result;
+    }
+    return Ok();
+}

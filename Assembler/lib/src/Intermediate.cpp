@@ -234,3 +234,16 @@ InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
     instrIr.size = s_InstructionIRSizeMap.at(instrIr.opcode);
     return instrIr;
 }
+
+
+std::vector<InstructionIR> LowerAllInstructions(const std::vector<ParsedInstruction>& parsedInstructions)
+{
+    std::vector<InstructionIR> intermediateInstructions;
+    intermediateInstructions.reserve(parsedInstructions.size());
+
+    for (const auto& instr : parsedInstructions)
+    {
+        intermediateInstructions.push_back(LowerInstruction(instr));
+    }
+    return intermediateInstructions;
+}
