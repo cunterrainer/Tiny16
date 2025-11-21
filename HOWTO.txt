@@ -1,6 +1,7 @@
 Add a new Register:
--> Emulator/src/CPU.hpp -> Add to enum
+-> Emulator/src/Core/CPU.hpp -> Add to enum
 -> Emulator/src/main.cpp -> Add to rendering code
+-> Emulator/src/UI/ScriptIDE.hpp -> Add to LanguageDefinition
 -> Assembler/lib/Validator.cpp -> Add to IsValidRegister()
 -> Assembler/lib/Intermediate.cpp -> Check if ParseOperand() is valid
 -> Assembler/test/Validator.cpp -> Add tests
@@ -18,10 +19,11 @@ Add a new Instructions:
 -> Add to Assembler/test/src/Validator.cpp -> Add tests
 -> Consider all test cases but these are the most important
 -> Fix tests that might be broken
--> Emulator/src/CPU.hpp -> Add to m_InstructionFunctionTable & Add an instruction function
--> Emulator/src/CPU.cpp -> Add to instruction function
--> Emulator/src/Disassembler.hpp -> Add to m_OpcodeToStringMap
--> Emulator/src/Disassembler.cpp -> Add to DisassembleOperands
+-> Emulator/src/Core/CPU.hpp -> Add to m_InstructionFunctionTable & Add an instruction function
+-> Emulator/src/Core/CPU.cpp -> Add to instruction function
+-> Emulator/src/Disassembler/Disassembler.hpp -> Add to m_OpcodeToStringMap
+-> Emulator/src/Disassembler/Disassembler.cpp -> Add to DisassembleOperands
+-> Emulator/src/UI/ScriptIDE.hpp -> Add to LanguageDefinition
 -> Add to SPEC.txt
 
 Always after changing anything write a little test program and verify using the emulator
