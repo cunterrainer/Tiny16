@@ -105,19 +105,23 @@ void CPU::Instruction_JMP_LABEL(OpcodeMC)
     m_ProgramCounter = addr;
 }
 
-void CPU::Instruction_JE_REG(OpcodeMC)
+void CPU::Instruction_JE_REG(OpcodeMC opcode)
 {
     if (m_Registers[RF] == Flags::Equal)
     {
         const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
         m_ProgramCounter = m_Registers[reg];
     }
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
-void CPU::Instruction_JE_LABEL(OpcodeMC)
+void CPU::Instruction_JE_LABEL(OpcodeMC opcode)
 {
     if (m_Registers[RF] == Flags::Equal)
         m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
 void CPU::Instruction_HLT(OpcodeMC)
