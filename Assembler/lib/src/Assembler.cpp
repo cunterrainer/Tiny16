@@ -99,10 +99,8 @@ std::uint32_t ResolveLabelAddress(std::string_view label, const std::vector<Inst
 
 Result<std::vector<InstructionMC>> AssembleInstructions(const std::vector<InstructionIR>& instr)
 {
-    // TODO check if address more than uin16 max
     std::unordered_map<std::string, std::uint32_t> labelAddress;
 
-    // TODO check if main exists
     InstructionIR jmpToMain;
     jmpToMain.opcode = OpcodeIR::JMP_LABEL;
     jmpToMain.op1.type = OperandTypeIR::Label;
