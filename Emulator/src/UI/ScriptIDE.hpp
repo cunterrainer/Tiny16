@@ -15,7 +15,7 @@ namespace UI
         std::string m_Content;
         TextEditor m_TextEditor;
     private:
-        TextEditor::LanguageDefinition GetLangugeDefiniton() const
+        TextEditor::LanguageDefinition GetLanguageDefinition() const
         {
             TextEditor::LanguageDefinition langDef;
 
@@ -45,7 +45,7 @@ namespace UI
     public:
         ScriptIDE()
         {
-            m_TextEditor.SetLanguageDefinition(GetLangugeDefiniton());
+            m_TextEditor.SetLanguageDefinition(GetLanguageDefinition());
             m_TextEditor.SetShowWhitespaces(false);
         }
 
