@@ -179,3 +179,19 @@ void CPU::Clock()
     const OpcodeMC opcode = (OpcodeMC)m_Prom.Read(m_ProgramCounter);
     (this->*m_InstructionFunctionTable.at(opcode))(opcode);
 }
+
+
+CPU::CPU(CPU&& cpu) : m_Prom(cpu.m_Prom), m_Ram(cpu.m_Ram)
+{
+    m_ExecutionMode = cpu.m_ExecutionMode;
+    m_ProgramCounter = cpu.m_ProgramCounter;
+    m_Registers = cpu.m_Registers;
+}
+
+
+CPU::CPU(const CPU& cpu) : m_Prom(cpu.m_Prom), m_Ram(cpu.m_Ram)
+{
+    m_ExecutionMode = cpu.m_ExecutionMode;
+    m_ProgramCounter = cpu.m_ProgramCounter;
+    m_Registers = cpu.m_Registers;
+}

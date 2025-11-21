@@ -54,7 +54,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
 }
 
 
-Disassembler::Disassembler(const std::vector<std::uint8_t>& machineCode)
+void Disassembler::Disassemble(const std::vector<std::uint8_t>& machineCode)
 {
     m_SourceCode.reserve(machineCode.size());
 

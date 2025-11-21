@@ -90,6 +90,11 @@ private:
     void Instruction_STORE_REG_TO_REG(OpcodeMC opcode);
 public:
     explicit CPU(const PROM& prom, RAM& ram) : m_Prom(prom), m_Ram(ram) {};
+    CPU(CPU&& cpu);
+    CPU(const CPU& cpu);
+    CPU& operator=(CPU&& cpu) = delete;
+    CPU& operator=(const CPU& cpu) = delete;
+
     void Clock();
 
     constexpr bool IsExecuting() const noexcept { return m_ExecutionMode; }

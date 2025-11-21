@@ -36,7 +36,7 @@ private:
 private:
     std::string DisassembleOperands(OpcodeMC opcode, const std::vector<std::uint8_t>& machineCode, std::uint16_t index) const;
 public:
-    explicit Disassembler(const std::vector<std::uint8_t>& machineCode);
+    void Disassemble(const std::vector<std::uint8_t>& machineCode);
 
 
     inline const std::vector<std::pair<std::uint16_t, std::string>>& GetSourceInstructions() const noexcept

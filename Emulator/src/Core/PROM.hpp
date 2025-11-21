@@ -9,7 +9,10 @@ class PROM
 private:
     std::vector<std::uint8_t> m_SourceCode;
 public:
-    explicit PROM(const std::vector<std::uint8_t>& code) : m_SourceCode(code) {}
+    inline void LoadProgam(const std::vector<std::uint8_t>& machineCode)
+    {
+        m_SourceCode = machineCode;
+    }
 
     inline std::uint8_t Read(std::uint16_t address) const noexcept
     {
