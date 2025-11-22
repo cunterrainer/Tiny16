@@ -42,13 +42,9 @@ void CPU::Instruction_CMP_IMM_TO_REG(OpcodeMC opcode)
     const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
     const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
 
-    if (m_Registers[reg] == imm)
-        m_Registers[RF] = Flags::Equal;
-    else if (imm > m_Registers[reg])
-        m_Registers[RF] = Flags::Greater;
-    else
-        m_Registers[RF] = Flags::Less;
-
+    m_Registers[RF] = (imm == m_Registers[reg]) ? Flags::Equal
+                    : (imm > m_Registers[reg]) ? Flags::Greater
+                    : Flags::Less;
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
@@ -81,12 +77,9 @@ void CPU::Instruction_CMP_REG_TO_REG(OpcodeMC opcode)
     const Register reg1 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
     const Register reg2 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
 
-    if (m_Registers[reg1] == m_Registers[reg2])
-        m_Registers[RF] = Flags::Equal;
-    else if (m_Registers[reg1] > m_Registers[reg2])
-        m_Registers[RF] = Flags::Greater;
-    else
-        m_Registers[RF] = Flags::Less;
+    m_Registers[RF] = (m_Registers[reg1] == m_Registers[reg2]) ? Flags::Equal
+                    : (m_Registers[reg1] > m_Registers[reg2]) ? Flags::Greater
+                    : Flags::Less;
 
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
