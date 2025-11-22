@@ -8,8 +8,6 @@
 #include "../../Assembler/lib/src/Intermediate.hpp"
 
 #include "CPU.hpp"
-#include "Log.hpp"
-#include "Utility.hpp"
 
 
 void CPU::Instruction_MOV_IMM_TO_REG(OpcodeMC opcode)
@@ -180,15 +178,39 @@ void CPU::Instruction_STORE_REG_TO_REG(OpcodeMC opcode)
 
 void CPU::Clock()
 {
-    try
+    /*
+        Decided to use a massive switch statement due to a 20 - 50 % performance
+        increase compared to the lookup table
+    */
+    const OpcodeMC opcode = (OpcodeMC)m_Prom.Read(m_ProgramCounter);
+    switch (opcode)
     {
-        const OpcodeMC opcode = (OpcodeMC)m_Prom.Read(m_ProgramCounter);
-        (this->*m_InstructionFunctionTable.at(opcode))(opcode);
-    }
-    catch (const std::out_of_range&)
-    {
-        m_ErrorMsg = "Execution failed, either instruction is unknown or error reading instruction from memory. Did you miss a HLT instruction?";
+    case OpcodeIR::MOV_IMM_TO_REG:      return Instruction_MOV_IMM_TO_REG(opcode);
+    case OpcodeIR::ADD_IMM_TO_REG:      return Instruction_ADD_IMM_TO_REG(opcode);
+    case OpcodeIR::SUB_IMM_TO_REG:      return Instruction_SUB_IMM_TO_REG(opcode);
+    case OpcodeIR::CMP_IMM_TO_REG:      return Instruction_CMP_IMM_TO_REG(opcode);
+
+    case OpcodeIR::MOV_REG_TO_REG:      return Instruction_MOV_REG_TO_REG(opcode);
+    case OpcodeIR::ADD_REG_TO_REG:      return Instruction_ADD_REG_TO_REG(opcode);
+    case OpcodeIR::SUB_REG_TO_REG:      return Instruction_SUB_REG_TO_REG(opcode);
+    case OpcodeIR::CMP_REG_TO_REG:      return Instruction_CMP_REG_TO_REG(opcode);
+
+    case OpcodeIR::JMP_REG:             return Instruction_JMP_REG(opcode);
+    case OpcodeIR::JMP_LABEL:           return Instruction_JMP_LABEL(opcode);
+    case OpcodeIR::JE_REG:              return Instruction_JE_REG(opcode);
+    case OpcodeIR::JE_LABEL:            return Instruction_JE_LABEL(opcode);
+
+    case OpcodeIR::HLT:                 return Instruction_HLT(opcode);
+
+    case OpcodeIR::LOAD_ADD_TO_REG:     return Instruction_LOAD_ADD_TO_REG(opcode);
+    case OpcodeIR::LOAD_REG_TO_REG:     return Instruction_LOAD_REG_TO_REG(opcode);
+    case OpcodeIR::STORE_REG_TO_ADD:    return Instruction_STORE_REG_TO_ADD(opcode);
+    case OpcodeIR::STORE_REG_TO_REG:    return Instruction_STORE_REG_TO_REG(opcode);
+
+    default:
+        m_ErrorMsg = "Execution failed: unknown instruction or memory read error. Did you miss a HLT instruction?";
         m_ExecutionMode = false;
+        return;
     }
 }
 
