@@ -51,22 +51,17 @@ int main()
                     {
                     case UI::ScriptIDE::State::CompiledAndRun:
                     {
-                        emu.SetStep(false);
-                        emu.SetExecute(true);
-                        emu.LoadProgram(f.GetMachineCode());
-
-                        f.ResetState();
                         ImGui::SetTabItemClosed("Editor");
+                        emu.LoadProgram(f.GetMachineCode());
+                        f.ResetState();
+                        emu.StartExecution();
                         break;
                     }
                     case UI::ScriptIDE::State::CompiledAndDebug:
                     {
-                        emu.SetStep(false);
-                        emu.SetExecute(false);
-                        emu.LoadProgram(f.GetMachineCode());
-
-                        f.ResetState();
                         ImGui::SetTabItemClosed("Editor");
+                        emu.LoadProgram(f.GetMachineCode());
+                        f.ResetState();
                         break;
                     }
                     case UI::ScriptIDE::State::Compiled:

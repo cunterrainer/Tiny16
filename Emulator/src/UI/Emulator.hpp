@@ -12,6 +12,7 @@
 #include "Core/CPU.hpp"
 #include "Core/RAM.hpp"
 #include "Core/PROM.hpp"
+#include "Core/Emulator.hpp"
 #include "Disassembler/Disassembler.hpp"
 
 namespace UI
@@ -19,26 +20,15 @@ namespace UI
     class Emulator
     {
     private:
-        std::unique_ptr<CPU> m_CPU = std::make_unique<CPU>(m_PROM, m_RAM);
-        RAM m_RAM;
-        PROM m_PROM;
         Disassembler m_Disassembler;
 
-        bool m_Step = false;
-        bool m_Execute = false;
+        Core::Emulator m_Emulator;
         bool m_ShouldReset = false;
-        bool m_ProgramLoaded = false;
     public:
         void LoadProgram(const std::vector<std::uint8_t>& machineCode)
         {
+            m_Emulator.LoadProgram(machineCode);
             m_Disassembler.Disassemble(machineCode);
-            m_PROM.LoadProgam(machineCode);
-
-            // We don't have to reset the ram because, as a developer, you can't just assume that a ram cell has a specific
-            // value without seting it first. Thus it's expected behaviour to have garbage values in ram
-            
-            m_CPU = std::make_unique<CPU>(m_PROM, m_RAM);
-            m_ProgramLoaded = true;
         }
 
         inline bool ShouldReset() const noexcept
@@ -51,24 +41,13 @@ namespace UI
             m_ShouldReset = value;
         }
 
-        inline void SetStep(bool value) noexcept
+        inline void StartExecution() noexcept
         {
-            m_Step = value;
-        }
-
-        inline void SetExecute(bool value) noexcept
-        {
-            m_Execute = value;
+            m_Emulator.StartExecution();
         }
 
         void Render()
         {
-            if (m_ProgramLoaded && m_CPU->IsExecuting() && (m_Execute || m_Step))
-            {
-                m_CPU->Clock();
-                m_Step = false;
-            }
-
             Show();
         }
 
@@ -83,18 +62,20 @@ namespace UI
                 cursorY = ImGui::GetWindowPos().y;
                 float item_width = 100;
 
-                ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R0Label", "R0: 0x%04X", m_CPU->GetRegister(CPU::Register::R0));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R3Label", "R3: 0x%04X", m_CPU->GetRegister(CPU::Register::R3));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R6Label", "R6: 0x%04X", m_CPU->GetRegister(CPU::Register::R6));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##PCLabel", "PC: 0x%04X", m_CPU->GetProgramCounter());
+                ImGui::Text("%f", m_Emulator.m_Frequenz.load());
+                ImGui::Text("%f", m_Emulator.m_Elapsed);
+                ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R0Label", "R0: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R0));
+                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R3Label", "R3: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R3));
+                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R6Label", "R6: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R6));
+                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##PCLabel", "PC: 0x%04X", m_Emulator.m_CPU->GetProgramCounter());
                 
-                ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R1Label", "R1: 0x%04X", m_CPU->GetRegister(CPU::Register::R1));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R4Label", "R4: 0x%04X", m_CPU->GetRegister(CPU::Register::R4));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R7Label", "R7: 0x%04X", m_CPU->GetRegister(CPU::Register::R7));
+                ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R1Label", "R1: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R1));
+                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R4Label", "R4: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R4));
+                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R7Label", "R7: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R7));
                 
-                ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R2Label", "R2: 0x%04X", m_CPU->GetRegister(CPU::Register::R2));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R5Label", "R5: 0x%04X", m_CPU->GetRegister(CPU::Register::R5));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RFLabel", "RF: 0x%04X", m_CPU->GetRegister(CPU::Register::RF));
+                ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R2Label", "R2: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R2));
+                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R5Label", "R5: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R5));
+                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RFLabel", "RF: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::RF));
 
             }
             ImGui::EndChild();
@@ -129,7 +110,7 @@ namespace UI
                     ImGui::TableSetupColumn("0F");
                     ImGui::TableHeadersRow();
                 
-                    for (int row = memoryViewStartAddress; row < (int)m_RAM.GetSize() && row < memoryViewStartAddress + pageSize*1.4; row += 16)
+                    for (int row = memoryViewStartAddress; row < (int)m_Emulator.m_RAM.GetSize() && row < memoryViewStartAddress + pageSize*1.4; row += 16)
                     {
                         ImGui::TableNextRow();
                 
@@ -142,7 +123,7 @@ namespace UI
                             const std::uint16_t addressofCell = static_cast<std::uint16_t>(row + column);
                 
                             char buf[5] = { 0 };
-                            std::snprintf(buf, 5, "0x%02X", m_RAM.GetMemory(addressofCell));
+                            std::snprintf(buf, 5, "0x%02X", m_Emulator.m_RAM.GetMemory(addressofCell));
                 
                             ImGui::PushID(addressofCell);
                 
@@ -162,7 +143,7 @@ namespace UI
                                 const int result = std::sscanf(buf, "%x", &num);
                                 if (result != 0 && result != EOF)
                                 {
-                                    m_RAM.SetMemory(addressofCell, static_cast<std::uint8_t>(num));
+                                    m_Emulator.m_RAM.SetMemory(addressofCell, static_cast<std::uint8_t>(num));
                                 }
                             }
                             ImGui::PopStyleColor(colors);
@@ -209,8 +190,20 @@ namespace UI
             //ImGui::SetNextWindowPos({ 20, 560 });
             ImGui::BeginChild("ButtonWindow", { width, 47 }, ImGuiChildFlags_Borders);
             {
-                ImGui::SameLine(); if (ImGui::Button(!m_Execute ? "Execute" : "Pause", {100, 30})) m_Execute = !m_Execute;
-                ImGui::SameLine(); if (ImGui::Button("Step", { 100, 30 })) m_Step = true;
+                ImGui::SameLine();
+                if (ImGui::Button(!m_Emulator.m_IsExecuting ? "Execute" : "Pause", { 100, 30 }))
+                {
+                    if (m_Emulator.m_IsExecuting)
+                        m_Emulator.StopExecution();
+                    else
+                        m_Emulator.StartExecution();
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Step", { 100, 30 }))
+                {
+                    m_Emulator.Step();
+                }
                 ImGui::SameLine(); if (ImGui::Button("Reload", { 100, 30 })) m_ShouldReset = true;
             }
             ImGui::EndChild();
@@ -226,10 +219,10 @@ namespace UI
                     ImGui::PopStyleColor();
                 }
 
-                if (!m_CPU->GetErrorMsg().empty())
+                if (!m_Emulator.m_CPU->GetErrorMsg().empty())
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-                    ImGui::TextWrapped("%s", m_CPU->GetErrorMsg().c_str());
+                    ImGui::TextWrapped("%s", m_Emulator.m_CPU->GetErrorMsg().c_str());
                     ImGui::PopStyleColor();
                 }
 
@@ -237,9 +230,9 @@ namespace UI
             
                 for (auto& instr : sourceInstructions)
                 {
-                    if (instr.first == m_CPU->GetProgramCounter())
+                    if (instr.first == m_Emulator.m_CPU->GetProgramCounter())
                     {
-                        const ImU32 color = m_CPU->GetErrorMsg().empty() ? IM_COL32(0, 255, 0, 255) : IM_COL32(255, 0, 0, 255);
+                        const ImU32 color = m_Emulator.m_CPU->GetErrorMsg().empty() ? IM_COL32(0, 255, 0, 255) : IM_COL32(255, 0, 0, 255);
                         ImGui::PushStyleColor(ImGuiCol_Text, color);
                         ImGui::LabelText("##InstructionLabel", "-> %s", instr.second.c_str());
                         ImGui::PopStyleColor();
