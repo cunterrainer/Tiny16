@@ -4,6 +4,10 @@
 #include <vector>
 #include <cstdint>
 
+#include "Assembler/lib/src/Intermediate.hpp"
+
+#include "Log.hpp"
+
 class PROM
 {
 private:
@@ -16,14 +20,16 @@ public:
 
     inline std::uint8_t Read(std::uint16_t address) const
     {
-        return m_SourceCode.at(address);
+        ERR_IF(address >= m_SourceCode.size(), "");
+        return m_SourceCode[address];
     }
 
     // Reads at address and address + 1
     inline std::uint16_t Read16(std::uint16_t address) const
     {
         // Reminder: Little endian architecture
-        return (m_SourceCode.at(address + 1) << 8) | m_SourceCode.at(address);
+        ERR_IF(address + 1 >= m_SourceCode.size(), "");
+        return (m_SourceCode[address + 1] << 8) | m_SourceCode[address];
     }
 };
 
