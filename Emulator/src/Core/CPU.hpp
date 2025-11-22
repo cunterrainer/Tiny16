@@ -48,8 +48,6 @@ private:
     std::uint16_t m_ProgramCounter = 0;
     std::array<std::uint16_t, static_cast<std::size_t>(Register::RF) + 1> m_Registers = { 0 };
 private:
-    inline std::uint16_t GetImmediate16(const std::uint8_t* ptr) const noexcept;
-
     // Instruction functions
     void Instruction_MOV_IMM_TO_REG  (OpcodeMC opcode);
     void Instruction_ADD_IMM_TO_REG  (OpcodeMC opcode);
@@ -70,7 +68,7 @@ private:
     void Instruction_STORE_REG_TO_REG(OpcodeMC opcode);
 public:
     explicit CPU(const PROM& prom, RAM& ram) : m_Prom(prom), m_Ram(ram) {};
-    CPU(CPU&& cpu);
+    CPU(CPU&& cpu) noexcept;
     CPU(const CPU& cpu);
     CPU& operator=(CPU&& cpu) = delete;
     CPU& operator=(const CPU& cpu) = delete;

@@ -46,7 +46,7 @@ void CPU::Instruction_CMP_IMM_TO_REG(OpcodeMC opcode)
         m_Registers[RF] = Flags::Equal;
     else if (imm > m_Registers[reg])
         m_Registers[RF] = Flags::Greater;
-    else if (imm < m_Registers[reg])
+    else
         m_Registers[RF] = Flags::Less;
 
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
@@ -85,7 +85,7 @@ void CPU::Instruction_CMP_REG_TO_REG(OpcodeMC opcode)
         m_Registers[RF] = Flags::Equal;
     else if (m_Registers[reg1] > m_Registers[reg2])
         m_Registers[RF] = Flags::Greater;
-    else if (m_Registers[reg1] < m_Registers[reg2])
+    else
         m_Registers[RF] = Flags::Less;
 
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
@@ -215,7 +215,7 @@ void CPU::Clock()
 }
 
 
-CPU::CPU(CPU&& cpu) : m_Prom(cpu.m_Prom), m_Ram(cpu.m_Ram)
+CPU::CPU(CPU&& cpu) noexcept : m_Prom(cpu.m_Prom), m_Ram(cpu.m_Ram)
 {
     m_ExecutionMode = cpu.m_ExecutionMode;
     m_ProgramCounter = cpu.m_ProgramCounter;
