@@ -49,7 +49,7 @@ filter { "configurations:Release" }
     runtime "Release"
     symbols "on"
     optimize "Speed"
-    defines "NDEBUG"
+    defines { "NDEBUG", "MODE_RELEASE" }
     floatingpoint "fast"
     linktimeoptimization "on"
 
@@ -57,7 +57,7 @@ filter { "configurations:Distribution" }
     runtime "Release"
     symbols "off"
     optimize "Full"
-    defines "NDEBUG"
+    defines { "NDEBUG", "MODE_RELEASE" }
     floatingpoint "fast"
     linktimeoptimization "on"
 
@@ -65,7 +65,7 @@ filter { "configurations:MinSizeDistribution" }
     runtime "Release"
     symbols "off"
     optimize "Size"
-    defines "NDEBUG"
+    defines { "NDEBUG", "MODE_RELEASE" }
     floatingpoint "fast"
     linktimeoptimization "on"
 
