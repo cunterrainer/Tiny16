@@ -510,7 +510,7 @@ public:
     inline Result(const E& e) : m_Error(e), m_Valid(false) {}
     inline Result() : m_Valid(true) {}
 
-    Result(const Result& other) : m_Valid(other.m_Valid), m_Error(other.m_Error) {}
+    Result(const Result& other) : m_Error(other.m_Error), m_Valid(other.m_Valid) {}
     Result(Result&& other) noexcept(std::is_nothrow_move_constructible<E>::value) : m_Valid(other.m_Valid), m_Error(std::move(other.m_Error)) {}
 
     Result& operator=(const Result& other)
