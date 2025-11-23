@@ -9,6 +9,7 @@
 
 #include "imgui.h"
 
+#include "UI/Screen.hpp"
 #include "Core/CPU.hpp"
 #include "Core/RAM.hpp"
 #include "Core/PROM.hpp"
@@ -22,6 +23,7 @@ namespace UI
     private:
         Disassembler m_Disassembler;
 
+        Screen m_Screen;
         Core::Emulator m_Emulator;
         bool m_ShouldReset = false;
     public:
@@ -80,6 +82,12 @@ namespace UI
             }
             ImGui::EndChild();
 
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+            ImGui::BeginChild(4, { width, width / (16.f/9.f)}, ImGuiChildFlags_Borders);
+            m_Screen.Swap();
+            ImGui::Image(m_Screen.GetTexture(), { width, width / (16.f / 9.f) }, { width-20, 300-33 });
+            ImGui::EndChild();
+            ImGui::PopStyleVar();
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
             ImGui::BeginChild(2, { width, -(51)}, ImGuiChildFlags_Borders);
