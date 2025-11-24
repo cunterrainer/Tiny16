@@ -20,7 +20,7 @@ public:
 
     inline std::uint8_t Read(std::uint16_t address) const
     {
-        ERR_IF(address >= m_SourceCode.size(), "");
+        ERR_IF(address >= m_SourceCode.size(), "PROM::Read address greater than machine code size, address: {}, machine code size: {}", address, m_SourceCode.size());
         return m_SourceCode[address];
     }
 
@@ -28,7 +28,7 @@ public:
     inline std::uint16_t Read16(std::uint16_t address) const
     {
         // Reminder: Little endian architecture
-        ERR_IF(address + 1 >= m_SourceCode.size(), "");
+        ERR_IF(address + 1 >= m_SourceCode.size(), "PROM::Read16 address greater than machine code size, address: {}, machine code size: {}", address, m_SourceCode.size());
         return (m_SourceCode[address + 1] << 8) | m_SourceCode[address];
     }
 };

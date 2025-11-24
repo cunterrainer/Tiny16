@@ -11,7 +11,7 @@
 #include <source_location>
 
 // ERR acts as an assert calling std::abort when used
-#ifndef NDEBUG
+#ifndef MODE_RELEASE
     #define LOG(fmt, ...) Log::Impl::Log(fmt, __VA_ARGS__)
     #define ERR(fmt, ...) Log::Impl::Err(std::source_location::current(), fmt, __VA_ARGS__)
     #define LOG_REASON(fmt, ...) Log::Impl::LogReason(fmt, __VA_ARGS__)
@@ -21,7 +21,7 @@
     #define ERR_IF(cond, fmt, ...) if (cond) { ERR(fmt, __VA_ARGS__); }
     #define LOG_REASON_IF(cond, fmt, ...) if (cond) { LOG_REASON(fmt, __VA_ARGS__); }
     #define ERR_REASON_IF(cond, fmt, ...) if (cond) { ERR_REASON(fmt, __VA_ARGS__); }
-#elif defined NDEBUG
+#elif defined MODE_RELEASE
     #define LOG(fmt, ...) Log::Impl::Log(fmt, __VA_ARGS__)
     #define ERR(fmt, ...)
     #define LOG_REASON(fmt, ...) Log::Impl::LogReason(fmt, __VA_ARGS__)
@@ -51,7 +51,7 @@ namespace Log::Impl
 }
 
 
-#ifndef NDEBUG
+#ifndef MODE_RELEASE
 #ifdef PLATFORM_WINDOWS
     #include <Windows.h>
     #undef min

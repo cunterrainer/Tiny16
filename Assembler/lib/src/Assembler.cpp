@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <vector>
 #include <limits>
 #include <cstdint>
@@ -43,6 +44,9 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::HLT:
         instrMc.op1.type = OperandTypeMC::None;
         break;
+    default:
+        throw std::logic_error("AssembleInstruction operand 1 invalid");
+        break;
     }
 
     switch (instrIr.opcode)
@@ -71,6 +75,9 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::JE_REG:
     case OpcodeIR::JE_LABEL:
         instrMc.op2.type = OperandTypeMC::None;
+        break;
+    default:
+        throw std::logic_error("AssembleInstruction operand 2 invalid");
         break;
     }
 

@@ -209,6 +209,9 @@ InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
         instrIr.op1.type = OperandTypeIR::None;
         THROW_IF(!parsedInstr.lhs.empty(), std::format("LowerInstruction: Operand is not empty but type is none: {}, Line: {}", parsedInstr.lhs, parsedInstr.lineNumber));
         break;
+    default:
+        throw std::logic_error("LowerInstruction operand 1 invalid");
+        break;
     }
 
     switch (instr.op2)
@@ -226,6 +229,9 @@ InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
     case OperandType::None:
         instrIr.op2.type = OperandTypeIR::None;
         THROW_IF(!parsedInstr.rhs.empty(), std::format("LowerInstruction: Operand is not empty but type is none: {}, Line: {}", parsedInstr.rhs, parsedInstr.lineNumber));
+        break;
+    default:
+        throw std::logic_error("LowerInstruction operand 2 invalid");
         break;
     }
 
