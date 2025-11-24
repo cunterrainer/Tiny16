@@ -7,7 +7,8 @@
 5:  JMP  reg/addr16       -> PC = reg/addr16
 4:  JE   reg/addr16       -> PC = reg/addr16 if RF (Flag register) == 0 else NOP
 7:  CMP  imm16/reg, reg   -> Set flag (RF) if equal / greater / less (reg - imm16/reg)
-8:  HLT                   -> Halt execution effectively exit the program
+8:  HALT                  -> Halt execution and wait for vblank interrupt
+9:  BRK                   -> Stop execution, terminate program
 
 * imm16 are the bytes immediately following the instruction byte in memory
 
@@ -46,8 +47,12 @@ then we just execute these instructions, e.g. the binary looks like:
 mov 1 r0 add 2 r0 sub 3 r0
 
 === INSTRUCTIONS ===
+1: HALT
+
 10: LOAD addr16, reg
-11: STORE reg, addr16
+11: LOAD reg, reg
+12: STORE reg, reg
+13: STORE reg, reg
 
 20: MOV imm16, reg
 21: MOV reg,   reg
@@ -66,4 +71,4 @@ mov 1 r0 add 2 r0 sub 3 r0
 60: CMP imm16, reg
 61: CMP reg,   reg
 
-255: HLT
+255: BRK
