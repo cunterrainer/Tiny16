@@ -14,7 +14,8 @@ enum class Opcode
     CMP,
     LOAD,
     STORE,
-    HLT,
+    HALT,
+    BRK,
     JMP,
     JE
 };
@@ -46,7 +47,8 @@ static const std::unordered_map<std::string_view, Instruction> s_InstructionMap 
 
     { "LOAD",  { Opcode::LOAD,  OperandType::RegisterOrIntermediate, OperandType::Register } },
     { "STORE", { Opcode::STORE, OperandType::Register,               OperandType::RegisterOrIntermediate } },
-    { "HLT",   { Opcode::HLT,   OperandType::None,                   OperandType::None } },
+    { "HALT",  { Opcode::HALT,  OperandType::None,                   OperandType::None } },
+    { "BRK",   { Opcode::BRK,   OperandType::None,                   OperandType::None } },
     { "JMP",   { Opcode::JMP,   OperandType::RegisterOrLabel,        OperandType::None } },
     { "JE",    { Opcode::JE,    OperandType::RegisterOrLabel,        OperandType::None } }
 };

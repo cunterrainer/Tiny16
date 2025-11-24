@@ -47,7 +47,8 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
         const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 3) << 8) | machineCode.at(index + 2));
         return std::format(" R{}, $0x{:04X}", machineCode.at(index + 1), immediateValue);
     }
-    case OpcodeMC::HLT:
+    case OpcodeMC::BRK:
+    case OpcodeMC::HALT:
         return std::string();
     }
     return " ???, ???";

@@ -115,9 +115,16 @@ void CPU::Instruction_JE_LABEL(OpcodeMC opcode)
         m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
-void CPU::Instruction_HLT(OpcodeMC)
+void CPU::Instruction_BRK(OpcodeMC)
 {
     m_ExecutionMode = false; // Stay stuck at this instructions, NOT a bug
+}
+
+void CPU::Instruction_HALT(OpcodeMC opcode)
+{
+    m_WaitingOnHalt = true;
+    while (m_WaitingOnHalt.load(std::memory_order_relaxed));
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
 void CPU::Instruction_LOAD_ADD_TO_REG(OpcodeMC opcode)
@@ -193,7 +200,8 @@ void CPU::Clock()
     case OpcodeIR::JE_REG:              return Instruction_JE_REG(opcode);
     case OpcodeIR::JE_LABEL:            return Instruction_JE_LABEL(opcode);
 
-    case OpcodeIR::HLT:                 return Instruction_HLT(opcode);
+    case OpcodeIR::BRK:                 return Instruction_BRK(opcode);
+    case OpcodeIR::HALT:                return Instruction_HALT(opcode);
 
     case OpcodeIR::LOAD_ADD_TO_REG:     return Instruction_LOAD_ADD_TO_REG(opcode);
     case OpcodeIR::LOAD_REG_TO_REG:     return Instruction_LOAD_REG_TO_REG(opcode);

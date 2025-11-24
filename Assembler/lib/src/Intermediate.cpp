@@ -145,9 +145,14 @@ OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1, OperandTypeIR op2)
         return OpcodeIR::CMP_IMM_TO_REG;
     }
 
-    if (opcode == Opcode::HLT)
+    if (opcode == Opcode::HALT)
     {
-        return OpcodeIR::HLT;
+        return OpcodeIR::HALT;
+    }
+
+    if (opcode == Opcode::BRK)
+    {
+        return OpcodeIR::BRK;
     }
 
     if (opcode == Opcode::JMP)

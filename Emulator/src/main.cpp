@@ -11,7 +11,6 @@ int main()
     InitWindow(1280, 720, "Tiny16-Emulator");
     SetExitKey(KEY_NULL);
     SetWindowState(FLAG_WINDOW_RESIZABLE);
-
     rlImGuiSetup(true);
 
     ImGuiIO& io = ImGui::GetIO();

@@ -171,9 +171,14 @@ TEST_CASE("Test GetOpcodeIR()")
         CHECK(GetOpcodeIR(Opcode::CMP, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::CMP_IMM_TO_REG);
     }
 
-    SUBCASE("HLT")
+    SUBCASE("HALT")
     {
-        CHECK(GetOpcodeIR(Opcode::HLT, OperandTypeIR::None, OperandTypeIR::Register) == OpcodeIR::HLT);
+        CHECK(GetOpcodeIR(Opcode::HALT, OperandTypeIR::None, OperandTypeIR::Register) == OpcodeIR::HALT);
+    }
+
+    SUBCASE("BRK")
+    {
+        CHECK(GetOpcodeIR(Opcode::BRK, OperandTypeIR::None, OperandTypeIR::Register) == OpcodeIR::BRK);
     }
 
     SUBCASE("JMP")
@@ -363,11 +368,11 @@ TEST_CASE("Testing LowerInstruction() Valid")
         CHECK(std::get<std::uint8_t>(inst.op2.value) == 4);
     }
 
-    SUBCASE("HLT instruction")
+    SUBCASE("HALT instruction")
     {
         ParsedInstruction pi {
             .label = "end",
-            .opcode = "HLT",
+            .opcode = "HALT",
             .lhs = "",
             .rhs = ""
         };
@@ -376,7 +381,7 @@ TEST_CASE("Testing LowerInstruction() Valid")
 
         CHECK(inst.size == 1);
         CHECK(inst.label == "end");
-        CHECK(inst.opcode == OpcodeIR::HLT);
+        CHECK(inst.opcode == OpcodeIR::HALT);
         CHECK(inst.op1.type == OperandTypeIR::None);
         CHECK(inst.op2.type == OperandTypeIR::None);
     }

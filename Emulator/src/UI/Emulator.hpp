@@ -87,6 +87,7 @@ namespace UI
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
             ImGui::BeginChild(4, { width, width / (16.f/9.f)}, ImGuiChildFlags_Borders);
             m_Screen.Swap(m_Emulator.GetScreenPixel(UI::Screen::Width, UI::Screen::Height));
+            m_Emulator.FireVBlankInterrupt();
             ImGui::Image(m_Screen.GetTexture(), { width, width / (16.f / 9.f) }, { width-20, 300-33 });
             ImGui::EndChild();
             ImGui::PopStyleVar();

@@ -1,6 +1,7 @@
 #ifndef CPU_H
 #define CPU_H
 #include <array>
+#include <atomic>
 #include <vector>
 #include <string>
 #include <cstdint>
@@ -45,6 +46,7 @@ private:
     RAM& m_Ram;
     std::string m_ErrorMsg;
     bool m_ExecutionMode = true;
+    std::atomic_bool m_WaitingOnHalt = false;
     std::uint16_t m_ProgramCounter = 0;
     std::array<std::uint16_t, static_cast<std::size_t>(Register::RF) + 1> m_Registers = { 0 };
 private:
@@ -61,7 +63,8 @@ private:
     void Instruction_JMP_LABEL       (OpcodeMC opcode);
     void Instruction_JE_REG          (OpcodeMC opcode);
     void Instruction_JE_LABEL        (OpcodeMC opcode);
-    void Instruction_HLT             (OpcodeMC opcode);
+    void Instruction_BRK             (OpcodeMC opcode);
+    void Instruction_HALT            (OpcodeMC opcode);
     void Instruction_LOAD_ADD_TO_REG (OpcodeMC opcode);
     void Instruction_LOAD_REG_TO_REG (OpcodeMC opcode);
     void Instruction_STORE_REG_TO_ADD(OpcodeMC opcode);
@@ -75,6 +78,7 @@ public:
 
     void Clock();
 
+    inline void FireVBlankInterrupt() noexcept { m_WaitingOnHalt = false; }
     constexpr bool IsExecuting() const noexcept { return m_ExecutionMode; }
     constexpr std::uint16_t GetRegister(Register reg) const noexcept { return m_Registers[reg]; }
     constexpr std::uint16_t GetProgramCounter() const noexcept { return m_ProgramCounter; }

@@ -12,8 +12,8 @@ TEST_CASE("Test ValidateInstruction()")
     SUBCASE("Invalid instruction")
     {
         // HLT should not have any operands
-        CHECK(ValidateInstruction(ParseLine("HLT R1", 0).Ok()).IsErr());
-        CHECK(ValidateInstruction(ParseLine("HLT R1, R2", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("HALT R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("HALT R1, R2", 0).Ok()).IsErr());
 
         // JMP/JE require exactly one operand
         CHECK(ValidateInstruction(ParseLine("JMP", 0).Ok()).IsErr());
@@ -96,7 +96,8 @@ TEST_CASE("Test ValidateInstruction()")
 
     SUBCASE("Valid Instruction")
     {
-        CHECK(ValidateInstruction(ParseLine("HLT", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("BRK",  0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("HALT", 0).Ok()).IsOk());
         
         CHECK(ValidateInstruction(ParseLine("JMP Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
         CHECK(ValidateInstruction(ParseLine("JE  Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
@@ -200,7 +201,7 @@ TEST_CASE("Test LookupOpcode()")
         CHECK_FALSE(LookupOpcode("sub").has_value());
         CHECK_FALSE(LookupOpcode("cmp").has_value());
         CHECK_FALSE(LookupOpcode("jmp").has_value());
-        CHECK_FALSE(LookupOpcode("hlt").has_value());
+        CHECK_FALSE(LookupOpcode("halt").has_value());
     }
 
     SUBCASE("Valid")
@@ -209,7 +210,8 @@ TEST_CASE("Test LookupOpcode()")
         CHECK(LookupOpcode("ADD").has_value());
         CHECK(LookupOpcode("SUB").has_value());
         CHECK(LookupOpcode("CMP").has_value());
-        CHECK(LookupOpcode("HLT").has_value());
+        CHECK(LookupOpcode("BRK").has_value());
+        CHECK(LookupOpcode("HALT").has_value());
         CHECK(LookupOpcode("JMP").has_value());
         CHECK(LookupOpcode("JE").has_value());
         CHECK(LookupOpcode("STORE").has_value());

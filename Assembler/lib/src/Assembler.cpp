@@ -41,7 +41,8 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
         instrMc.op1.type = OperandTypeMC::Intermediate;
         instrMc.op1.value = (std::uint16_t)labelAddress.at(std::get<std::string>(instrIr.op1.value));
         break;
-    case OpcodeIR::HLT:
+    case OpcodeIR::BRK:
+    case OpcodeIR::HALT:
         instrMc.op1.type = OperandTypeMC::None;
         break;
     default:
@@ -69,7 +70,8 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
         instrMc.op2.type = OperandTypeMC::Intermediate;
         instrMc.op2.value = std::get<std::uint16_t>(instrIr.op2.value);
         break;
-    case OpcodeIR::HLT:
+    case OpcodeIR::BRK:
+    case OpcodeIR::HALT:
     case OpcodeIR::JMP_REG:
     case OpcodeIR::JMP_LABEL:
     case OpcodeIR::JE_REG:

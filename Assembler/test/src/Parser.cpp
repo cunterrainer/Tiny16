@@ -92,10 +92,18 @@ TEST_CASE("Testing ParseLine() Instructions")
         CHECK(ins.Ok().rhs == "");
         CHECK(ins.Ok().lineNumber == 0xFF);
     
-        ins = ParseLine("   HLT   ", 0xFF);
+        ins = ParseLine("   HALT   ", 0xFF);
         CHECK(ins.IsOk() == true);
         CHECK(ins.Ok().label == "");
-        CHECK(ins.Ok().opcode == "HLT");
+        CHECK(ins.Ok().opcode == "HALT");
+        CHECK(ins.Ok().lhs == "");
+        CHECK(ins.Ok().rhs == "");
+        CHECK(ins.Ok().lineNumber == 0xFF);
+
+        ins = ParseLine("BRK", 0xFF);
+        CHECK(ins.IsOk() == true);
+        CHECK(ins.Ok().label == "");
+        CHECK(ins.Ok().opcode == "BRK");
         CHECK(ins.Ok().lhs == "");
         CHECK(ins.Ok().rhs == "");
         CHECK(ins.Ok().lineNumber == 0xFF);

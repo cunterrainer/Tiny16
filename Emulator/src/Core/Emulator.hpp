@@ -47,6 +47,10 @@ namespace Core
             m_CpuThread.join();
         }
 
+        inline void FireVBlankInterrupt() noexcept
+        {
+            m_CPU->FireVBlankInterrupt();
+        }
 
         inline const std::uint8_t* const GetScreenPixel(int screenWidth, int screenHeight) const noexcept
         {

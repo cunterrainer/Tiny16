@@ -10,6 +10,8 @@
 // Opcode values from SPEC.txt
 enum class OpcodeIR
 {
+    HALT = 1,
+
     MOV_IMM_TO_REG = 20,
     ADD_IMM_TO_REG = 30,
     SUB_IMM_TO_REG = 32,
@@ -25,11 +27,12 @@ enum class OpcodeIR
     JE_REG = 52,
     JE_LABEL = 53,
 
-    HLT = 0xFF,
     LOAD_ADD_TO_REG = 10,
     LOAD_REG_TO_REG = 11,
     STORE_REG_TO_ADD = 12,
-    STORE_REG_TO_REG = 13
+    STORE_REG_TO_REG = 13,
+
+    BRK = 0xFF
 };
 
 
@@ -69,7 +72,8 @@ static const std::unordered_map<OpcodeIR, std::uint16_t> s_InstructionIRSizeMap 
     { OpcodeIR::JMP_LABEL       , 3 },
     { OpcodeIR::JE_REG          , 2 },
     { OpcodeIR::JE_LABEL        , 3 },
-    { OpcodeIR::HLT             , 1 },
+    { OpcodeIR::HALT            , 1 },
+    { OpcodeIR::BRK             , 1 },
     { OpcodeIR::LOAD_ADD_TO_REG , 4 },
     { OpcodeIR::LOAD_REG_TO_REG , 3 },
     { OpcodeIR::STORE_REG_TO_ADD, 4 },
