@@ -11,16 +11,15 @@ namespace UI
 {
     class Screen
     {
-    private:
+    public:
         static constexpr int Width = 256;
         static constexpr int Height = 144;
     private:
         GLuint m_ImageTexture = 0;
-        std::vector<std::uint8_t> m_Framebuffer;
     public:
-        Screen() noexcept;
+        Screen(const std::uint8_t* const screenPixelPtr) noexcept;
         ~Screen() noexcept;
-        void Swap() const noexcept;
+        void Swap(const std::uint8_t* const screenPixelPtr) const noexcept;
 
         constexpr GLuint GetTexture() const noexcept
         {

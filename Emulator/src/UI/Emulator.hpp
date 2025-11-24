@@ -23,10 +23,12 @@ namespace UI
     private:
         Disassembler m_Disassembler;
 
-        Screen m_Screen;
         Core::Emulator m_Emulator;
         bool m_ShouldReset = false;
+        Screen m_Screen;
     public:
+        Emulator() : m_Screen(m_Emulator.GetScreenPixel(UI::Screen::Width, UI::Screen::Height)) {}
+
         void LoadProgram(const std::vector<std::uint8_t>& machineCode)
         {
             m_Emulator.LoadProgram(machineCode);
@@ -84,7 +86,7 @@ namespace UI
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
             ImGui::BeginChild(4, { width, width / (16.f/9.f)}, ImGuiChildFlags_Borders);
-            m_Screen.Swap();
+            m_Screen.Swap(m_Emulator.GetScreenPixel(UI::Screen::Width, UI::Screen::Height));
             ImGui::Image(m_Screen.GetTexture(), { width, width / (16.f / 9.f) }, { width-20, 300-33 });
             ImGui::EndChild();
             ImGui::PopStyleVar();

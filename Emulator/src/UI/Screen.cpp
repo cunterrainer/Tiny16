@@ -2,7 +2,7 @@
 
 namespace UI
 {
-    Screen::Screen() noexcept : m_Framebuffer(Width* Height, 0xff)
+    Screen::Screen(const std::uint8_t* const screenPixelPtr) noexcept
     {
         glGenTextures(1, &m_ImageTexture);
         glBindTexture(GL_TEXTURE_2D, m_ImageTexture);
@@ -17,7 +17,7 @@ namespace UI
 
         // Upload pixels into texture
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, Width, Height, 0, GL_RED, GL_UNSIGNED_BYTE, m_Framebuffer.data());
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, Width, Height, 0, GL_RED, GL_UNSIGNED_BYTE, screenPixelPtr);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -28,11 +28,11 @@ namespace UI
             glDeleteTextures(1, &m_ImageTexture);
     }
 
-    void Screen::Swap() const noexcept
+    void Screen::Swap(const std::uint8_t* const screenPixelPtr) const noexcept
     {
         glBindTexture(GL_TEXTURE_2D, m_ImageTexture);
         // Update GPU texture
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_RED, GL_UNSIGNED_BYTE, m_Framebuffer.data());
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_RED, GL_UNSIGNED_BYTE, screenPixelPtr);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 }

@@ -48,6 +48,12 @@ namespace Core
         }
 
 
+        inline const std::uint8_t* const GetScreenPixel(int screenWidth, int screenHeight) const noexcept
+        {
+            return m_RAM.GetScreenPixel(screenWidth, screenHeight);
+        }
+
+
         void StartExecution() noexcept;
         void LoadProgram(const std::vector<std::uint8_t>& machineCode);
     };
