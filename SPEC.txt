@@ -55,11 +55,6 @@ RD (D): GP register
 RE (E): GP register
 RSP(F): GP register
 RBP(16): GP register
-RF (17): Flags (LSB to MSB)
-    LESS
-    EQUAL
-    CARRY
-    BORROW
 PC (B): Program counter
 
 === FLAGS ===
