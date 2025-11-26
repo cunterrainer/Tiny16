@@ -217,6 +217,46 @@ TEST_CASE("Test GetOpcodeIR()")
         CHECK(GetOpcodeIR(Opcode::STOREB, OperandTypeIR::Register, OperandTypeIR::Intermediate) == OpcodeIR::STOREB_REG_TO_ADD);
     }
 
+    SUBCASE("STOREB")
+    {
+        CHECK(GetOpcodeIR(Opcode::STOREB, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::STOREB_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::STOREB, OperandTypeIR::Register, OperandTypeIR::Intermediate) == OpcodeIR::STOREB_REG_TO_ADD);
+    }
+
+    SUBCASE("Byte Operations")
+    {
+        // Extract Byte High/Low
+        CHECK(GetOpcodeIR(Opcode::EXTBH, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::EXTBH_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::EXTBL, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::EXTBL_REG_TO_REG);
+
+        // Insert Byte High/Low
+        CHECK(GetOpcodeIR(Opcode::INSBH, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::INSBH_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::INSBL, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::INSBL_REG_TO_REG);
+
+        // Swap Byte
+        // Usually single operand, passing Register as Op1
+        CHECK(GetOpcodeIR(Opcode::SWAPB, OperandTypeIR::Register, OperandTypeIR::None) == OpcodeIR::SWAPB_REG);
+    }
+
+    SUBCASE("Logical Operations")
+    {
+        // AND
+        CHECK(GetOpcodeIR(Opcode::AND, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::AND_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::AND, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::AND_IMM_TO_REG);
+
+        // OR
+        CHECK(GetOpcodeIR(Opcode::OR, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::OR_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::OR, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::OR_IMM_TO_REG);
+
+        // XOR
+        CHECK(GetOpcodeIR(Opcode::XOR, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::XOR_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::XOR, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::XOR_IMM_TO_REG);
+
+        // NEG (Unary)
+        CHECK(GetOpcodeIR(Opcode::NEG, OperandTypeIR::Register, OperandTypeIR::None) == OpcodeIR::NEG_REG);
+    }
+
+    CHECK(GetOpcodeIR(Opcode::NOP, OperandTypeIR::None, OperandTypeIR::None) == OpcodeIR::NOP);
     CHECK_THROWS_AS(GetOpcodeIR((Opcode)100, (OperandTypeIR)100, (OperandTypeIR)100), std::logic_error);
 }
 

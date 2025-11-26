@@ -11,6 +11,7 @@
 // Opcode values from SPEC.txt
 enum class OpcodeIR
 {
+    NOP = 0,
     HALT = 1,
 
     MOV_IMM_TO_REG = 20,
@@ -36,6 +37,19 @@ enum class OpcodeIR
     STORE_REG_TO_REG = 15,
     STOREB_REG_TO_ADD = 16,
     STOREB_REG_TO_REG = 17,
+
+    EXTBH_REG_TO_REG = 100,
+    EXTBL_REG_TO_REG = 101,
+    INSBH_REG_TO_REG = 102,
+    INSBL_REG_TO_REG = 103,
+    SWAPB_REG        = 104,
+    AND_REG_TO_REG   = 110,
+    AND_IMM_TO_REG   = 111,
+    OR_REG_TO_REG    = 112,
+    OR_IMM_TO_REG    = 113,
+    XOR_REG_TO_REG   = 114,
+    XOR_IMM_TO_REG   = 115,
+    NEG_REG          = 116,
 
     BRK = 0xFF
 };
@@ -87,6 +101,19 @@ static const std::unordered_map<OpcodeIR, std::uint16_t> s_InstructionIRSizeMap 
     { OpcodeIR::STORE_REG_TO_REG , 3 },
     { OpcodeIR::STOREB_REG_TO_ADD, 4 },
     { OpcodeIR::STOREB_REG_TO_REG, 3 },
+    { OpcodeIR::EXTBH_REG_TO_REG , 3 },
+    { OpcodeIR::EXTBL_REG_TO_REG , 3 },
+    { OpcodeIR::INSBH_REG_TO_REG , 3 },
+    { OpcodeIR::INSBL_REG_TO_REG , 3 },
+    { OpcodeIR::SWAPB_REG        , 2 },
+    { OpcodeIR::AND_REG_TO_REG   , 3 },
+    { OpcodeIR::AND_IMM_TO_REG   , 4 },
+    { OpcodeIR::OR_REG_TO_REG    , 3 },
+    { OpcodeIR::OR_IMM_TO_REG    , 4 },
+    { OpcodeIR::XOR_REG_TO_REG   , 3 },
+    { OpcodeIR::XOR_IMM_TO_REG   , 4 },
+    { OpcodeIR::NEG_REG          , 2 },
+    { OpcodeIR::NOP              , 1 }
 };
 
 
@@ -116,6 +143,22 @@ static const std::unordered_map<Opcode, OpcodeIRMapping> s_OpcodeIRMapping = {
     // Single byte instructions (Don't care about operands)
     { Opcode::HALT,   {0, OpcodeIR::HALT,               OpcodeIR::HALT            }},
     { Opcode::BRK,    {0, OpcodeIR::BRK,                OpcodeIR::BRK             }},
+    { Opcode::NOP,    {0, OpcodeIR::NOP,                OpcodeIR::NOP             }},
+
+    // Logical Operations
+    {Opcode::AND,    {1, OpcodeIR::AND_REG_TO_REG,     OpcodeIR::AND_IMM_TO_REG}},
+    {Opcode::OR,     {1, OpcodeIR::OR_REG_TO_REG,      OpcodeIR::OR_IMM_TO_REG}},
+    {Opcode::XOR,    {1, OpcodeIR::XOR_REG_TO_REG,     OpcodeIR::XOR_IMM_TO_REG}},
+
+    // Unary / Single Operand
+    {Opcode::NEG,    {0, OpcodeIR::NEG_REG,            OpcodeIR::NEG_REG}},
+    {Opcode::SWAPB,  {0, OpcodeIR::SWAPB_REG,          OpcodeIR::SWAPB_REG}},
+
+    // Byte Manipulation
+    {Opcode::EXTBH,  {0, OpcodeIR::EXTBH_REG_TO_REG,   OpcodeIR::EXTBH_REG_TO_REG}},
+    {Opcode::EXTBL,  {0, OpcodeIR::EXTBL_REG_TO_REG,   OpcodeIR::EXTBL_REG_TO_REG}},
+    {Opcode::INSBH,  {0, OpcodeIR::INSBH_REG_TO_REG,   OpcodeIR::INSBH_REG_TO_REG}},
+    {Opcode::INSBL,  {0, OpcodeIR::INSBL_REG_TO_REG,   OpcodeIR::INSBL_REG_TO_REG}}
 };
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr);

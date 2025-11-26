@@ -82,6 +82,19 @@ private:
     void Instruction_STORE_REG_TO_REG (OpcodeMC opcode);
     void Instruction_STOREB_REG_TO_ADD(OpcodeMC opcode);
     void Instruction_STOREB_REG_TO_REG(OpcodeMC opcode);
+    void Instruction_NOP              (OpcodeMC opcode);
+    void Instruction_EXTBH_REG_TO_REG (OpcodeMC opcode);
+    void Instruction_EXTBL_REG_TO_REG (OpcodeMC opcode);
+    void Instruction_INSBH_REG_TO_REG (OpcodeMC opcode);
+    void Instruction_INSBL_REG_TO_REG (OpcodeMC opcode);
+    void Instruction_SWAPB_REG        (OpcodeMC opcode);
+    void Instruction_AND_REG_TO_REG   (OpcodeMC opcode);
+    void Instruction_AND_IMM_TO_REG   (OpcodeMC opcode);
+    void Instruction_OR_REG_TO_REG    (OpcodeMC opcode);
+    void Instruction_OR_IMM_TO_REG    (OpcodeMC opcode);
+    void Instruction_XOR_REG_TO_REG   (OpcodeMC opcode);
+    void Instruction_XOR_IMM_TO_REG   (OpcodeMC opcode);
+    void Instruction_NEG_REG          (OpcodeMC opcode);
 public:
     explicit CPU(const PROM& prom, RAM& ram) : m_Prom(prom), m_Ram(ram) {};
     CPU(CPU&& cpu) noexcept;

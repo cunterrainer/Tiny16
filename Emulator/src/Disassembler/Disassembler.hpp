@@ -30,6 +30,7 @@ private:
         { OpcodeMC::JE_LABEL        , "JE " },
         { OpcodeMC::BRK             , "BRK" },
         { OpcodeMC::HALT            , "HALT" },
+        { OpcodeMC::NOP             , "NOP" },
         { OpcodeMC::LOAD_ADD_TO_REG , "LOAD" },
         { OpcodeMC::LOAD_REG_TO_REG , "LOAD" },
         { OpcodeMC::LOADB_ADD_TO_REG , "LOADB" },
@@ -38,6 +39,18 @@ private:
         { OpcodeMC::STORE_REG_TO_REG, "STORE" },
         { OpcodeMC::STOREB_REG_TO_ADD, "STOREB" },
         { OpcodeMC::STOREB_REG_TO_REG, "STOREB" },
+        { OpcodeMC::EXTBH_REG_TO_REG, "EXTBH" },
+        { OpcodeMC::EXTBL_REG_TO_REG, "EXTBL" },
+        { OpcodeMC::INSBH_REG_TO_REG, "INSBH" },
+        { OpcodeMC::INSBL_REG_TO_REG, "INSBL" },
+        { OpcodeMC::SWAPB_REG       , "SWAPB" },
+        { OpcodeMC::AND_REG_TO_REG  , "AND"   },
+        { OpcodeMC::AND_IMM_TO_REG  , "AND"   },
+        { OpcodeMC::OR_REG_TO_REG   , "OR"    },
+        { OpcodeMC::OR_IMM_TO_REG   , "OR"    },
+        { OpcodeMC::XOR_REG_TO_REG  , "XOR"   },
+        { OpcodeMC::XOR_IMM_TO_REG  , "XOR"   },
+        { OpcodeMC::NEG_REG         , "NEG"   }
     };
 
 

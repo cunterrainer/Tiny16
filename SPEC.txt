@@ -9,8 +9,18 @@
 7:   JMP    reg/addr16       -> PC = reg/addr16
 8:   JE     reg/addr16       -> PC = reg/addr16 if RF (Flag register) == 0 else NOP
 9:   CMP    imm16/reg, reg   -> Set flag (RF) if equal / greater / less (reg - imm16/reg)
-10:  HALT                  -> Halt execution and wait for vblank interrupt
-11:  BRK                   -> Stop execution, terminate program
+10:  HALT                    -> Halt execution and wait for vblank interrupt
+11:  BRK                     -> Stop execution, terminate program
+12:  NOP                     -> No operation
+13:  EXTBL reg, reg          -> reg = reg & 0x00FF extract low byte
+14:  EXTBH reg, reg          -> reg = (reg >> 8) & 0x00FF
+15:  INSBL reg, reg          -> reg = (reg & 0x00FF) | ((reg8 & 0x00FF) << 8) Insert into low 8 bits
+16:  INSBH reg, reg          -> reg = ((reg & 0xFF) << 8) | (reg >> 8) Insert into high 8 bits
+17:  SWAPB reg               -> reg = ((reg & 0xFF) << 8) | (reg >> 8) Swap high/low bytes
+18:  AND   imm16/reg, reg    -> reg = reg & imm16/reg
+19:  OR    imm16/reg, reg    -> reg = reg | imm16/reg
+20:  XOR   imm16/reg, reg    -> reg = reg ^ imm16/reg
+21:  NEG   reg               -> reg = -reg
 
 * imm16 are the bytes immediately following the instruction byte in memory
 

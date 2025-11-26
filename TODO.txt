@@ -17,3 +17,18 @@ do the entire emulating process on a different thread
 
 - VBlank interrupt
 - Set a cpu frequency
+
+Instr:
+	mul
+	div
+	mod
+	JMP to address forbidden
+	jne
+	jl
+	jle
+	jg
+	jge
+	signed and unsigned for jumps
+RSP Stack pointer
+	call // save current address to a designed register
+	ret

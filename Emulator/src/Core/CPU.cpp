@@ -211,6 +211,106 @@ void CPU::Instruction_STOREB_REG_TO_REG(OpcodeMC opcode)
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
+void CPU::Instruction_NOP(OpcodeMC opcode)
+{
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_EXTBL_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register src = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[dst] = m_Registers[src] & 0x00FF;
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_EXTBH_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register src = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[dst] = (m_Registers[src] >> 8) & 0x00FF;
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_INSBL_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register src = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[dst] = (m_Registers[dst] & 0x00FF) | (m_Registers[src] & 0x00FF);
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_INSBH_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register src = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[dst] = (m_Registers[dst] & 0x00FF) | ((m_Registers[src] & 0x00FF) << 8);
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_SWAPB_REG(OpcodeMC opcode)
+{
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    m_Registers[dst] = ((m_Registers[dst] & 0x00FF) << 8) | (m_Registers[dst] >> 8);
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_AND_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register src = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[dst] = m_Registers[src] & m_Registers[dst];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_AND_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+    m_Registers[dst] = imm & m_Registers[dst];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_OR_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register src = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[dst] = m_Registers[src] | m_Registers[dst];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_OR_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+    m_Registers[dst] = imm | m_Registers[dst];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_XOR_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register src = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+    m_Registers[dst] = m_Registers[src] ^ m_Registers[dst];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_XOR_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+    m_Registers[dst] = imm ^ m_Registers[dst];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_NEG_REG(OpcodeMC opcode)
+{
+    const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    m_Registers[dst] = -m_Registers[dst];
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+
 
 void CPU::Clock()
 {
@@ -238,6 +338,7 @@ void CPU::Clock()
 
     case OpcodeIR::BRK:                 return Instruction_BRK(opcode);
     case OpcodeIR::HALT:                return Instruction_HALT(opcode);
+    case OpcodeIR::NOP:                 return Instruction_NOP(opcode);
 
     case OpcodeIR::LOAD_ADD_TO_REG:     return Instruction_LOAD_ADD_TO_REG(opcode);
     case OpcodeIR::LOAD_REG_TO_REG:     return Instruction_LOAD_REG_TO_REG(opcode);
@@ -247,6 +348,20 @@ void CPU::Clock()
     case OpcodeIR::STORE_REG_TO_REG:    return Instruction_STORE_REG_TO_REG(opcode);
     case OpcodeIR::STOREB_REG_TO_ADD:   return Instruction_STOREB_REG_TO_ADD(opcode);
     case OpcodeIR::STOREB_REG_TO_REG:   return Instruction_STOREB_REG_TO_REG(opcode);
+
+
+    case OpcodeIR::EXTBH_REG_TO_REG:    return Instruction_EXTBH_REG_TO_REG(opcode);
+    case OpcodeIR::EXTBL_REG_TO_REG:    return Instruction_EXTBL_REG_TO_REG(opcode);
+    case OpcodeIR::INSBH_REG_TO_REG:    return Instruction_INSBH_REG_TO_REG(opcode);
+    case OpcodeIR::INSBL_REG_TO_REG:    return Instruction_INSBL_REG_TO_REG(opcode);
+    case OpcodeIR::SWAPB_REG:           return Instruction_SWAPB_REG(opcode);
+    case OpcodeIR::AND_REG_TO_REG:      return Instruction_AND_REG_TO_REG(opcode);        
+    case OpcodeIR::AND_IMM_TO_REG:      return Instruction_AND_IMM_TO_REG(opcode);     
+    case OpcodeIR::OR_REG_TO_REG:       return Instruction_OR_REG_TO_REG(opcode);  
+    case OpcodeIR::OR_IMM_TO_REG:       return Instruction_OR_IMM_TO_REG(opcode);    
+    case OpcodeIR::XOR_REG_TO_REG:      return Instruction_XOR_REG_TO_REG(opcode);   
+    case OpcodeIR::XOR_IMM_TO_REG:      return Instruction_XOR_IMM_TO_REG(opcode);    
+    case OpcodeIR::NEG_REG:             return Instruction_NEG_REG(opcode);
 
     default:
         m_ErrorMsg = "Execution failed: unknown instruction or memory read error. Did you miss a HLT instruction?";

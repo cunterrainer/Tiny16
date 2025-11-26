@@ -19,7 +19,17 @@ enum class Opcode
     HALT,
     BRK,
     JMP,
-    JE
+    JE,
+    EXTBH,
+    EXTBL,
+    INSBH,
+    INSBL,
+    SWAPB,
+    AND,
+    OR,
+    XOR,
+    NEG,
+    NOP
 };
 
 
@@ -54,7 +64,19 @@ static const std::unordered_map<std::string_view, Instruction> s_InstructionMap 
     { "HALT",   { Opcode::HALT,   OperandType::None,                   OperandType::None } },
     { "BRK",    { Opcode::BRK,    OperandType::None,                   OperandType::None } },
     { "JMP",    { Opcode::JMP,    OperandType::RegisterOrLabel,        OperandType::None } },
-    { "JE",     { Opcode::JE,     OperandType::RegisterOrLabel,        OperandType::None } }
+    { "JE",     { Opcode::JE,     OperandType::RegisterOrLabel,        OperandType::None } },
+
+    { "EXTBH",  { Opcode::EXTBH,   OperandType::Register,        OperandType::Register } },
+    { "EXTBL",  { Opcode::EXTBL,   OperandType::Register,        OperandType::Register } },
+    { "INSBH",  { Opcode::INSBH,   OperandType::Register,        OperandType::Register } },
+    { "INSBL",  { Opcode::INSBL,   OperandType::Register,        OperandType::Register } },
+    { "SWAPB",  { Opcode::SWAPB,   OperandType::Register,        OperandType::None } },
+
+    { "AND",    { Opcode::AND,     OperandType::RegisterOrIntermediate,  OperandType::Register } },
+    { "OR",     { Opcode::OR,      OperandType::RegisterOrIntermediate,  OperandType::Register } },
+    { "XOR",    { Opcode::XOR,     OperandType::RegisterOrIntermediate,  OperandType::Register } },
+    { "NEG",    { Opcode::NEG,     OperandType::Register,                OperandType::None     } },
+    { "NOP",    { Opcode::NOP,     OperandType::None,                    OperandType::None     } }
 };
 
 #endif // INSTRUCTION_H

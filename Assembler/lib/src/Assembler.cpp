@@ -20,6 +20,9 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::ADD_IMM_TO_REG:
     case OpcodeIR::SUB_IMM_TO_REG:
     case OpcodeIR::CMP_IMM_TO_REG:
+    case OpcodeIR::AND_IMM_TO_REG:
+    case OpcodeIR::OR_IMM_TO_REG:
+    case OpcodeIR::XOR_IMM_TO_REG:
     case OpcodeIR::LOAD_ADD_TO_REG:
     case OpcodeIR::LOADB_ADD_TO_REG:
         instrMc.op1.type = OperandTypeMC::Intermediate;
@@ -27,6 +30,8 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
         break;
     case OpcodeIR::JE_REG:
     case OpcodeIR::JMP_REG:
+    case OpcodeIR::NEG_REG:
+    case OpcodeIR::SWAPB_REG:
     case OpcodeIR::MOV_REG_TO_REG:
     case OpcodeIR::ADD_REG_TO_REG:
     case OpcodeIR::SUB_REG_TO_REG:
@@ -37,6 +42,13 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::STORE_REG_TO_REG:
     case OpcodeIR::STOREB_REG_TO_ADD:
     case OpcodeIR::STOREB_REG_TO_REG:
+    case OpcodeIR::AND_REG_TO_REG:
+    case OpcodeIR::XOR_REG_TO_REG:
+    case OpcodeIR::OR_REG_TO_REG:
+    case OpcodeIR::EXTBH_REG_TO_REG:
+    case OpcodeIR::EXTBL_REG_TO_REG:
+    case OpcodeIR::INSBH_REG_TO_REG:
+    case OpcodeIR::INSBL_REG_TO_REG:
         instrMc.op1.type = OperandTypeMC::Register;
         instrMc.op1.value = std::get<std::uint8_t>(instrIr.op1.value);
         break;
@@ -45,6 +57,7 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
         instrMc.op1.type = OperandTypeMC::Intermediate;
         instrMc.op1.value = (std::uint16_t)labelAddress.at(std::get<std::string>(instrIr.op1.value));
         break;
+    case OpcodeIR::NOP:
     case OpcodeIR::BRK:
     case OpcodeIR::HALT:
         instrMc.op1.type = OperandTypeMC::None;
@@ -70,6 +83,16 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::LOADB_REG_TO_REG:
     case OpcodeIR::STORE_REG_TO_REG:
     case OpcodeIR::STOREB_REG_TO_REG:
+    case OpcodeIR::AND_IMM_TO_REG:
+    case OpcodeIR::AND_REG_TO_REG:
+    case OpcodeIR::OR_IMM_TO_REG:
+    case OpcodeIR::OR_REG_TO_REG:
+    case OpcodeIR::XOR_REG_TO_REG:
+    case OpcodeIR::XOR_IMM_TO_REG:
+    case OpcodeIR::EXTBH_REG_TO_REG:
+    case OpcodeIR::EXTBL_REG_TO_REG:
+    case OpcodeIR::INSBH_REG_TO_REG:
+    case OpcodeIR::INSBL_REG_TO_REG:
         instrMc.op2.type = OperandTypeMC::Register;
         instrMc.op2.value = std::get<std::uint8_t>(instrIr.op2.value);
         break;
@@ -78,7 +101,9 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
         instrMc.op2.type = OperandTypeMC::Intermediate;
         instrMc.op2.value = std::get<std::uint16_t>(instrIr.op2.value);
         break;
-    case OpcodeIR::BRK:
+    case OpcodeIR::NOP:
+    case OpcodeIR::NEG_REG:
+    case OpcodeIR::SWAPB_REG:
     case OpcodeIR::HALT:
     case OpcodeIR::JMP_REG:
     case OpcodeIR::JMP_LABEL:
