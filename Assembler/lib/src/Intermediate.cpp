@@ -181,6 +181,7 @@ InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
     instrIr.op1 = LowerOperand(instr.op1, parsedInstr.lhs, parsedInstr);
     instrIr.op2 = LowerOperand(instr.op2, parsedInstr.rhs, parsedInstr);
    
+    instrIr.lineNumber = parsedInstr.lineNumber;
     instrIr.opcode = GetOpcodeIR(instr.opcode, instrIr.op1.type, instrIr.op2.type);
     instrIr.label = parsedInstr.label;
     instrIr.size = s_InstructionIRSizeMap.at(instrIr.opcode);

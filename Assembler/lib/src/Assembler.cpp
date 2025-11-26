@@ -3,6 +3,7 @@
 #include <limits>
 #include <cstdint>
 #include <variant>
+#include <format>
 
 #include "Assembler.hpp"
 #include "Intermediate.hpp"
@@ -80,7 +81,7 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
         instrMc.op1.type = OperandTypeMC::None;
         break;
     default:
-        throw std::logic_error("AssembleInstruction operand 1 invalid");
+        throw std::logic_error(std::format("AssembleInstruction operand 1 invalid, line: {}", instrIr.lineNumber));
         break;
     }
 
@@ -130,6 +131,7 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::NEG_REG:
     case OpcodeIR::SWAPB_REG:
     case OpcodeIR::HALT:
+    case OpcodeIR::BRK:
     case OpcodeIR::JMP_REG:
     case OpcodeIR::JMP_LABEL:
     case OpcodeIR::JE_REG:
@@ -146,7 +148,7 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
         instrMc.op2.type = OperandTypeMC::None;
         break;
     default:
-        throw std::logic_error("AssembleInstruction operand 2 invalid");
+        throw std::logic_error(std::format("AssembleInstruction operand 2 invalid, line: {}", instrIr.lineNumber));
         break;
     }
 
@@ -163,7 +165,7 @@ std::uint32_t ResolveLabelAddress(std::string_view label, const std::vector<Inst
         {
             if (address > std::numeric_limits<std::uint16_t>::max())
             {
-                throw std::logic_error(std::format("ResolveLabelAddress: Address for label {} = {}, greater than allowed for 16 bit architecture", label, address));
+                throw std::logic_error(std::format("ResolveLabelAddress: Line: {} Address for label {} = {}, greater than allowed for 16 bit architecture", i.lineNumber, label, address));
             }
             return address;
         }

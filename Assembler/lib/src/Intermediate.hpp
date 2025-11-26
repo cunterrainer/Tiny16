@@ -88,6 +88,7 @@ struct OperandIR
 
 struct InstructionIR
 {
+    size_t lineNumber; // For error messaGe purposes
     std::string label;
     OpcodeIR opcode;
     OperandIR op1;
