@@ -1,11 +1,11 @@
 #ifndef SCREEN_HPP
 #define SCREEN_HPP
 
-#include <vector>
 #include <cstdint>
 
+#include "imgui.h"
+
 #include "raylib.h"
-#include "external/glad.h"
 
 namespace UI
 {
@@ -15,15 +15,15 @@ namespace UI
         static constexpr int Width = 256;
         static constexpr int Height = 144;
     private:
-        GLuint m_ImageTexture = 0;
+        Texture2D m_Texture;
     public:
         Screen(const std::uint8_t* const screenPixelPtr) noexcept;
         ~Screen() noexcept;
         void Swap(const std::uint8_t* const screenPixelPtr) const noexcept;
 
-        constexpr GLuint GetTexture() const noexcept
+        constexpr ImU64 GetTexture() const noexcept
         {
-            return m_ImageTexture;
+            return m_Texture.id;
         }
     };
 }
