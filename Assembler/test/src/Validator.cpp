@@ -150,6 +150,20 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("STORE R1, R0", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("STORE R1, R7", 0).Ok()).IsOk());
+
+        CHECK(ValidateInstruction(ParseLine("LOADB  $0x4, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("LOADB $+0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("LOADB $-0x4, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("LOADB R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("LOADB R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("LOADB R1, R0", 0).Ok()).IsOk());
+
+        CHECK(ValidateInstruction(ParseLine("STOREB R0, $0xFF", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STOREB R7, $0x29", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STOREB R7, $0b11", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STOREB R1, R0", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STOREB R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("STOREB R1, R7", 0).Ok()).IsOk());
     }
 }
 
@@ -222,7 +236,9 @@ TEST_CASE("Test LookupOpcode()")
         CHECK(LookupOpcode("JMP").has_value());
         CHECK(LookupOpcode("JE").has_value());
         CHECK(LookupOpcode("STORE").has_value());
+        CHECK(LookupOpcode("STOREB").has_value());
         CHECK(LookupOpcode("LOAD").has_value());
+        CHECK(LookupOpcode("LOADB").has_value());
     }
 }
 

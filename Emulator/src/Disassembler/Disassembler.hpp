@@ -32,8 +32,12 @@ private:
         { OpcodeMC::HALT            , "HALT" },
         { OpcodeMC::LOAD_ADD_TO_REG , "LOAD" },
         { OpcodeMC::LOAD_REG_TO_REG , "LOAD" },
+        { OpcodeMC::LOADB_ADD_TO_REG , "LOADB" },
+        { OpcodeMC::LOADB_REG_TO_REG , "LOADB" },
         { OpcodeMC::STORE_REG_TO_ADD, "STORE" },
         { OpcodeMC::STORE_REG_TO_REG, "STORE" },
+        { OpcodeMC::STOREB_REG_TO_ADD, "STOREB" },
+        { OpcodeMC::STOREB_REG_TO_REG, "STOREB" },
     };
 
 

@@ -147,6 +147,24 @@ void CPU::Instruction_LOAD_REG_TO_REG(OpcodeMC opcode)
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
+void CPU::Instruction_LOADB_ADD_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    m_Registers[reg] = m_Ram.GetMemory(imm);
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_LOADB_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register regSrcAddr = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register regDst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    m_Registers[regDst] = m_Ram.GetMemory(m_Registers[regSrcAddr]);
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
 void CPU::Instruction_STORE_REG_TO_ADD(OpcodeMC opcode)
 {
     const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
@@ -172,6 +190,24 @@ void CPU::Instruction_STORE_REG_TO_REG(OpcodeMC opcode)
 
     m_Ram.SetMemory(m_Registers[regDstAddr], lowerHalf);
     m_Ram.SetMemory(m_Registers[regDstAddr] + 1, upperHalf);
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_STOREB_REG_TO_ADD(OpcodeMC opcode)
+{
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    m_Ram.SetMemory(imm, static_cast<std::uint8_t>(m_Registers[reg]));
+    m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_STOREB_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register regValue = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register regDstAddr = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    m_Ram.SetMemory(m_Registers[regDstAddr], static_cast<std::uint8_t>(m_Registers[regValue]));
     m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
 }
 
@@ -205,8 +241,12 @@ void CPU::Clock()
 
     case OpcodeIR::LOAD_ADD_TO_REG:     return Instruction_LOAD_ADD_TO_REG(opcode);
     case OpcodeIR::LOAD_REG_TO_REG:     return Instruction_LOAD_REG_TO_REG(opcode);
+    case OpcodeIR::LOADB_ADD_TO_REG:    return Instruction_LOADB_ADD_TO_REG(opcode);
+    case OpcodeIR::LOADB_REG_TO_REG:    return Instruction_LOADB_REG_TO_REG(opcode);
     case OpcodeIR::STORE_REG_TO_ADD:    return Instruction_STORE_REG_TO_ADD(opcode);
     case OpcodeIR::STORE_REG_TO_REG:    return Instruction_STORE_REG_TO_REG(opcode);
+    case OpcodeIR::STOREB_REG_TO_ADD:   return Instruction_STOREB_REG_TO_ADD(opcode);
+    case OpcodeIR::STOREB_REG_TO_REG:   return Instruction_STOREB_REG_TO_REG(opcode);
 
     default:
         m_ErrorMsg = "Execution failed: unknown instruction or memory read error. Did you miss a HLT instruction?";

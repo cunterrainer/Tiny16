@@ -14,6 +14,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     switch (opcode)
     {
     case OpcodeMC::LOAD_ADD_TO_REG:
+    case OpcodeMC::LOADB_ADD_TO_REG:
     {
         const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 2) << 8) | machineCode.at(index + 1));
         return std::format(" $0x{:04X}, {}", immediateValue, m_RegisterToStringMap.at(machineCode.at(index + 3)));
@@ -31,7 +32,9 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::SUB_REG_TO_REG:
     case OpcodeMC::CMP_REG_TO_REG:
     case OpcodeMC::LOAD_REG_TO_REG:
+    case OpcodeMC::LOADB_REG_TO_REG:
     case OpcodeMC::STORE_REG_TO_REG:
+    case OpcodeMC::STOREB_REG_TO_REG:
         return std::format(" {}, {}", m_RegisterToStringMap.at(machineCode.at(index + 1)), m_RegisterToStringMap.at(machineCode.at(index + 2)));
     case OpcodeMC::JE_REG:
     case OpcodeMC::JMP_REG:
@@ -43,6 +46,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
         return std::format(" $0x{:04X}", immediateValue);
     }
     case OpcodeMC::STORE_REG_TO_ADD:
+    case OpcodeMC::STOREB_REG_TO_ADD:
     {
         const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 3) << 8) | machineCode.at(index + 2));
         return std::format(" {}, $0x{:04X}", m_RegisterToStringMap.at(machineCode.at(index + 1)), immediateValue);
@@ -74,6 +78,7 @@ void Disassembler::Disassemble(const std::vector<std::uint8_t>& machineCode)
         catch (const std::out_of_range&)
         {
             m_ErrorMsg = std::format("Failed to disassemble machine code, instruction: {} | 0x{:X}, at address: {} | 0x{:04X}", (int)machineCode[i], (int)machineCode[i], i, i);
+            return;
         }
     }
     m_ErrorMsg.clear();

@@ -1,14 +1,16 @@
 === INSTRUCTIONS ===
-0:  LOAD  reg/addr16, reg -> reg = *addr16/*reg
-1:  STORE reg, reg/addr16 -> *addr16/*reg = reg
-2:  MOV  imm16/reg, reg   -> reg = imm16/reg
-3:  ADD  imm16/reg, reg   -> reg = reg + imm16/reg
-4:  SUB  imm16/reg, reg   -> reg = reg - imm16/reg
-5:  JMP  reg/addr16       -> PC = reg/addr16
-4:  JE   reg/addr16       -> PC = reg/addr16 if RF (Flag register) == 0 else NOP
-7:  CMP  imm16/reg, reg   -> Set flag (RF) if equal / greater / less (reg - imm16/reg)
-8:  HALT                  -> Halt execution and wait for vblank interrupt
-9:  BRK                   -> Stop execution, terminate program
+0:   LOAD   reg/addr16, reg -> reg = *addr16/*reg # reads 2 bytes
+1:   STORE  reg, reg/addr16 -> *addr16/*reg = reg # stores 2 bytes
+2:   LOADB  reg/addr16, reg -> reg = *addr16/*reg # reads 1 byte
+3:   STOREB reg, reg/addr16 -> *addr16/*reg = reg # stores 1 byte
+4:   MOV    imm16/reg, reg   -> reg = imm16/reg
+5:   ADD    imm16/reg, reg   -> reg = reg + imm16/reg
+6:   SUB    imm16/reg, reg   -> reg = reg - imm16/reg
+7:   JMP    reg/addr16       -> PC = reg/addr16
+8:   JE     reg/addr16       -> PC = reg/addr16 if RF (Flag register) == 0 else NOP
+9:   CMP    imm16/reg, reg   -> Set flag (RF) if equal / greater / less (reg - imm16/reg)
+10:  HALT                  -> Halt execution and wait for vblank interrupt
+11:  BRK                   -> Stop execution, terminate program
 
 * imm16 are the bytes immediately following the instruction byte in memory
 

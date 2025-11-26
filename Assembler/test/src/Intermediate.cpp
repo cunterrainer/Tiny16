@@ -205,6 +205,18 @@ TEST_CASE("Test GetOpcodeIR()")
         CHECK(GetOpcodeIR(Opcode::STORE, OperandTypeIR::Register, OperandTypeIR::Intermediate) == OpcodeIR::STORE_REG_TO_ADD);
     }
 
+    SUBCASE("LOADB")
+    {
+        CHECK(GetOpcodeIR(Opcode::LOADB, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::LOADB_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::LOADB, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::LOADB_ADD_TO_REG);
+    }
+
+    SUBCASE("STOREB")
+    {
+        CHECK(GetOpcodeIR(Opcode::STOREB, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::STOREB_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::STOREB, OperandTypeIR::Register, OperandTypeIR::Intermediate) == OpcodeIR::STOREB_REG_TO_ADD);
+    }
+
     CHECK_THROWS_AS(GetOpcodeIR((Opcode)100, (OperandTypeIR)100, (OperandTypeIR)100), std::logic_error);
 }
 
@@ -422,6 +434,44 @@ TEST_CASE("Testing LowerInstruction() Valid")
         CHECK(std::get<std::uint8_t>(inst.op1.value) == 7);
     }
 
+    SUBCASE("LOAD Byte from register to register")
+    {
+        ParsedInstruction pi{
+            .label = "",
+            .opcode = "LOADB",
+            .lhs = "R1",
+            .rhs = "R0"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 3);
+        CHECK(inst.opcode == OpcodeIR::LOADB_REG_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 0);
+    }
+
+    SUBCASE("LOAD Byte from address to register")
+    {
+        ParsedInstruction pi{
+            .label = "",
+            .opcode = "LOADB",
+            .lhs = "$0xFF",
+            .rhs = "R0"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 4);
+        CHECK(inst.opcode == OpcodeIR::LOADB_ADD_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Intermediate);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint16_t>(inst.op1.value) == 0xFF);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 0);
+    }
+
     SUBCASE("LOAD from address to register")
     {
         ParsedInstruction pi{
@@ -458,6 +508,44 @@ TEST_CASE("Testing LowerInstruction() Valid")
         CHECK(inst.op2.type == OperandTypeIR::Register);
         CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
         CHECK(std::get<std::uint8_t>(inst.op2.value) == 0);
+    }
+
+    SUBCASE("STORE Byte from register to register")
+    {
+        ParsedInstruction pi{
+            .label = "",
+            .opcode = "STOREB",
+            .lhs = "R1",
+            .rhs = "R2"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 3);
+        CHECK(inst.opcode == OpcodeIR::STOREB_REG_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 2);
+    }
+
+    SUBCASE("STORE Byte from register to address")
+    {
+        ParsedInstruction pi{
+            .label = "",
+            .opcode = "STOREB",
+            .lhs = "R1",
+            .rhs = "$0XFF"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 4);
+        CHECK(inst.opcode == OpcodeIR::STOREB_REG_TO_ADD);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Intermediate);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
+        CHECK(std::get<std::uint16_t>(inst.op2.value) == 0xFF);
     }
 
     SUBCASE("STORE from register to address")

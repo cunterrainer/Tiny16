@@ -123,6 +123,14 @@ TEST_CASE("Testing ParseLine() Instructions")
         CHECK(ins.Ok().lhs == "R1");
         CHECK(ins.Ok().rhs == "R2");
         CHECK(ins.Ok().lineNumber == 0xFF);
+
+        ins = ParseLine("STOREB R1, R2 # Comment", 0xFF);
+        CHECK(ins.IsOk() == true);
+        CHECK(ins.Ok().label == "");
+        CHECK(ins.Ok().opcode == "STOREB");
+        CHECK(ins.Ok().lhs == "R1");
+        CHECK(ins.Ok().rhs == "R2");
+        CHECK(ins.Ok().lineNumber == 0xFF);
     }
 }
 

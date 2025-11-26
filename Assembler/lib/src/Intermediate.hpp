@@ -30,8 +30,12 @@ enum class OpcodeIR
 
     LOAD_ADD_TO_REG = 10,
     LOAD_REG_TO_REG = 11,
-    STORE_REG_TO_ADD = 12,
-    STORE_REG_TO_REG = 13,
+    LOADB_ADD_TO_REG = 12,
+    LOADB_REG_TO_REG = 13,
+    STORE_REG_TO_ADD = 14,
+    STORE_REG_TO_REG = 15,
+    STOREB_REG_TO_ADD = 16,
+    STOREB_REG_TO_REG = 17,
 
     BRK = 0xFF
 };
@@ -61,24 +65,28 @@ struct InstructionIR
 };
 
 static const std::unordered_map<OpcodeIR, std::uint16_t> s_InstructionIRSizeMap = {
-    { OpcodeIR::MOV_IMM_TO_REG  , 4 },
-    { OpcodeIR::ADD_IMM_TO_REG  , 4 },
-    { OpcodeIR::SUB_IMM_TO_REG  , 4 },
-    { OpcodeIR::CMP_IMM_TO_REG  , 4 },
-    { OpcodeIR::MOV_REG_TO_REG  , 3 },
-    { OpcodeIR::ADD_REG_TO_REG  , 3 },
-    { OpcodeIR::SUB_REG_TO_REG  , 3 },
-    { OpcodeIR::CMP_REG_TO_REG  , 3 },
-    { OpcodeIR::JMP_REG         , 2 },
-    { OpcodeIR::JMP_LABEL       , 3 },
-    { OpcodeIR::JE_REG          , 2 },
-    { OpcodeIR::JE_LABEL        , 3 },
-    { OpcodeIR::HALT            , 1 },
-    { OpcodeIR::BRK             , 1 },
-    { OpcodeIR::LOAD_ADD_TO_REG , 4 },
-    { OpcodeIR::LOAD_REG_TO_REG , 3 },
-    { OpcodeIR::STORE_REG_TO_ADD, 4 },
-    { OpcodeIR::STORE_REG_TO_REG, 3 },
+    { OpcodeIR::MOV_IMM_TO_REG   , 4 },
+    { OpcodeIR::ADD_IMM_TO_REG   , 4 },
+    { OpcodeIR::SUB_IMM_TO_REG   , 4 },
+    { OpcodeIR::CMP_IMM_TO_REG   , 4 },
+    { OpcodeIR::MOV_REG_TO_REG   , 3 },
+    { OpcodeIR::ADD_REG_TO_REG   , 3 },
+    { OpcodeIR::SUB_REG_TO_REG   , 3 },
+    { OpcodeIR::CMP_REG_TO_REG   , 3 },
+    { OpcodeIR::JMP_REG          , 2 },
+    { OpcodeIR::JMP_LABEL        , 3 },
+    { OpcodeIR::JE_REG           , 2 },
+    { OpcodeIR::JE_LABEL         , 3 },
+    { OpcodeIR::HALT             , 1 },
+    { OpcodeIR::BRK              , 1 },
+    { OpcodeIR::LOAD_ADD_TO_REG  , 4 },
+    { OpcodeIR::LOAD_REG_TO_REG  , 3 },
+    { OpcodeIR::LOADB_ADD_TO_REG , 4 },
+    { OpcodeIR::LOADB_REG_TO_REG , 3 },
+    { OpcodeIR::STORE_REG_TO_ADD , 4 },
+    { OpcodeIR::STORE_REG_TO_REG , 3 },
+    { OpcodeIR::STOREB_REG_TO_ADD, 4 },
+    { OpcodeIR::STOREB_REG_TO_REG, 3 },
 };
 
 
@@ -92,20 +100,22 @@ struct OpcodeIRMapping
 
 static const std::unordered_map<Opcode, OpcodeIRMapping> s_OpcodeIRMapping = {
     // Opcode    | Check Op? | If Register returns...  | If Other returns...
-    { Opcode::MOV,   {1, OpcodeIR::MOV_REG_TO_REG,     OpcodeIR::MOV_IMM_TO_REG  }},
-    { Opcode::ADD,   {1, OpcodeIR::ADD_REG_TO_REG,     OpcodeIR::ADD_IMM_TO_REG  }},
-    { Opcode::SUB,   {1, OpcodeIR::SUB_REG_TO_REG,     OpcodeIR::SUB_IMM_TO_REG  }},
-    { Opcode::CMP,   {1, OpcodeIR::CMP_REG_TO_REG,     OpcodeIR::CMP_IMM_TO_REG  }},
-    { Opcode::LOAD,  {1, OpcodeIR::LOAD_REG_TO_REG,    OpcodeIR::LOAD_ADD_TO_REG }},
-    { Opcode::JMP,   {1, OpcodeIR::JMP_REG,            OpcodeIR::JMP_LABEL       }},
-    { Opcode::JE,    {1, OpcodeIR::JE_REG,             OpcodeIR::JE_LABEL        }},
+    { Opcode::MOV,    {1, OpcodeIR::MOV_REG_TO_REG,     OpcodeIR::MOV_IMM_TO_REG  }},
+    { Opcode::ADD,    {1, OpcodeIR::ADD_REG_TO_REG,     OpcodeIR::ADD_IMM_TO_REG  }},
+    { Opcode::SUB,    {1, OpcodeIR::SUB_REG_TO_REG,     OpcodeIR::SUB_IMM_TO_REG  }},
+    { Opcode::CMP,    {1, OpcodeIR::CMP_REG_TO_REG,     OpcodeIR::CMP_IMM_TO_REG  }},
+    { Opcode::LOAD,   {1, OpcodeIR::LOAD_REG_TO_REG,    OpcodeIR::LOAD_ADD_TO_REG }},
+    { Opcode::LOADB,  {1, OpcodeIR::LOADB_REG_TO_REG,   OpcodeIR::LOADB_ADD_TO_REG }},
+    { Opcode::JMP,    {1, OpcodeIR::JMP_REG,            OpcodeIR::JMP_LABEL       }},
+    { Opcode::JE,     {1, OpcodeIR::JE_REG,             OpcodeIR::JE_LABEL        }},
 
     // STORE checks Op2, not Op1
-    { Opcode::STORE, {2, OpcodeIR::STORE_REG_TO_REG,   OpcodeIR::STORE_REG_TO_ADD}},
+    { Opcode::STORE,  {2, OpcodeIR::STORE_REG_TO_REG,   OpcodeIR::STORE_REG_TO_ADD}},
+    { Opcode::STOREB, {2, OpcodeIR::STOREB_REG_TO_REG,  OpcodeIR::STOREB_REG_TO_ADD}},
 
     // Single byte instructions (Don't care about operands)
-    { Opcode::HALT,  {0, OpcodeIR::HALT,               OpcodeIR::HALT            }},
-    { Opcode::BRK,   {0, OpcodeIR::BRK,                OpcodeIR::BRK             }},
+    { Opcode::HALT,   {0, OpcodeIR::HALT,               OpcodeIR::HALT            }},
+    { Opcode::BRK,    {0, OpcodeIR::BRK,                OpcodeIR::BRK             }},
 };
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr);
