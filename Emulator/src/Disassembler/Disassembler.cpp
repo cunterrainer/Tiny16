@@ -16,7 +16,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::LOAD_ADD_TO_REG:
     {
         const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 2) << 8) | machineCode.at(index + 1));
-        return std::format(" $0x{:04X}, R{}", immediateValue, machineCode.at(index + 3));
+        return std::format(" $0x{:04X}, {}", immediateValue, m_RegisterToStringMap.at(machineCode.at(index + 3)));
     }
     case OpcodeMC::MOV_IMM_TO_REG:
     case OpcodeMC::ADD_IMM_TO_REG:
@@ -24,7 +24,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::CMP_IMM_TO_REG:
     {
         const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 2) << 8) | machineCode.at(index + 1));
-        return std::format(" $0x{:X}, R{}", immediateValue, machineCode.at(index + 3));
+        return std::format(" $0x{:X}, {}", immediateValue, m_RegisterToStringMap.at(machineCode.at(index + 3)));
     }
     case OpcodeMC::MOV_REG_TO_REG:
     case OpcodeMC::ADD_REG_TO_REG:
@@ -32,10 +32,10 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::CMP_REG_TO_REG:
     case OpcodeMC::LOAD_REG_TO_REG:
     case OpcodeMC::STORE_REG_TO_REG:
-        return std::format(" R{}, R{}", machineCode.at(index + 1), machineCode.at(index + 2));
+        return std::format(" {}, {}", m_RegisterToStringMap.at(machineCode.at(index + 1)), m_RegisterToStringMap.at(machineCode.at(index + 2)));
     case OpcodeMC::JE_REG:
     case OpcodeMC::JMP_REG:
-        return std::format(" R{}", machineCode.at(index + 1));
+        return std::format(" {}", m_RegisterToStringMap.at(machineCode.at(index + 1)));
     case OpcodeMC::JE_LABEL:
     case OpcodeMC::JMP_LABEL:
     {
@@ -45,7 +45,7 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::STORE_REG_TO_ADD:
     {
         const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 3) << 8) | machineCode.at(index + 2));
-        return std::format(" R{}, $0x{:04X}", machineCode.at(index + 1), immediateValue);
+        return std::format(" {}, $0x{:04X}", m_RegisterToStringMap.at(machineCode.at(index + 1)), immediateValue);
     }
     case OpcodeMC::BRK:
     case OpcodeMC::HALT:

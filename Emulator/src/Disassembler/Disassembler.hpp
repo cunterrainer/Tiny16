@@ -35,6 +35,18 @@ private:
         { OpcodeMC::STORE_REG_TO_ADD, "STORE" },
         { OpcodeMC::STORE_REG_TO_REG, "STORE" },
     };
+
+
+    const std::unordered_map<std::uint8_t, std::string_view> m_RegisterToStringMap = {
+        { 0  , "R0" },
+        { 1  , "R1" },
+        { 2  , "R2" },
+        { 3  , "R3" },
+        { 4  , "R4" },
+        { 5  , "R5" },
+        { 6  , "R6" },
+        { 7  , "R7" }
+    };
 private:
     std::string DisassembleOperands(OpcodeMC opcode, const std::vector<std::uint8_t>& machineCode, std::uint16_t index) const;
 public:
