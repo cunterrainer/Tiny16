@@ -103,15 +103,15 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("JE  Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
         CHECK(ValidateInstruction(ParseLine("JMP R1", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("JE  R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JNE R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JL  R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JLE R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JG  R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JGE R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JA  R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JAE R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JB  R1", 0).Ok()).IsOk());
-        CHECK(ValidateInstruction(ParseLine("JBE R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JNE Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JL  Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JLE Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JG  Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JGE Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JA  Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JAE Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JB  Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JBE Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
         
         CHECK(ValidateInstruction(ParseLine("MOV  $0x4, R0", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("MOV $+0X4, R7", 0).Ok()).IsOk());
@@ -192,6 +192,8 @@ TEST_CASE("Test ValidateOperand()")
     SUBCASE("Invalid")
     {
         CHECK(ValidateOperand(OperandType::None,                   "R1", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::Label,                  "Multiply", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::Label,                  "Mul:", {}, "", { {}}).IsErr());
         CHECK(ValidateOperand(OperandType::Register,               "$0x04", {}, "", {}).IsErr());
         CHECK(ValidateOperand(OperandType::Register,               "RR", {}, "", {}).IsErr());
         CHECK(ValidateOperand(OperandType::Intermediate,           "R1", {}, "", {}).IsErr());
@@ -204,6 +206,7 @@ TEST_CASE("Test ValidateOperand()")
     SUBCASE("Valid")
     {
         CHECK(ValidateOperand(OperandType::None, "", {}, "", {}).IsOk());
+        CHECK(ValidateOperand(OperandType::Label, "Mul:", {}, "", { "Mul:" }).IsOk());
         CHECK(ValidateOperand(OperandType::Register, "R1", {}, "", {}).IsOk());
         CHECK(ValidateOperand(OperandType::Register, "r7", {}, "", {}).IsOk());
         CHECK(ValidateOperand(OperandType::Intermediate, "$0xFF", {}, "", {}).IsOk());

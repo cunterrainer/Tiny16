@@ -107,6 +107,10 @@ Result<void, ASMError> ValidateOperand(OperandType operand, const std::string& p
     {
         return ASMError(parsedInstr.lineNumber, "Instruction: {} {}, {}\nInvalid {} register or {} value: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, sourceOrDest, sourceOrDest, parsedOperand);
     }
+    else if (operand == OperandType::Label && !IsValidLabel(parsedOperand, labels))
+    {
+        return ASMError(parsedInstr.lineNumber, "Instruction: {} {}, {}\nInvalid label: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedOperand);
+    }
     else if (operand == OperandType::RegisterOrLabel && !IsValidLabel(parsedOperand, labels) && !IsValidRegister(parsedOperand))
     {
         return ASMError(parsedInstr.lineNumber, "Instruction: {} {}, {}\nInvalid register or label: {}", parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedOperand);
