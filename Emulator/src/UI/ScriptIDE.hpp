@@ -36,7 +36,6 @@ namespace UI
                 CompiledAndDebug
         };
     private:
-        std::string m_Content;
         TextEditor m_TextEditor;
 
         State m_State;
