@@ -58,9 +58,7 @@ project "Tiny16-Emulator"
         linkoptions "-framework AppKit -framework iokit -framework OpenGl"
         disablewarnings { "sign-conversion" }
 
-    filter "system:emscripten"
-        buildoptions { "-fexceptions" }
-        linkoptions { "-sUSE_GLFW=3", "-sASYNCIFY", "-sMIN_WEBGL_VERSION=2", "-sMAX_WEBGL_VERSION=2", "-sALLOW_MEMORY_GROWTH=1", "-sUSE_PTHREADS=0", "-fexceptions" } -- Hint: USE_PTHREADS used to be 1 but we had to disable it due to TextEditor.o
+    -- filter emscripten in workspace premake file
 
     filter "configurations:Debug"
         warnings "off"
@@ -133,7 +131,7 @@ project "Tiny16-Emulator"
         }
 
     filter { "system:emscripten", "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution" }
-        linkoptions "--memory-init-file 0"
+        --linkoptions "--memory-init-file 0"
         warnings "Extra"
         externalwarnings "Everything"
 

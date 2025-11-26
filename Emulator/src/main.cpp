@@ -1,85 +1,32 @@
-﻿#include "imgui.h"
-#include "raygui.h"
+﻿#if defined(__EMSCRIPTEN__)
+    #include <emscripten/emscripten.h>
+#endif
+
 #include "raylib.h"
 #include "rlImGui.h"
 
-#include "UI/Emulator.hpp"
-#include "UI/ScriptIDE.hpp"
+#include "UI/Application.hpp"
 
 int main()
 {
     InitWindow(1280, 720, "Tiny16-Emulator");
     SetExitKey(KEY_NULL);
     SetWindowState(FLAG_WINDOW_RESIZABLE);
-    
+
     rlImGuiSetup(true);
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr;
 
-    UI::ScriptIDE f;
-    UI::Emulator emu;
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-        rlImGuiBegin();
+    UI::Application app;
 
-        ImGui::SetNextWindowPos({ 0, 0 });
-        ImGui::SetNextWindowSize({ (float)GetScreenWidth(), (float)GetScreenHeight()});
-        ImGui::Begin("##MainWindow", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar);
+    #if defined(__EMSCRIPTEN__)
+        emscripten_set_main_loop_arg(UI::Application::EmscriptenLoopCallback, &app, 0, 1);
+    #else
+        while (!WindowShouldClose())
         {
-            ImGui::BeginTabBar("EmulatorTabs");
-            {
-                if (ImGui::BeginTabItem("Emulator"))
-                {
-                    emu.Render();
-                    ImGui::EndTabItem();
-
-                    if (emu.ShouldReset())
-                    {
-                        emu.LoadProgram(f.GetMachineCode()); // TODO add other option if loaded in by external file, but works for now
-                        emu.SetShouldReset(false);
-                    }
-                }
-
-                if (ImGui::BeginTabItem("Editor"))
-                {
-                    f.Show();
-                    ImGui::EndTabItem();
-
-                    switch (f.GetState())
-                    {
-                    case UI::ScriptIDE::State::CompiledAndRun:
-                    {
-                        ImGui::SetTabItemClosed("Editor");
-                        emu.LoadProgram(f.GetMachineCode());
-                        f.ResetState();
-                        emu.StartExecution();
-                        break;
-                    }
-                    case UI::ScriptIDE::State::CompiledAndDebug:
-                    {
-                        ImGui::SetTabItemClosed("Editor");
-                        emu.LoadProgram(f.GetMachineCode());
-                        f.ResetState();
-                        break;
-                    }
-                    case UI::ScriptIDE::State::Compiled:
-                    {
-                        emu.LoadProgram(f.GetMachineCode());
-                        f.ResetState();
-                        break;
-                    }
-                    case UI::ScriptIDE::State::None:
-                        break;
-                    }
-                }
-            }
-            ImGui::EndTabBar();
+            app.Run();
         }
-        ImGui::End();
-        rlImGuiEnd();
-        EndDrawing();
-    }
+    #endif
 
     rlImGuiShutdown();
     TerminateWindow();

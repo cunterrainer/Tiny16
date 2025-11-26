@@ -84,6 +84,11 @@ filter { "system:windows", "configurations:Release or configurations:Distributio
 
 filter { "configurations:Release or configurations:Distribution or configurations:MinSizeDistribution", "toolset:msc*" }
     linkoptions { "/OPT:REF", "/OPT:ICF" } -- remove unused sections (code)
+
+filter "system:emscripten"
+    buildoptions { "-fexceptions", "-pthread" }
+    linkoptions { "-sUSE_GLFW=3", "-sMIN_WEBGL_VERSION=2", "-sMAX_WEBGL_VERSION=2", "-sALLOW_MEMORY_GROWTH=1", "-sUSE_PTHREADS=1", "-fexceptions", "-sSTACK_SIZE=4194304", "-sPTHREAD_POOL_SIZE=2" }
+
 filter {}
 
 -- only for visual studio
