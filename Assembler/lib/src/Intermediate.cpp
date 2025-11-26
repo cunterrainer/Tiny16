@@ -153,7 +153,7 @@ OperandIR LowerOperand(OperandType operand, const std::string& parsedOperand, [[
     case OperandType::Intermediate:
     case OperandType::RegisterOrIntermediate:
         operandIr = ParseOperand(parsedOperand);
-        THROW_IF(operandIr.type == OperandTypeIR::Register && std::get<std::uint8_t>(operandIr.value) > 7, std::format("LowerInstruction: Register '{}' not valid, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.lhs, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
+        THROW_IF(operandIr.type == OperandTypeIR::Register && std::get<std::uint8_t>(operandIr.value) > 16, std::format("LowerInstruction: Register '{}' not valid, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.lhs, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
         break;
     case OperandType::Label:
     case OperandType::RegisterOrLabel:

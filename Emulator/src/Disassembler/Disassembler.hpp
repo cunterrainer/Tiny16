@@ -49,7 +49,16 @@ private:
         { 4  , "R4" },
         { 5  , "R5" },
         { 6  , "R6" },
-        { 7  , "R7" }
+        { 7  , "R7" },
+        { 8  , "R6" },
+        { 9  , "R6" },
+        { 10  , "RA" },
+        { 11  , "RB" },
+        { 12  , "RC" },
+        { 13  , "RD" },
+        { 14  , "RE" },
+        { 15  , "RSP" },
+        { 16  , "RBP" },
     };
 private:
     std::string DisassembleOperands(OpcodeMC opcode, const std::vector<std::uint8_t>& machineCode, std::uint16_t index) const;

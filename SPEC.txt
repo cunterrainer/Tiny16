@@ -23,7 +23,16 @@ R4 (4): GP register
 R5 (5): GP register
 R6 (6): GP register
 R7 (7): GP register
-RF (A): Flags (LSB to MSB)
+R8 (8): GP register
+R9 (9): GP register
+RA (A): GP register
+RB (B): GP register
+RC (C): GP register
+RD (D): GP register
+RE (E): GP register
+RSP(F): GP register
+RBP(16): GP register
+RF (17): Flags (LSB to MSB)
     LESS
     EQUAL
     CARRY
@@ -32,17 +41,6 @@ PC (B): Program counter
 
 === ENCODING ===
 We are using a little endian architecture
-=== REGISTERS ===
-0x0 R0
-0x1 R1
-0x2 R2
-0x3 R3
-0x4 R4
-0x5 R5
-0x6 R6
-0x7 R7
-0xA RF
-0xB PC
 
 The binary starts at main and has to start with an instruction,
 then we just execute these instructions, e.g. the binary looks like:

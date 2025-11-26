@@ -31,9 +31,9 @@ namespace UI
         enum class State
         {
             None,
-                Compiled,
-                CompiledAndRun,
-                CompiledAndDebug
+            Compiled,
+            CompiledAndRun,
+            CompiledAndDebug
         };
     private:
         TextEditor m_TextEditor;
@@ -54,10 +54,10 @@ namespace UI
             for (const char* k : keywords)
                 langDef.mKeywords.emplace(k);
 
+            langDef.mTokenRegexStrings.emplace_back("[rR]([sS][pP]|[bB][pP]|[0-9a-eA-E])", TextEditor::PaletteIndex::KnownIdentifier);
             langDef.mTokenRegexStrings.emplace_back("[+-]?0[xX][0-9a-fA-F]+", TextEditor::PaletteIndex::Number);
             langDef.mTokenRegexStrings.emplace_back("0[bB][01]+", TextEditor::PaletteIndex::Number);
             langDef.mTokenRegexStrings.emplace_back("[+-]?[0-9]+", TextEditor::PaletteIndex::Number);
-            langDef.mTokenRegexStrings.emplace_back("[rR][0-7]", TextEditor::PaletteIndex::KnownIdentifier);
             langDef.mTokenRegexStrings.emplace_back("[a-zA-Z_][a-zA-Z0-9_:]*", TextEditor::PaletteIndex::Identifier);
             langDef.mTokenRegexStrings.emplace_back("[\\$,]", TextEditor::PaletteIndex::Punctuation);
 

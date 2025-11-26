@@ -18,7 +18,16 @@ static const std::unordered_map<std::string_view, std::uint8_t> m_RegisterMap = 
     { "R4", 4 },
     { "R5", 5 },
     { "R6", 6 },
-    { "R7", 7 }
+    { "R7", 7 },
+    { "R8", 8 },
+    { "R9", 9 },
+    { "RA", 10 },
+    { "RB", 11 },
+    { "RC", 12 },
+    { "RD", 13 },
+    { "RE", 14 },
+    { "RSP", 15 },
+    { "RBP", 16 }
 };
 
 

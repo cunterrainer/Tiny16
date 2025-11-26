@@ -31,8 +31,8 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("MOV $0x4, AA", 0).Ok()).IsErr());
         CHECK(ValidateInstruction(ParseLine("MOV 0x4, R1", 0).Ok()).IsErr());    // missing $
         CHECK(ValidateInstruction(ParseLine("MOV $5, $6", 0).Ok()).IsErr());     // both immediates
-        CHECK(ValidateInstruction(ParseLine("MOV R8, R1", 0).Ok()).IsErr());     // R8 invalid if only R0-R7 allowed
-        CHECK(ValidateInstruction(ParseLine("MOV $+4, R9", 0).Ok()).IsErr());    // R9 invalid
+        CHECK(ValidateInstruction(ParseLine("MOV RZ, R1", 0).Ok()).IsErr());
+        CHECK(ValidateInstruction(ParseLine("MOV $+4, RU", 0).Ok()).IsErr());
         CHECK(ValidateInstruction(ParseLine("MOV $-2, X1", 0).Ok()).IsErr());    // invalid register name
 
         // Source must be a valid register or immediate
@@ -175,7 +175,7 @@ TEST_CASE("Test ValidateOperand()")
     {
         CHECK(ValidateOperand(OperandType::None,                   "R1", {}, "", {}).IsErr());
         CHECK(ValidateOperand(OperandType::Register,               "$0x04", {}, "", {}).IsErr());
-        CHECK(ValidateOperand(OperandType::Register,               "R8", {}, "", {}).IsErr());
+        CHECK(ValidateOperand(OperandType::Register,               "RR", {}, "", {}).IsErr());
         CHECK(ValidateOperand(OperandType::Intermediate,           "R1", {}, "", {}).IsErr());
         CHECK(ValidateOperand(OperandType::Intermediate,           "0xFF", {}, "", {}).IsErr());
         CHECK(ValidateOperand(OperandType::Intermediate,           "$0bFF", {}, "", {}).IsErr());
@@ -253,9 +253,9 @@ TEST_CASE("Test IsValidRegister()")
         CHECK_FALSE(IsValidRegister(""));
         CHECK_FALSE(IsValidRegister(" "));
         CHECK_FALSE(IsValidRegister("RR"));
-        CHECK_FALSE(IsValidRegister("R8"));
+        CHECK_FALSE(IsValidRegister("RT"));
         CHECK_FALSE(IsValidRegister("R-1"));
-        CHECK_FALSE(IsValidRegister("R9"));
+        CHECK_FALSE(IsValidRegister("RU"));
     }
     
     
@@ -270,6 +270,16 @@ TEST_CASE("Test IsValidRegister()")
         CHECK(IsValidRegister("R6"));
         CHECK(IsValidRegister("R7"));
         
+        CHECK(IsValidRegister("R8"));
+        CHECK(IsValidRegister("R9"));
+        CHECK(IsValidRegister("RA"));
+        CHECK(IsValidRegister("RB"));
+        CHECK(IsValidRegister("RC"));
+        CHECK(IsValidRegister("RD"));
+        CHECK(IsValidRegister("RE"));
+        CHECK(IsValidRegister("RSP"));
+        CHECK(IsValidRegister("RBP"));
+        
         CHECK(IsValidRegister("r0"));
         CHECK(IsValidRegister("r1"));
         CHECK(IsValidRegister("r2"));
@@ -278,6 +288,15 @@ TEST_CASE("Test IsValidRegister()")
         CHECK(IsValidRegister("r5"));
         CHECK(IsValidRegister("r6"));
         CHECK(IsValidRegister("r7"));
+        CHECK(IsValidRegister("r8"));
+        CHECK(IsValidRegister("r9"));
+        CHECK(IsValidRegister("ra"));
+        CHECK(IsValidRegister("rb"));
+        CHECK(IsValidRegister("rc"));
+        CHECK(IsValidRegister("rd"));
+        CHECK(IsValidRegister("re"));
+        CHECK(IsValidRegister("rsp"));
+        CHECK(IsValidRegister("rbp"));
     }
 }
 
