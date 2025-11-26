@@ -1,8 +1,9 @@
 Add a new Register:
 -> Emulator/src/Core/CPU.hpp -> Add to enum
--> Emulator/src/main.cpp -> Add to rendering code
+-> Emulator/src/Application.cpp -> Add to rendering code
 -> Emulator/src/UI/ScriptIDE.hpp -> Add to LanguageDefinition
--> Assembler/lib/Validator.cpp -> Add to IsValidRegister()
+-> Emulator/src/Disassembler/Disassembler.hpp -> Add to m_RegisterToStringMap
+-> Assembler/lib/Validator.hpp -> Add to m_RegisterMap
 -> Assembler/lib/Intermediate.cpp -> Check if ParseOperand() is valid
 -> Assembler/test/Validator.cpp -> Add tests
 -> Assembler/test/Intermediate.cpp -> Add tests
@@ -11,8 +12,7 @@ Add a new Register:
 Add a new Instructions:
 -> Check if Assembler/lib/Parser.cpp can handle it
 -> Add to Assembler/lib/Instruction.hpp -> Add to Opcode & s_InstructionMap
--> Add to Assembler/lib/Intermediate.hpp -> Add to OpcodeIR & Add to s_InstructionIRSizeMap
--> Add to Assembler/lib/Intermediate.cpp -> Add to GetOpcodeIR()
+-> Add to Assembler/lib/Intermediate.hpp -> Add to OpcodeIR & Add to s_InstructionIRSizeMap & Add to s_OpcodeIRMapping
 -> Add to Assembler/lib/Assembler.cpp -> Add to AssembleInstruction()
 -> Add to Assembler/test/src/Intermediate.cpp -> Add tests
 -> Add to Assembler/test/src/Parser.cpp -> Add tests
