@@ -81,7 +81,6 @@ private:
     void Instruction_JE_LABEL         (OpcodeMC opcode);
     void Instruction_HALT             (OpcodeMC opcode);
     void Instruction_BRK              (OpcodeMC opcode);
-    void Instruction_NOP              (OpcodeMC opcode);
 
     // Arithmetic operations
     void Instruction_ADD_IMM_TO_REG   (OpcodeMC opcode);
