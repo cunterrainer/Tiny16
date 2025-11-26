@@ -51,7 +51,7 @@ filter { "configurations:Release" }
     optimize "Speed"
     defines { "NDEBUG", "MODE_RELEASE" }
     floatingpoint "fast"
-    linktimeoptimization "on"
+    linktimeoptimization "off" -- can disable some breakpoints
 
 filter { "configurations:Distribution" }
     runtime "Release"

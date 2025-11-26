@@ -14,12 +14,7 @@
 #include "Instruction.hpp"
 #include "Intermediate.hpp"
 
-#ifndef NDEBUG
 #define THROW_IF(cond, msg) if (cond) { throw std::logic_error(msg); }
-#else
-#define THROW_IF(cond, msg)
-#endif
-
 
 std::uint16_t ParseIntermediate(const std::string& operand)
 {
