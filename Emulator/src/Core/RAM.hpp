@@ -25,7 +25,7 @@ public:
         return m_Memory.size();
     }
 
-    inline const std::uint8_t* const GetScreenPixel(int screenWidth, int screenHeight) const noexcept
+    inline const std::uint8_t* GetScreenPixel(int screenWidth, int screenHeight) const noexcept
     {
         return &m_Memory[std::numeric_limits<std::uint16_t>::max() - (screenWidth * screenHeight)];
     }

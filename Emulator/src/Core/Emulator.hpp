@@ -44,6 +44,7 @@ namespace Core
         {
             if (!m_IsExecuting) return;
             m_IsExecuting = false;
+            m_CPU->FireVBlankInterrupt(); // If it's waiting on a HALT instruction it will never finish if we don't synchronize before
             m_CpuThread.join();
         }
 
@@ -52,7 +53,7 @@ namespace Core
             m_CPU->FireVBlankInterrupt();
         }
 
-        inline const std::uint8_t* const GetScreenPixel(int screenWidth, int screenHeight) const noexcept
+        inline const std::uint8_t* GetScreenPixel(int screenWidth, int screenHeight) const noexcept
         {
             return m_RAM.GetScreenPixel(screenWidth, screenHeight);
         }
