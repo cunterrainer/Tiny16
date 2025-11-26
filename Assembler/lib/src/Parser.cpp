@@ -97,7 +97,7 @@ Result<std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>
 
             const auto res = labels.insert(a.label);
             if (!res.second)
-                return ASMError(a.lineNumber, "Label: '{}' already exists", a.lineNumber, a.label);
+                return ASMError(a.lineNumber, "Label: '{}' already exists", a.label);
         }
         else
         {
