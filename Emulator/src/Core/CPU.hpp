@@ -79,6 +79,15 @@ private:
     void Instruction_JMP_LABEL        ();
     void Instruction_JE_REG           (OpcodeMC opcode);
     void Instruction_JE_LABEL         (OpcodeMC opcode);
+    void Instruction_JNE_LABEL        (OpcodeMC opcode);
+    void Instruction_JG_LABEL         (OpcodeMC opcode);
+    void Instruction_JGE_LABEL        (OpcodeMC opcode);
+    void Instruction_JL_LABEL         (OpcodeMC opcode);
+    void Instruction_JLE_LABEL        (OpcodeMC opcode);
+    void Instruction_JA_LABEL         (OpcodeMC opcode);
+    void Instruction_JAE_LABEL        (OpcodeMC opcode);
+    void Instruction_JB_LABEL         (OpcodeMC opcode);
+    void Instruction_JBE_LABEL        (OpcodeMC opcode);
     void Instruction_HALT             ();
     void Instruction_BRK              ();
 

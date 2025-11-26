@@ -217,6 +217,50 @@ TEST_CASE("Test GetOpcodeIR()")
         CHECK(GetOpcodeIR(Opcode::JE, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JE_LABEL);
     }
 
+    SUBCASE("JNE")
+    {
+        CHECK(GetOpcodeIR(Opcode::JNE, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JNE_LABEL);
+    }
+
+    SUBCASE("JG")
+    {
+        CHECK(GetOpcodeIR(Opcode::JG, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JG_LABEL);
+    }
+
+    SUBCASE("JGE")
+    {
+        CHECK(GetOpcodeIR(Opcode::JGE, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JGE_LABEL);
+    }
+
+    SUBCASE("JL")
+    {
+        CHECK(GetOpcodeIR(Opcode::JL, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JL_LABEL);
+    }
+
+    SUBCASE("JLE")
+    {
+        CHECK(GetOpcodeIR(Opcode::JLE, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JLE_LABEL);
+    }
+
+    SUBCASE("JA")
+    {
+        CHECK(GetOpcodeIR(Opcode::JA, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JA_LABEL);
+    }
+    SUBCASE("JAE")
+    {
+        CHECK(GetOpcodeIR(Opcode::JAE, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JAE_LABEL);
+    }
+
+    SUBCASE("JB")
+    {
+        CHECK(GetOpcodeIR(Opcode::JB, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JB_LABEL);
+    }
+
+    SUBCASE("JBE")
+    {
+        CHECK(GetOpcodeIR(Opcode::JBE, OperandTypeIR::Label, OperandTypeIR::Register) == OpcodeIR::JBE_LABEL);
+    }
+
     SUBCASE("LOAD")
     {
         CHECK(GetOpcodeIR(Opcode::LOAD, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::LOAD_REG_TO_REG);

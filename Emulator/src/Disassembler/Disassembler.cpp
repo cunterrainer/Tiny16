@@ -61,6 +61,15 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
         return std::format(" {}", m_RegisterToStringMap.at(machineCode.at(index + 1)));
     case OpcodeMC::JE_LABEL:
     case OpcodeMC::JMP_LABEL:
+    case OpcodeMC::JNE_LABEL:
+    case OpcodeMC::JG_LABEL:
+    case OpcodeMC::JGE_LABEL:
+    case OpcodeMC::JL_LABEL:
+    case OpcodeMC::JLE_LABEL:
+    case OpcodeMC::JA_LABEL:
+    case OpcodeMC::JAE_LABEL:
+    case OpcodeMC::JB_LABEL:
+    case OpcodeMC::JBE_LABEL:
     {
         const std::uint16_t immediateValue = static_cast<std::uint16_t>((machineCode.at(index + 2) << 8) | machineCode.at(index + 1));
         return std::format(" $0x{:04X}", immediateValue);

@@ -62,6 +62,15 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
         break;
     case OpcodeIR::JE_LABEL:
     case OpcodeIR::JMP_LABEL:
+    case OpcodeIR::JNE_LABEL:
+    case OpcodeIR::JG_LABEL:
+    case OpcodeIR::JGE_LABEL:
+    case OpcodeIR::JL_LABEL:
+    case OpcodeIR::JLE_LABEL:
+    case OpcodeIR::JA_LABEL:
+    case OpcodeIR::JAE_LABEL:
+    case OpcodeIR::JB_LABEL:
+    case OpcodeIR::JBE_LABEL:
         instrMc.op1.type = OperandTypeMC::Intermediate;
         instrMc.op1.value = (std::uint16_t)labelAddress.at(std::get<std::string>(instrIr.op1.value));
         break;
@@ -125,6 +134,15 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::JMP_LABEL:
     case OpcodeIR::JE_REG:
     case OpcodeIR::JE_LABEL:
+    case OpcodeIR::JNE_LABEL:
+    case OpcodeIR::JG_LABEL:
+    case OpcodeIR::JGE_LABEL:
+    case OpcodeIR::JL_LABEL:
+    case OpcodeIR::JLE_LABEL:
+    case OpcodeIR::JA_LABEL:
+    case OpcodeIR::JAE_LABEL:
+    case OpcodeIR::JB_LABEL:
+    case OpcodeIR::JBE_LABEL:
         instrMc.op2.type = OperandTypeMC::None;
         break;
     default:

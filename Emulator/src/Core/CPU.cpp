@@ -162,7 +162,79 @@ void CPU::Instruction_JE_REG(OpcodeMC opcode)
 
 void CPU::Instruction_JE_LABEL(OpcodeMC opcode)
 {
-    if (m_Flags.ZF)
+    if (m_Flags.ZF == 1)
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JNE_LABEL(OpcodeMC opcode)
+{
+    if (m_Flags.ZF == 0)
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JG_LABEL(OpcodeMC opcode)
+{
+    if ((m_Flags.SF == m_Flags.OF) && (m_Flags.ZF == 0))
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JGE_LABEL(OpcodeMC opcode)
+{
+    if (m_Flags.SF == m_Flags.OF)
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JL_LABEL(OpcodeMC opcode)
+{
+    if (m_Flags.SF != m_Flags.OF)
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JLE_LABEL(OpcodeMC opcode)
+{
+    if ((m_Flags.SF != m_Flags.OF) || (m_Flags.ZF == 1))
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JA_LABEL(OpcodeMC opcode)
+{
+    if ((m_Flags.CF == 0) && (m_Flags.ZF == 0))
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JAE_LABEL(OpcodeMC opcode)
+{
+    if (m_Flags.CF == 0)
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JB_LABEL(OpcodeMC opcode)
+{
+    if (m_Flags.CF == 1)
+        m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    else
+        m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
+}
+
+void CPU::Instruction_JBE_LABEL(OpcodeMC opcode)
+{
+    if ((m_Flags.CF == 1) || (m_Flags.ZF == 1))
         m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
     else
         m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);
@@ -420,6 +492,15 @@ void CPU::Clock()
     case OpcodeIR::JMP_LABEL:           return Instruction_JMP_LABEL();
     case OpcodeIR::JE_REG:              return Instruction_JE_REG(opcode);
     case OpcodeIR::JE_LABEL:            return Instruction_JE_LABEL(opcode);
+    case OpcodeIR::JNE_LABEL:           return Instruction_JNE_LABEL(opcode);
+    case OpcodeIR::JG_LABEL:            return Instruction_JG_LABEL(opcode);
+    case OpcodeIR::JGE_LABEL:           return Instruction_JGE_LABEL(opcode);
+    case OpcodeIR::JL_LABEL:            return Instruction_JL_LABEL(opcode);
+    case OpcodeIR::JLE_LABEL:           return Instruction_JLE_LABEL(opcode);
+    case OpcodeIR::JA_LABEL:            return Instruction_JA_LABEL(opcode);
+    case OpcodeIR::JAE_LABEL:           return Instruction_JAE_LABEL(opcode);
+    case OpcodeIR::JB_LABEL:            return Instruction_JB_LABEL(opcode);
+    case OpcodeIR::JBE_LABEL:           return Instruction_JBE_LABEL(opcode);
 
     case OpcodeIR::BRK:                 return Instruction_BRK();
     case OpcodeIR::HALT:                Instruction_HALT(); break;

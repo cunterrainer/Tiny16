@@ -103,6 +103,15 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("JE  Label", 0).Ok(), { "123", "Label", "Test" }).IsOk());
         CHECK(ValidateInstruction(ParseLine("JMP R1", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("JE  R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JNE R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JL  R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JLE R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JG  R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JGE R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JA  R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JAE R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JB  R1", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("JBE R1", 0).Ok()).IsOk());
         
         CHECK(ValidateInstruction(ParseLine("MOV  $0x4, R0", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("MOV $+0X4, R7", 0).Ok()).IsOk());
@@ -278,7 +287,6 @@ TEST_CASE("Test IsValidRegister()")
         CHECK(IsValidRegister("R5"));
         CHECK(IsValidRegister("R6"));
         CHECK(IsValidRegister("R7"));
-        
         CHECK(IsValidRegister("R8"));
         CHECK(IsValidRegister("R9"));
         CHECK(IsValidRegister("RA"));
