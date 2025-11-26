@@ -6,6 +6,7 @@
 #include <charconv>
 #include <stdexcept>
 #include <algorithm>
+#include <system_error>
 #include <string_view>
 
 #include "Parser.hpp"
@@ -83,13 +84,15 @@ std::uint16_t ParseIntermediate(const std::string& operand)
 }
 
 
-OperandIR ParseOperand(const std::string& str)
+OperandIR ParseOperand(std::string str)
 {
     THROW_IF(str.empty(), std::format("Unreachable code: Failed to parse operand, operand is empty!"));
     
-    if (str[0] == 'R' || str[0] == 'r')
+    const auto toUpper = [](unsigned char c) { return std::toupper(c); };
+    std::transform(str.begin(), str.end(), str.begin(), toUpper);
+    if (IsValidRegister(str))
     {
-        return { OperandTypeIR::Register, static_cast<std::uint8_t>(str[1] - '0')};
+        return { OperandTypeIR::Register, m_RegisterMap.at(str) };
     }
 
     if (str[0] == '$')
@@ -104,7 +107,7 @@ OperandIR ParseOperand(const std::string& str)
 
 OperandIR ParseOperandJmp(const std::string& str)
 {
-    if (str.size() == 2 && (str[0] == 'R' || str[0] == 'r'))
+    if (str.size() == 2 && str[0] == 'R')
     {
         const std::uint8_t reg = static_cast<std::uint8_t>(str[1] - '0');
         if (reg <= 7)
@@ -117,129 +120,67 @@ OperandIR ParseOperandJmp(const std::string& str)
 
 OpcodeIR GetOpcodeIR(Opcode opcode, OperandTypeIR op1, OperandTypeIR op2)
 {
-    if (opcode == Opcode::MOV)
+    const auto it = s_OpcodeIRMapping.find(opcode);
+    if (it == s_OpcodeIRMapping.end())
     {
-        if (op1 == OperandTypeIR::Register)
-            return OpcodeIR::MOV_REG_TO_REG;
-        return OpcodeIR::MOV_IMM_TO_REG;
+        throw std::logic_error(std::format("Unknown Opcode in GetOpcodeIR: {}", (int)opcode));
     }
 
-    if (opcode == Opcode::ADD)
+    const auto& mapping = it->second;
+
+    if (mapping.relevantOperandIndex == 0)
     {
-        if (op1 == OperandTypeIR::Register)
-            return OpcodeIR::ADD_REG_TO_REG;
-        return OpcodeIR::ADD_IMM_TO_REG;
+        return mapping.resIfRegister; // Both are the same for index 0
     }
 
-    if (opcode == Opcode::SUB)
+    OperandTypeIR typeToCheck = (mapping.relevantOperandIndex == 1) ? op1 : op2;
+    if (typeToCheck == OperandTypeIR::Register)
     {
-        if (op1 == OperandTypeIR::Register)
-            return OpcodeIR::SUB_REG_TO_REG;
-        return OpcodeIR::SUB_IMM_TO_REG;
+        return mapping.resIfRegister;
     }
 
-    if (opcode == Opcode::CMP)
-    {
-        if (op1 == OperandTypeIR::Register)
-            return OpcodeIR::CMP_REG_TO_REG;
-        return OpcodeIR::CMP_IMM_TO_REG;
-    }
+    return mapping.resIfOther;
+}
 
-    if (opcode == Opcode::HALT)
-    {
-        return OpcodeIR::HALT;
-    }
 
-    if (opcode == Opcode::BRK)
-    {
-        return OpcodeIR::BRK;
-    }
+OperandIR LowerOperand(OperandType operand, const std::string& parsedOperand, [[ maybe_unused ]] const ParsedInstruction& parsedInstr)
+{
+    OperandIR operandIr;
 
-    if (opcode == Opcode::JMP)
+    switch (operand)
     {
-        if (op1 == OperandTypeIR::Register)
-            return OpcodeIR::JMP_REG;
-        return OpcodeIR::JMP_LABEL;
+    case OperandType::Register:
+    case OperandType::Intermediate:
+    case OperandType::RegisterOrIntermediate:
+        operandIr = ParseOperand(parsedOperand);
+        THROW_IF(operandIr.type == OperandTypeIR::Register && std::get<std::uint8_t>(operandIr.value) > 7, std::format("LowerInstruction: Register '{}' not valid, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.lhs, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
+        break;
+    case OperandType::Label:
+    case OperandType::RegisterOrLabel:
+        operandIr = ParseOperandJmp(parsedOperand);
+        break;
+    case OperandType::None:
+        operandIr.type = OperandTypeIR::None;
+        THROW_IF(!parsedOperand.empty(), std::format("LowerInstruction: Operand is not empty but type is none: {}, Line: {}", parsedInstr.lhs, parsedInstr.lineNumber));
+        break;
+    default:
+        throw std::logic_error(std::format("LowerInstruction operand {} invalid", parsedOperand));
+        break;
     }
-
-    if (opcode == Opcode::JE)
-    {
-        if (op1 == OperandTypeIR::Register)
-            return OpcodeIR::JE_REG;
-        return OpcodeIR::JE_LABEL;
-    }
-
-    if (opcode == Opcode::LOAD)
-    {
-        if (op1 == OperandTypeIR::Register)
-            return OpcodeIR::LOAD_REG_TO_REG;
-        return OpcodeIR::LOAD_ADD_TO_REG;
-    }
-
-    if (opcode == Opcode::STORE)
-    {
-        if (op2 == OperandTypeIR::Register)
-            return OpcodeIR::STORE_REG_TO_REG;
-        return OpcodeIR::STORE_REG_TO_ADD;
-    }
-
-    throw std::logic_error(std::format("Unreachable code: GetOpcodeIR, check validation code Operand: {}", (int)opcode));
+    return operandIr;
 }
 
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr)
 {
-    std::string opcode = parsedInstr.opcode;
-    std::transform(opcode.begin(), opcode.end(), opcode.begin(), [](unsigned char c) {
-        return std::toupper(c);
-        });
-
-    THROW_IF(!LookupOpcode(opcode).has_value(), std::format("LowerInstruction: Opcode '{}' not found, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.opcode, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
-    const Instruction& instr = s_InstructionMap.at(opcode);
+    const auto instrOpt = LookupOpcode(parsedInstr.opcode);
+    THROW_IF(!instrOpt.has_value(), std::format("LowerInstruction: Opcode '{}' not found, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.opcode, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
+    const Instruction& instr = instrOpt.value();
 
     InstructionIR instrIr;
-    switch (instr.op1)
-    {
-    case OperandType::Register:
-    case OperandType::Intermediate:
-    case OperandType::RegisterOrIntermediate:
-        instrIr.op1 = ParseOperand(parsedInstr.lhs);
-        THROW_IF(instrIr.op1.type == OperandTypeIR::Register && std::get<std::uint8_t>(instrIr.op1.value) > 7, std::format("LowerInstruction: Register '{}' not valid, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.lhs, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
-        break;
-    case OperandType::Label:
-    case OperandType::RegisterOrLabel:
-        instrIr.op1 = ParseOperandJmp(parsedInstr.lhs);
-        break;
-    case OperandType::None:
-        instrIr.op1.type = OperandTypeIR::None;
-        THROW_IF(!parsedInstr.lhs.empty(), std::format("LowerInstruction: Operand is not empty but type is none: {}, Line: {}", parsedInstr.lhs, parsedInstr.lineNumber));
-        break;
-    default:
-        throw std::logic_error("LowerInstruction operand 1 invalid");
-        break;
-    }
-
-    switch (instr.op2)
-    {
-    case OperandType::Register:
-    case OperandType::Intermediate:
-    case OperandType::RegisterOrIntermediate:
-        instrIr.op2 = ParseOperand(parsedInstr.rhs);
-        THROW_IF(instrIr.op2.type == OperandTypeIR::Register && std::get<std::uint8_t>(instrIr.op2.value) > 7, std::format("LowerInstruction: Register '{}' not valid, check validator. Instruction: {} {}, {} Line: {}", parsedInstr.rhs, parsedInstr.opcode, parsedInstr.lhs, parsedInstr.rhs, parsedInstr.lineNumber));
-        break;
-    case OperandType::Label:
-    case OperandType::RegisterOrLabel:
-        instrIr.op2 = ParseOperandJmp(parsedInstr.rhs);
-        break;
-    case OperandType::None:
-        instrIr.op2.type = OperandTypeIR::None;
-        THROW_IF(!parsedInstr.rhs.empty(), std::format("LowerInstruction: Operand is not empty but type is none: {}, Line: {}", parsedInstr.rhs, parsedInstr.lineNumber));
-        break;
-    default:
-        throw std::logic_error("LowerInstruction operand 2 invalid");
-        break;
-    }
-
+    instrIr.op1 = LowerOperand(instr.op1, parsedInstr.lhs, parsedInstr);
+    instrIr.op2 = LowerOperand(instr.op2, parsedInstr.rhs, parsedInstr);
+   
     instrIr.opcode = GetOpcodeIR(instr.opcode, instrIr.op1.type, instrIr.op2.type);
     instrIr.label = parsedInstr.label;
     instrIr.size = s_InstructionIRSizeMap.at(instrIr.opcode);

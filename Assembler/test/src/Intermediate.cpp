@@ -60,7 +60,7 @@ namespace {
     }
 }
 
-OperandIR ParseOperand(const std::string& str);
+OperandIR ParseOperand(std::string str);
 TEST_CASE("Testing ParseOperand()")
 {
     SUBCASE("Valid registers")
@@ -126,7 +126,7 @@ TEST_CASE("Testing ParseOperandJmp()")
         auto a = ParseOperandJmp("R0");
         CHECK(a == OperandIR{ OperandTypeIR::Register, (uint8_t)0 });
 
-        a = ParseOperandJmp("r1");
+        a = ParseOperandJmp("R1");
         CHECK(a == OperandIR{ OperandTypeIR::Register, (uint8_t)1 });
 
         a = ParseOperandJmp("R7");

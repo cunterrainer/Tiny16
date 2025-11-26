@@ -55,13 +55,17 @@ bool IsValidIntermediate(std::string_view s)
 }
 
 
-bool IsValidRegister(const std::string_view s)
+bool IsValidRegister(std::string s)
 {
-    // including lower and uppercase R is easier than uppercasing every string
-    return s == "R0" || s == "R1" || s == "R2" || s == "R3" ||
-        s == "R4" || s == "R5" || s == "R6" || s == "R7" ||
-        s == "r0" || s == "r1" || s == "r2" || s == "r3" ||
-        s == "r4" || s == "r5" || s == "r6" || s == "r7";
+    const auto toUpperCase = [](unsigned char c) { return std::toupper(c); };
+    std::transform(s.begin(), s.end(), s.begin(), toUpperCase);
+
+    for (auto const& [key, val] : m_RegisterMap)
+    {
+        if (s == key)
+            return true;
+    }
+    return false;
 }
 
 
@@ -71,8 +75,11 @@ bool IsValidLabel(const std::string& label, const std::unordered_set<std::string
 }
 
 
-std::optional<Instruction> LookupOpcode(const std::string& opcode)
+std::optional<Instruction> LookupOpcode(std::string opcode)
 {
+    const auto toUpper = [](unsigned char c) { return std::toupper(c); };
+    std::transform(opcode.begin(), opcode.end(), opcode.begin(), toUpper);
+
     const auto& it = s_InstructionMap.find(opcode);
     if (it == s_InstructionMap.end())
     {
@@ -110,12 +117,7 @@ Result<void, ASMError> ValidateOperand(OperandType operand, const std::string& p
 
 Result<void, ASMError> ValidateInstruction(const ParsedInstruction& parsedInstr, const std::unordered_set<std::string>& labels)
 {
-    const auto toUpperCase = [](unsigned char c) { return std::toupper(c); };
-
-    std::string opcode = parsedInstr.opcode;
-    std::transform(opcode.begin(), opcode.end(), opcode.begin(), toUpperCase);
-
-    const std::optional<Instruction> info = LookupOpcode(opcode);
+    const std::optional<Instruction> info = LookupOpcode(parsedInstr.opcode);
 
     if (!info.has_value())
     {

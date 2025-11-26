@@ -2,11 +2,28 @@
 #define VALIDATOR_H
 
 #include <string>
+#include <cstdint>
+#include <optional>
+#include <string_view>
+#include <unordered_map>
 
 #include "Parser.hpp"
 #include "Instruction.hpp"
 
-std::optional<Instruction> LookupOpcode(const std::string& opcode);
+static const std::unordered_map<std::string_view, std::uint8_t> m_RegisterMap = {
+    { "R0", 0 },
+    { "R1", 1 },
+    { "R2", 2 },
+    { "R3", 3 },
+    { "R4", 4 },
+    { "R5", 5 },
+    { "R6", 6 },
+    { "R7", 7 }
+};
+
+
+bool IsValidRegister(std::string s);
+std::optional<Instruction> LookupOpcode(std::string opcode);
 Result<void, ASMError> ValidateInstruction(const ParsedInstruction& instr, const std::unordered_set<std::string>& labels);
 Result<void, ASMError> ValidateAllInstructions(const std::pair<std::vector<ParsedInstruction>, std::unordered_set<std::string>>& parseResult);
 

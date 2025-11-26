@@ -196,16 +196,23 @@ TEST_CASE("Test LookupOpcode()")
 {
     SUBCASE("Invalid")
     {
-        CHECK_FALSE(LookupOpcode("mov").has_value());
-        CHECK_FALSE(LookupOpcode("add").has_value());
-        CHECK_FALSE(LookupOpcode("sub").has_value());
-        CHECK_FALSE(LookupOpcode("cmp").has_value());
-        CHECK_FALSE(LookupOpcode("jmp").has_value());
-        CHECK_FALSE(LookupOpcode("halt").has_value());
+        CHECK_FALSE(LookupOpcode("move").has_value());
+        CHECK_FALSE(LookupOpcode("adda").has_value());
+        CHECK_FALSE(LookupOpcode("sub1").has_value());
+        CHECK_FALSE(LookupOpcode("camp").has_value());
+        CHECK_FALSE(LookupOpcode("jfmp").has_value());
+        CHECK_FALSE(LookupOpcode("haalt").has_value());
     }
 
     SUBCASE("Valid")
     {
+        CHECK(LookupOpcode("mov").has_value());
+        CHECK(LookupOpcode("add").has_value());
+        CHECK(LookupOpcode("sub").has_value());
+        CHECK(LookupOpcode("cmp").has_value());
+        CHECK(LookupOpcode("jmp").has_value());
+        CHECK(LookupOpcode("halt").has_value());
+
         CHECK(LookupOpcode("MOV").has_value());
         CHECK(LookupOpcode("ADD").has_value());
         CHECK(LookupOpcode("SUB").has_value());
@@ -220,7 +227,7 @@ TEST_CASE("Test LookupOpcode()")
 }
 
 
-bool IsValidRegister(std::string_view s);
+bool IsValidRegister(std::string s);
 TEST_CASE("Test IsValidRegister()")
 {
     SUBCASE("Invalid")

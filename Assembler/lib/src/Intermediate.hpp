@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "Parser.hpp"
+#include "Instruction.hpp"
 
 // Opcode values from SPEC.txt
 enum class OpcodeIR
@@ -78,6 +79,33 @@ static const std::unordered_map<OpcodeIR, std::uint16_t> s_InstructionIRSizeMap 
     { OpcodeIR::LOAD_REG_TO_REG , 3 },
     { OpcodeIR::STORE_REG_TO_ADD, 4 },
     { OpcodeIR::STORE_REG_TO_REG, 3 },
+};
+
+
+struct OpcodeIRMapping
+{
+    int relevantOperandIndex; // Which operand controls the logic? (0 = None, 1 = op1, 2 = op2)
+    OpcodeIR resIfRegister; // Result if the relevant operand is a Register
+    OpcodeIR resIfOther; // Result if the relevant operand is Immediate/Label/Address
+};
+
+
+static const std::unordered_map<Opcode, OpcodeIRMapping> s_OpcodeIRMapping = {
+    // Opcode    | Check Op? | If Register returns...  | If Other returns...
+    { Opcode::MOV,   {1, OpcodeIR::MOV_REG_TO_REG,     OpcodeIR::MOV_IMM_TO_REG  }},
+    { Opcode::ADD,   {1, OpcodeIR::ADD_REG_TO_REG,     OpcodeIR::ADD_IMM_TO_REG  }},
+    { Opcode::SUB,   {1, OpcodeIR::SUB_REG_TO_REG,     OpcodeIR::SUB_IMM_TO_REG  }},
+    { Opcode::CMP,   {1, OpcodeIR::CMP_REG_TO_REG,     OpcodeIR::CMP_IMM_TO_REG  }},
+    { Opcode::LOAD,  {1, OpcodeIR::LOAD_REG_TO_REG,    OpcodeIR::LOAD_ADD_TO_REG }},
+    { Opcode::JMP,   {1, OpcodeIR::JMP_REG,            OpcodeIR::JMP_LABEL       }},
+    { Opcode::JE,    {1, OpcodeIR::JE_REG,             OpcodeIR::JE_LABEL        }},
+
+    // STORE checks Op2, not Op1
+    { Opcode::STORE, {2, OpcodeIR::STORE_REG_TO_REG,   OpcodeIR::STORE_REG_TO_ADD}},
+
+    // Single byte instructions (Don't care about operands)
+    { Opcode::HALT,  {0, OpcodeIR::HALT,               OpcodeIR::HALT            }},
+    { Opcode::BRK,   {0, OpcodeIR::BRK,                OpcodeIR::BRK             }},
 };
 
 InstructionIR LowerInstruction(const ParsedInstruction& parsedInstr);
