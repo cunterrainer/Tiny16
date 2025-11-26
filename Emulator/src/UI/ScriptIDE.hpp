@@ -54,6 +54,7 @@ namespace UI
             for (const char* k : keywords)
                 langDef.mKeywords.emplace(k);
 
+            langDef.mTokenRegexStrings.emplace_back(";.*", TextEditor::PaletteIndex::Comment);
             langDef.mTokenRegexStrings.emplace_back("[rR]([sS][pP]|[bB][pP]|[0-9a-eA-E])", TextEditor::PaletteIndex::KnownIdentifier);
             langDef.mTokenRegexStrings.emplace_back("[+-]?0[xX][0-9a-fA-F]+", TextEditor::PaletteIndex::Number);
             langDef.mTokenRegexStrings.emplace_back("0[bB][01]+", TextEditor::PaletteIndex::Number);
@@ -63,7 +64,7 @@ namespace UI
 
             langDef.mCommentStart = "/*";
             langDef.mCommentEnd = "*/";
-            langDef.mSingleLineComment = "#";
+            langDef.mSingleLineComment = "#"; // ; Is also a valid single line comment, we add in in tokens
             langDef.mCaseSensitive = true;
             langDef.mAutoIndentation = true;
 

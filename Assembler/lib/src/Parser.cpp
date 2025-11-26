@@ -17,8 +17,8 @@
 Result<ParsedInstruction, ASMError> ParseLine(std::string line, size_t lineNumber)
 {
     // Strip comments
-    if (const size_t commentPos = line.find('#'); commentPos != std::string::npos)
-        line = line.substr(0, commentPos);
+    if (const size_t commentPos = line.find('#'); commentPos != std::string::npos) line = line.substr(0, commentPos);
+    if (const size_t commentPos = line.find(';'); commentPos != std::string::npos) line = line.substr(0, commentPos);
 
     line = Trim(line);
     if (line.empty()) return ParsedInstruction();
