@@ -32,8 +32,71 @@ namespace UI
 
             ImGui::SetNextWindowPos({ 0, 0 });
             ImGui::SetNextWindowSize({ (float)GetScreenWidth(), (float)GetScreenHeight() });
-            ImGui::Begin("##MainWindow", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar);
+            ImGui::Begin("##MainWindow", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar);
             {
+                if (ImGui::BeginMenuBar())
+                {
+                    if (ImGui::BeginMenu("Menu"))
+                    {
+                        if (ImGui::BeginMenu("Examples"))
+                        {
+                            if (ImGui::MenuItem("Color pattern"))
+                            {
+                                m_IDE.LoadExample("Color pattern");
+                            }
+
+                            if (ImGui::MenuItem("Scrolling interface"))
+                            {
+                                m_IDE.LoadExample("Scrolling interface");
+                            }
+
+                            if (ImGui::MenuItem("Scrolling digital wave"))
+                            {
+                                m_IDE.LoadExample("Scrolling digital wave");
+                            }
+
+                            if (ImGui::MenuItem("Hypnotic Ripples"))
+                            {
+                                m_IDE.LoadExample("Hypnotic Ripples");
+                            }
+
+                            if (ImGui::MenuItem("Diamond tunnel"))
+                            {
+                                m_IDE.LoadExample("Diamond tunnel");
+                            }
+
+                            if (ImGui::MenuItem("Fractal Scroll"))
+                            {
+                                m_IDE.LoadExample("Fractal Scroll");
+                            }
+
+                            if (ImGui::MenuItem("Manhatten tunnel"))
+                            {
+                                m_IDE.LoadExample("Manhatten tunnel");
+                            }
+
+                            if (ImGui::MenuItem("Hyperbolic plaid"))
+                            {
+                                m_IDE.LoadExample("Hyperbolic plaid");
+                            }
+
+                            if (ImGui::MenuItem("Kaleidoscope"))
+                            {
+                                m_IDE.LoadExample("Kaleidoscope");
+                            }
+
+                            if (ImGui::MenuItem("Perspective grid"))
+                            {
+                                m_IDE.LoadExample("Perspective grid");
+                            }
+                            ImGui::EndMenu();
+                        }
+                        ImGui::EndMenu();
+                    }
+
+                    ImGui::EndMenuBar();
+                }
+
                 ImGui::BeginTabBar("EmulatorTabs");
                 {
                     if (ImGui::BeginTabItem("Emulator"))

@@ -11,6 +11,7 @@
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "TextEditor.h"
+#include "Examples.hpp"
 
 #include "Assembler/lib/src/Error.hpp"
 #include "Assembler/lib/src/Parser.hpp"
@@ -184,6 +185,12 @@ namespace UI
         inline std::vector<std::uint8_t> GetMachineCode() const noexcept
         {
             return m_MachineCode;
+        }
+
+        void LoadExample(const std::string_view id)
+        {
+            m_TextEditor.SetText(s_ExamplesMap.at(id));
+            CompileProgram(State::CompiledAndDebug);
         }
     };
 }
