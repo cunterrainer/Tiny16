@@ -165,6 +165,30 @@ TEST_CASE("Test GetOpcodeIR()")
         CHECK(GetOpcodeIR(Opcode::SUB, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::SUB_IMM_TO_REG);
     }
 
+    SUBCASE("MUL")
+    {
+        CHECK(GetOpcodeIR(Opcode::MUL, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::MUL_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::MUL, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::MUL_IMM_TO_REG);
+    }
+
+    SUBCASE("IMUL")
+    {
+        CHECK(GetOpcodeIR(Opcode::IMUL, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::IMUL_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::IMUL, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::IMUL_IMM_TO_REG);
+    }
+
+    SUBCASE("DIV")
+    {
+        CHECK(GetOpcodeIR(Opcode::DIV, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::DIV_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::DIV, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::DIV_IMM_TO_REG);
+    }
+
+    SUBCASE("IDIV")
+    {
+        CHECK(GetOpcodeIR(Opcode::IDIV, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::IDIV_REG_TO_REG);
+        CHECK(GetOpcodeIR(Opcode::IDIV, OperandTypeIR::Intermediate, OperandTypeIR::Register) == OpcodeIR::IDIV_IMM_TO_REG);
+    }
+
     SUBCASE("CMP")
     {
         CHECK(GetOpcodeIR(Opcode::CMP, OperandTypeIR::Register, OperandTypeIR::Register) == OpcodeIR::CMP_REG_TO_REG);
@@ -381,6 +405,168 @@ TEST_CASE("Testing LowerInstruction() Valid")
         CHECK(std::get<std::uint16_t>(inst.op1.value) == 0b0101);
         CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
     }
+
+    SUBCASE("MUL Register to Register")
+    {
+        ParsedInstruction pi{
+            .label = "loop",
+            .opcode = "MUL",
+            .lhs = "R1",
+            .rhs = "R6"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 3);
+        CHECK(inst.label == "loop");
+        CHECK(inst.opcode == OpcodeIR::MUL_REG_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
+    }
+
+    SUBCASE("MUL Intermediate to Register")
+    {
+        ParsedInstruction pi{
+            .label = "loop",
+            .opcode = "MUL",
+            .lhs = "$0b0101",
+            .rhs = "R6"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 4);
+        CHECK(inst.label == "loop");
+        CHECK(inst.opcode == OpcodeIR::MUL_IMM_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Intermediate);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint16_t>(inst.op1.value) == 0b0101);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
+    }
+
+    SUBCASE("IMUL Register to Register")
+    {
+        ParsedInstruction pi{
+            .label = "loop",
+            .opcode = "IMUL",
+            .lhs = "R1",
+            .rhs = "R6"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 3);
+        CHECK(inst.label == "loop");
+        CHECK(inst.opcode == OpcodeIR::IMUL_REG_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 1);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
+    }
+
+    SUBCASE("IMUL Intermediate to Register")
+    {
+        ParsedInstruction pi{
+            .label = "loop",
+            .opcode = "IMUL",
+            .lhs = "$0b0101",
+            .rhs = "R6"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 4);
+        CHECK(inst.label == "loop");
+        CHECK(inst.opcode == OpcodeIR::IMUL_IMM_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Intermediate);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint16_t>(inst.op1.value) == 0b0101);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
+    }
+
+    SUBCASE("DIV Register to Register")
+    {
+        ParsedInstruction pi{
+            .label = "loop",
+            .opcode = "DIV",
+            .lhs = "RE",
+            .rhs = "R6"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 3);
+        CHECK(inst.label == "loop");
+        CHECK(inst.opcode == OpcodeIR::DIV_REG_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 14);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
+    }
+
+    SUBCASE("DIV Intermediate to Register")
+    {
+        ParsedInstruction pi{
+            .label = "loop",
+            .opcode = "DIV",
+            .lhs = "$0b0101",
+            .rhs = "R6"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 4);
+        CHECK(inst.label == "loop");
+        CHECK(inst.opcode == OpcodeIR::DIV_IMM_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Intermediate);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint16_t>(inst.op1.value) == 0b0101);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
+    }
+
+    SUBCASE("IDIV Register to Register")
+    {
+        ParsedInstruction pi{
+            .label = "loop",
+            .opcode = "IDIV",
+            .lhs = "R5",
+            .rhs = "R6"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 3);
+        CHECK(inst.label == "loop");
+        CHECK(inst.opcode == OpcodeIR::IDIV_REG_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Register);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint8_t>(inst.op1.value) == 5);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
+    }
+
+    SUBCASE("IDIV Intermediate to Register")
+    {
+        ParsedInstruction pi{
+            .label = "loop",
+            .opcode = "IDIV",
+            .lhs = "$0b0101",
+            .rhs = "R6"
+        };
+
+        auto inst = LowerInstruction(pi);
+
+        CHECK(inst.size == 4);
+        CHECK(inst.label == "loop");
+        CHECK(inst.opcode == OpcodeIR::IDIV_IMM_TO_REG);
+        CHECK(inst.op1.type == OperandTypeIR::Intermediate);
+        CHECK(inst.op2.type == OperandTypeIR::Register);
+        CHECK(std::get<std::uint16_t>(inst.op1.value) == 0b0101);
+        CHECK(std::get<std::uint8_t>(inst.op2.value) == 6);
+    }
+
+
 
     SUBCASE("CMP Immediate to Register")
     {

@@ -200,6 +200,93 @@ void CPU::Instruction_SUB_REG_TO_REG(OpcodeMC opcode)
     m_Registers[regDst] -= m_Registers[regSrc];
 }
 
+// =============================================================
+// MULTIPLICATION (MUL / IMUL)
+// Result stored in DX:AX (R2:R0)
+// =============================================================
+void CPU::Instruction_MUL_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t value = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    const std::uint32_t result = (std::uint32_t)m_Registers[reg] * (std::uint32_t)value;
+    m_Registers[R1] = (std::uint16_t)(result & 0xFFFF);
+    m_Registers[R0] = (std::uint16_t)((result >> 16) & 0xFFFF);
+}
+
+void CPU::Instruction_MUL_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register reg1 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register reg2 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    const std::uint32_t result = (std::uint32_t)m_Registers[reg1] * (std::uint32_t)m_Registers[reg2];
+    m_Registers[R1] = (std::uint16_t)(result & 0xFFFF);
+    m_Registers[R0] = (std::uint16_t)((result >> 16) & 0xFFFF);
+}
+
+void CPU::Instruction_IMUL_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::int16_t value = (std::int16_t)m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    // Note: Widening cast to int32_t preserves sign
+    const std::int32_t result = (std::int32_t)((std::int16_t)m_Registers[reg]) * (std::int32_t)value;
+    m_Registers[R1] = (std::uint16_t)(result & 0xFFFF);
+    m_Registers[R0] = (std::uint16_t)((result >> 16) & 0xFFFF);
+}
+
+void CPU::Instruction_IMUL_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register reg1 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register reg2 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    // Note: Widening cast to int32_t preserves sign
+    const std::int32_t result = (std::int32_t)((std::int16_t)m_Registers[reg1]) * (std::int32_t)((std::int16_t)m_Registers[reg2]);
+    m_Registers[R1] = (std::uint16_t)(result & 0xFFFF);
+    m_Registers[R0] = (std::uint16_t)((result >> 16) & 0xFFFF);
+}
+
+// =============================================================
+// DIVISION (DIV / IDIV)
+// Dividend: DX:AX (R2:R0)
+// Quotient -> AX (R0), Remainder -> DX (R2)
+// =============================================================
+void CPU::Instruction_DIV_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t value = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    m_Registers[R1] = (std::uint16_t)(m_Registers[reg] / value); // Quotient
+    m_Registers[R0] = (std::uint16_t)(m_Registers[reg] % value); // Remainder
+}
+
+void CPU::Instruction_DIV_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register reg1 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register reg2 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    m_Registers[R1] = (std::uint16_t)(m_Registers[reg2] / m_Registers[reg1]);
+    m_Registers[R0] = (std::uint16_t)(m_Registers[reg2] % m_Registers[reg1]);
+}
+
+void CPU::Instruction_IDIV_IMM_TO_REG(OpcodeMC opcode)
+{
+    const std::uint16_t value = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+
+    m_Registers[R1] = ((std::int16_t)m_Registers[reg] / (std::int16_t)value); // Quotient
+    m_Registers[R0] = ((std::int16_t)m_Registers[reg] % (std::int16_t)value); // Remainder
+}
+
+void CPU::Instruction_IDIV_REG_TO_REG(OpcodeMC opcode)
+{
+    const Register reg1 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
+    const Register reg2 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
+
+    m_Registers[R1] = ((std::int16_t)m_Registers[reg2] / (std::int16_t)m_Registers[reg1]);
+    m_Registers[R0] = ((std::int16_t)m_Registers[reg2] % (std::int16_t)m_Registers[reg1]);
+}
+
 void CPU::Instruction_NEG_REG(OpcodeMC opcode)
 {
     const Register dst = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
@@ -297,15 +384,23 @@ void CPU::Clock()
     const OpcodeMC opcode = (OpcodeMC)m_Prom.Read(m_ProgramCounter);
     switch (opcode)
     {
-    case OpcodeIR::MOV_IMM_TO_REG:      Instruction_MOV_IMM_TO_REG(opcode); break;
-    case OpcodeIR::ADD_IMM_TO_REG:      Instruction_ADD_IMM_TO_REG(opcode); break;
-    case OpcodeIR::SUB_IMM_TO_REG:      Instruction_SUB_IMM_TO_REG(opcode); break;
-    case OpcodeIR::CMP_IMM_TO_REG:      Instruction_CMP_IMM_TO_REG(opcode); break;
+    case OpcodeIR::MOV_IMM_TO_REG:      Instruction_MOV_IMM_TO_REG(opcode);  break;
+    case OpcodeIR::ADD_IMM_TO_REG:      Instruction_ADD_IMM_TO_REG(opcode);  break;
+    case OpcodeIR::MUL_IMM_TO_REG:      Instruction_MUL_IMM_TO_REG(opcode);  break;
+    case OpcodeIR::IMUL_IMM_TO_REG:     Instruction_IMUL_IMM_TO_REG(opcode); break;
+    case OpcodeIR::DIV_IMM_TO_REG:      Instruction_DIV_IMM_TO_REG(opcode);  break;
+    case OpcodeIR::IDIV_IMM_TO_REG:     Instruction_IDIV_IMM_TO_REG(opcode); break;
+    case OpcodeIR::SUB_IMM_TO_REG:      Instruction_SUB_IMM_TO_REG(opcode);  break;
+    case OpcodeIR::CMP_IMM_TO_REG:      Instruction_CMP_IMM_TO_REG(opcode);  break;
 
-    case OpcodeIR::MOV_REG_TO_REG:      Instruction_MOV_REG_TO_REG(opcode); break;
-    case OpcodeIR::ADD_REG_TO_REG:      Instruction_ADD_REG_TO_REG(opcode); break;
-    case OpcodeIR::SUB_REG_TO_REG:      Instruction_SUB_REG_TO_REG(opcode); break;
-    case OpcodeIR::CMP_REG_TO_REG:      Instruction_CMP_REG_TO_REG(opcode); break;
+    case OpcodeIR::MOV_REG_TO_REG:      Instruction_MOV_REG_TO_REG(opcode);  break;
+    case OpcodeIR::ADD_REG_TO_REG:      Instruction_ADD_REG_TO_REG(opcode);  break;
+    case OpcodeIR::MUL_REG_TO_REG:      Instruction_MUL_REG_TO_REG(opcode);  break;
+    case OpcodeIR::IMUL_REG_TO_REG:     Instruction_IMUL_REG_TO_REG(opcode); break;
+    case OpcodeIR::DIV_REG_TO_REG:      Instruction_DIV_REG_TO_REG(opcode);  break;
+    case OpcodeIR::IDIV_REG_TO_REG:     Instruction_IDIV_REG_TO_REG(opcode); break;
+    case OpcodeIR::SUB_REG_TO_REG:      Instruction_SUB_REG_TO_REG(opcode);  break;
+    case OpcodeIR::CMP_REG_TO_REG:      Instruction_CMP_REG_TO_REG(opcode);  break;
 
     // We return on jump because we don't want to advance the program counter
     // If a jmp has to advance it increments it itself

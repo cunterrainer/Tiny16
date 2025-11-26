@@ -6,6 +6,10 @@
 4:   MOV    imm16/reg, reg   -> reg = imm16/reg
 5:   ADD    imm16/reg, reg   -> reg = reg + imm16/reg
 6:   SUB    imm16/reg, reg   -> reg = reg - imm16/reg
+6:   MUL    imm16/reg, reg   -> R0:R1 = reg * imm16/reg (unsigned)
+6:   IMUL   imm16/reg, reg   -> R0:R1 = reg * imm16/reg (signed)
+6:   DIV    imm16/reg, reg   -> R1 = reg / imm16/reg, r0 = reg % imm16/reg (unsigned)
+6:   IDIV   imm16/reg, reg   -> R1 = reg / imm16/reg, r0 = reg % imm16/reg (signed)
 7:   JMP    reg/addr16       -> PC = reg/addr16
 8:   JE     reg/addr16       -> PC = reg/addr16 if RF (Flag register) == 0 else NOP
 9:   CMP    imm16/reg, reg   -> Set flag (RF) if equal / greater / less (reg - imm16/reg)

@@ -22,6 +22,10 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::MOV_IMM_TO_REG:
     case OpcodeMC::ADD_IMM_TO_REG:
     case OpcodeMC::SUB_IMM_TO_REG:
+    case OpcodeMC::MUL_IMM_TO_REG:
+    case OpcodeMC::IMUL_IMM_TO_REG:
+    case OpcodeMC::DIV_IMM_TO_REG:
+    case OpcodeMC::IDIV_IMM_TO_REG:
     case OpcodeMC::CMP_IMM_TO_REG:
     case OpcodeMC::AND_IMM_TO_REG:
     case OpcodeMC::XOR_IMM_TO_REG:
@@ -33,6 +37,10 @@ std::string Disassembler::DisassembleOperands(OpcodeMC opcode, const std::vector
     case OpcodeMC::MOV_REG_TO_REG:
     case OpcodeMC::ADD_REG_TO_REG:
     case OpcodeMC::SUB_REG_TO_REG:
+    case OpcodeMC::MUL_REG_TO_REG:
+    case OpcodeMC::IMUL_REG_TO_REG:
+    case OpcodeMC::DIV_REG_TO_REG:
+    case OpcodeMC::IDIV_REG_TO_REG:
     case OpcodeMC::CMP_REG_TO_REG:
     case OpcodeMC::EXTBH_REG_TO_REG:
     case OpcodeMC::EXTBL_REG_TO_REG:

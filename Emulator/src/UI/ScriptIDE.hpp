@@ -48,8 +48,8 @@ namespace UI
             TextEditor::LanguageDefinition langDef;
 
             constexpr const char* const keywords[] = {
-                "mov", "add", "sub", "jmp", "je", "cmp", "brk", "halt", "load", "store", "loadb", "storeb", "extbh", "extbl", "insbh", "insbl", "swapb", "and", "or", "xor", "neg", "nop",
-                "MOV", "ADD", "SUB", "JMP", "JE", "CMP", "BRK", "HALT", "LOAD", "STORE", "LOADB", "STOREB", "EXTBH", "EXTBL", "INSBH", "INSBL", "SWAPB", "AND", "OR", "XOR", "NEG", "NOP"
+                "mov", "add", "sub", "mul", "imul", "div", "idiv", "jmp", "je", "cmp", "brk", "halt", "load", "store", "loadb", "storeb", "extbh", "extbl", "insbh", "insbl", "swapb", "and", "or", "xor", "neg", "nop",
+                "MOV", "ADD", "SUB", "MUL", "IMUL", "DIV", "IDIV", "JMP", "JE", "CMP", "BRK", "HALT", "LOAD", "STORE", "LOADB", "STOREB", "EXTBH", "EXTBL", "INSBH", "INSBL", "SWAPB", "AND", "OR", "XOR", "NEG", "NOP"
             };
             for (const char* k : keywords)
                 langDef.mKeywords.emplace(k);

@@ -11,6 +11,10 @@ enum class Opcode
     MOV,
     ADD,
     SUB,
+    MUL,
+    IMUL,
+    DIV,
+    IDIV,
     CMP,
     LOAD,
     LOADB,
@@ -54,6 +58,10 @@ struct Instruction
 static const std::unordered_map<std::string_view, Instruction> s_InstructionMap = {
     { "MOV",    { Opcode::MOV, OperandType::RegisterOrIntermediate, OperandType::Register } },
     { "ADD",    { Opcode::ADD, OperandType::RegisterOrIntermediate, OperandType::Register } },
+    { "MUL",    { Opcode::MUL, OperandType::RegisterOrIntermediate, OperandType::Register } },
+    { "IMUL",   { Opcode::IMUL,OperandType::RegisterOrIntermediate, OperandType::Register } },
+    { "DIV",    { Opcode::DIV, OperandType::RegisterOrIntermediate, OperandType::Register } },
+    { "IDIV",   { Opcode::IDIV,OperandType::RegisterOrIntermediate, OperandType::Register } },
     { "SUB",    { Opcode::SUB, OperandType::RegisterOrIntermediate, OperandType::Register } },
     { "CMP",    { Opcode::CMP, OperandType::RegisterOrIntermediate, OperandType::Register } },
 

@@ -129,6 +129,15 @@ TEST_CASE("Test ValidateInstruction()")
         CHECK(ValidateInstruction(ParseLine("SUB R1, R0", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("SUB R1, R7", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("SUB R1, R7", 0).Ok()).IsOk());
+
+        CHECK(ValidateInstruction(ParseLine("MUL $1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("MUL R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("IMUL $1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("IMUL R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("DIV $1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("DIV R1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("IDIV $1, R7", 0).Ok()).IsOk());
+        CHECK(ValidateInstruction(ParseLine("IDIV R1, R7", 0).Ok()).IsOk());
         
         CHECK(ValidateInstruction(ParseLine("CMP  $0x4, R0", 0).Ok()).IsOk());
         CHECK(ValidateInstruction(ParseLine("CMP $+0x4, R7", 0).Ok()).IsOk());

@@ -87,6 +87,14 @@ private:
     void Instruction_SUB_IMM_TO_REG   (OpcodeMC opcode);
     void Instruction_ADD_REG_TO_REG   (OpcodeMC opcode);
     void Instruction_SUB_REG_TO_REG   (OpcodeMC opcode);
+    void Instruction_MUL_IMM_TO_REG   (OpcodeMC opcode);
+    void Instruction_MUL_REG_TO_REG   (OpcodeMC opcode);
+    void Instruction_IMUL_IMM_TO_REG  (OpcodeMC opcode);
+    void Instruction_IMUL_REG_TO_REG  (OpcodeMC opcode);
+    void Instruction_DIV_IMM_TO_REG   (OpcodeMC opcode);
+    void Instruction_DIV_REG_TO_REG   (OpcodeMC opcode);
+    void Instruction_IDIV_IMM_TO_REG  (OpcodeMC opcode);
+    void Instruction_IDIV_REG_TO_REG  (OpcodeMC opcode);
     void Instruction_NEG_REG          (OpcodeMC opcode);
     
     // Byte operations

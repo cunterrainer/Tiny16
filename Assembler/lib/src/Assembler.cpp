@@ -19,6 +19,10 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::MOV_IMM_TO_REG:
     case OpcodeIR::ADD_IMM_TO_REG:
     case OpcodeIR::SUB_IMM_TO_REG:
+    case OpcodeIR::MUL_IMM_TO_REG:
+    case OpcodeIR::IMUL_IMM_TO_REG:
+    case OpcodeIR::DIV_IMM_TO_REG:
+    case OpcodeIR::IDIV_IMM_TO_REG:
     case OpcodeIR::CMP_IMM_TO_REG:
     case OpcodeIR::AND_IMM_TO_REG:
     case OpcodeIR::OR_IMM_TO_REG:
@@ -35,6 +39,10 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::MOV_REG_TO_REG:
     case OpcodeIR::ADD_REG_TO_REG:
     case OpcodeIR::SUB_REG_TO_REG:
+    case OpcodeIR::MUL_REG_TO_REG:
+    case OpcodeIR::IMUL_REG_TO_REG:
+    case OpcodeIR::DIV_REG_TO_REG:
+    case OpcodeIR::IDIV_REG_TO_REG:
     case OpcodeIR::CMP_REG_TO_REG:
     case OpcodeIR::LOAD_REG_TO_REG:
     case OpcodeIR::LOADB_REG_TO_REG:
@@ -72,10 +80,18 @@ InstructionMC AssembleInstruction(const InstructionIR& instrIr, const std::unord
     case OpcodeIR::MOV_IMM_TO_REG:
     case OpcodeIR::ADD_IMM_TO_REG:
     case OpcodeIR::SUB_IMM_TO_REG:
+    case OpcodeIR::MUL_IMM_TO_REG:
+    case OpcodeIR::IMUL_IMM_TO_REG:
+    case OpcodeIR::DIV_IMM_TO_REG:
+    case OpcodeIR::IDIV_IMM_TO_REG:
     case OpcodeIR::CMP_IMM_TO_REG:
     case OpcodeIR::MOV_REG_TO_REG:
     case OpcodeIR::ADD_REG_TO_REG:
     case OpcodeIR::SUB_REG_TO_REG:
+    case OpcodeIR::MUL_REG_TO_REG:
+    case OpcodeIR::IMUL_REG_TO_REG:
+    case OpcodeIR::DIV_REG_TO_REG:
+    case OpcodeIR::IDIV_REG_TO_REG:
     case OpcodeIR::CMP_REG_TO_REG:
     case OpcodeIR::LOAD_ADD_TO_REG:
     case OpcodeIR::LOAD_REG_TO_REG:
