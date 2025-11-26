@@ -74,7 +74,6 @@ namespace UI
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R9Label", "R9: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R9));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RCLabel", "RC: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::RC));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RSPLabel", "RSP: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::RSP));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##PCLabel", "PC: 0x%04X", m_Emulator.m_CPU->GetProgramCounter());
                 
                 ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R1Label", "R1: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R1));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R4Label", "R4: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R4));
@@ -82,13 +81,13 @@ namespace UI
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RALabel", "RA: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::RA));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RDLabel", "RD: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::RD));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RBPLabel", "RBP: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::RBP));
-                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width + 50); ImGui::LabelText("##RFLabel", std::format("RF: 0b{:08b}", m_Emulator.m_CPU->GetRegister(CPU::Register::RF)).c_str());
 
                 ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R2Label", "R2: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R2));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R5Label", "R5: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R5));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R8Label", "R8: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R8));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RBLabel", "RB: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::RB));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##RELabel", "RE: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::RD));
+                ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##PCLabel", "PC:  0x%04X", m_Emulator.m_CPU->GetProgramCounter());
             }
             ImGui::EndChild();
 

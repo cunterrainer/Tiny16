@@ -37,8 +37,7 @@ public:
         RD,
         RE,
         RSP,
-        RBP,
-        RF  // Reserved for flags can't be used
+        RBP
     };
 
     struct Flags
@@ -57,7 +56,7 @@ private:
     bool m_ExecutionMode = true;
     std::atomic_bool m_WaitingOnHalt = false;
     std::uint16_t m_ProgramCounter = 0;
-    std::array<std::uint16_t, static_cast<std::size_t>(Register::RF) + 1> m_Registers = { 0 };
+    std::array<std::uint16_t, static_cast<std::size_t>(Register::RBP) + 1> m_Registers = { 0 };
 private:
     // Instruction functions
     // Data storage
