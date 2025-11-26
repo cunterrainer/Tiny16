@@ -107,12 +107,19 @@ void CPU::Instruction_STOREB_REG_TO_REG()
 // ----------------------- Program flow -----------------------
 void CPU::Instruction_CMP_IMM_TO_REG()
 {
-    const std::uint16_t imm = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
+    const std::uint16_t a = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
     const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + ImmediateOffset);
+    const std::uint16_t b = m_Registers[reg];
 
-    m_Registers[RF] = (imm == m_Registers[reg]) ? (std::uint16_t)Flags::Equal
-        : (imm > m_Registers[reg]) ? (std::uint16_t)Flags::Greater
-        : (std::uint16_t)Flags::Less;
+    // Virtual subtract: R = b - a
+    const std::uint32_t bw = b;
+    const std::uint32_t aw = a;
+    const std::uint16_t R = static_cast<std::uint16_t>(bw - aw);
+
+    m_Flags.ZF = (R == 0);
+    m_Flags.SF = (R >> 15) & 1;
+    m_Flags.CF = (bw < aw);
+    m_Flags.OF = (((a ^ b) & (b ^ R)) >> 15) & 1;
 }
 
 void CPU::Instruction_CMP_REG_TO_REG()
@@ -120,9 +127,14 @@ void CPU::Instruction_CMP_REG_TO_REG()
     const Register reg1 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
     const Register reg2 = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset + RegisterOffset);
 
-    m_Registers[RF] = (m_Registers[reg1] == m_Registers[reg2]) ? (std::uint16_t)Flags::Equal
-        : (m_Registers[reg1] > m_Registers[reg2]) ? (std::uint16_t)Flags::Greater
-        : (std::uint16_t)Flags::Less;
+    const std::uint16_t a = m_Registers[reg1];
+    const std::uint16_t b = m_Registers[reg2];
+    const std::uint16_t R = static_cast<std::uint16_t>(std::uint32_t(b) - std::uint32_t(a));
+
+    m_Flags.ZF = (R == 0);
+    m_Flags.SF = (R >> 15) & 1;
+    m_Flags.CF = (uint32_t(b) < uint32_t(a));
+    m_Flags.OF = (((a ^ b) & (b ^ R)) >> 15) & 1;
 }
 
 void CPU::Instruction_JMP_REG()
@@ -139,7 +151,7 @@ void CPU::Instruction_JMP_LABEL()
 
 void CPU::Instruction_JE_REG(OpcodeMC opcode)
 {
-    if (m_Registers[RF] == Flags::Equal)
+    if (m_Flags.ZF)
     {
         const Register reg = (Register)m_Prom.Read(m_ProgramCounter + OpcodeOffset);
         m_ProgramCounter = m_Registers[reg];
@@ -150,7 +162,7 @@ void CPU::Instruction_JE_REG(OpcodeMC opcode)
 
 void CPU::Instruction_JE_LABEL(OpcodeMC opcode)
 {
-    if (m_Registers[RF] == Flags::Equal)
+    if (m_Flags.ZF)
         m_ProgramCounter = m_Prom.Read16(m_ProgramCounter + OpcodeOffset);
     else
         m_ProgramCounter += s_InstructionIRSizeMap.at(opcode);

@@ -41,18 +41,18 @@ public:
         RF  // Reserved for flags can't be used
     };
 
-    enum Flags
+    struct Flags
     {
-        // TODO implement carry and borrow
-        Less    = 0b00000001,
-        Equal   = 0b00000010,
-        Greater = 0b00000100,
-        Carry   = 0b00001000,
-        Borrow  = 0b00010000
+        std::uint32_t ZF = 0;
+        std::uint32_t SF = 0;
+        std::uint32_t CF = 0;
+        std::uint32_t OF = 0;
     };
 private:
     const PROM& m_Prom;
     RAM& m_Ram;
+    Flags m_Flags;
+
     std::string m_ErrorMsg;
     bool m_ExecutionMode = true;
     std::atomic_bool m_WaitingOnHalt = false;
