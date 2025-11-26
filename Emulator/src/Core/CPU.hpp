@@ -61,54 +61,54 @@ private:
 private:
     // Instruction functions
     // Data storage
-    void Instruction_MOV_IMM_TO_REG   (OpcodeMC opcode);
-    void Instruction_MOV_REG_TO_REG   (OpcodeMC opcode);
-    void Instruction_LOAD_ADD_TO_REG  (OpcodeMC opcode);
-    void Instruction_LOAD_REG_TO_REG  (OpcodeMC opcode);
-    void Instruction_LOADB_ADD_TO_REG (OpcodeMC opcode);
-    void Instruction_LOADB_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_STORE_REG_TO_ADD (OpcodeMC opcode);
-    void Instruction_STORE_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_STOREB_REG_TO_ADD(OpcodeMC opcode);
-    void Instruction_STOREB_REG_TO_REG(OpcodeMC opcode);
+    void Instruction_MOV_IMM_TO_REG   ();
+    void Instruction_MOV_REG_TO_REG   ();
+    void Instruction_LOAD_ADD_TO_REG  ();
+    void Instruction_LOAD_REG_TO_REG  ();
+    void Instruction_LOADB_ADD_TO_REG ();
+    void Instruction_LOADB_REG_TO_REG ();
+    void Instruction_STORE_REG_TO_ADD ();
+    void Instruction_STORE_REG_TO_REG ();
+    void Instruction_STOREB_REG_TO_ADD();
+    void Instruction_STOREB_REG_TO_REG();
 
     // Program flow
-    void Instruction_CMP_REG_TO_REG   (OpcodeMC opcode);
-    void Instruction_CMP_IMM_TO_REG   (OpcodeMC opcode);
-    void Instruction_JMP_REG          (OpcodeMC opcode);
-    void Instruction_JMP_LABEL        (OpcodeMC opcode);
+    void Instruction_CMP_REG_TO_REG   ();
+    void Instruction_CMP_IMM_TO_REG   ();
+    void Instruction_JMP_REG          ();
+    void Instruction_JMP_LABEL        ();
     void Instruction_JE_REG           (OpcodeMC opcode);
     void Instruction_JE_LABEL         (OpcodeMC opcode);
-    void Instruction_HALT             (OpcodeMC opcode);
-    void Instruction_BRK              (OpcodeMC opcode);
+    void Instruction_HALT             ();
+    void Instruction_BRK              ();
 
     // Arithmetic operations
-    void Instruction_ADD_IMM_TO_REG   (OpcodeMC opcode);
-    void Instruction_SUB_IMM_TO_REG   (OpcodeMC opcode);
-    void Instruction_ADD_REG_TO_REG   (OpcodeMC opcode);
-    void Instruction_SUB_REG_TO_REG   (OpcodeMC opcode);
-    void Instruction_MUL_IMM_TO_REG   (OpcodeMC opcode);
-    void Instruction_MUL_REG_TO_REG   (OpcodeMC opcode);
-    void Instruction_IMUL_IMM_TO_REG  (OpcodeMC opcode);
-    void Instruction_IMUL_REG_TO_REG  (OpcodeMC opcode);
-    void Instruction_DIV_IMM_TO_REG   (OpcodeMC opcode);
-    void Instruction_DIV_REG_TO_REG   (OpcodeMC opcode);
-    void Instruction_IDIV_IMM_TO_REG  (OpcodeMC opcode);
-    void Instruction_IDIV_REG_TO_REG  (OpcodeMC opcode);
-    void Instruction_NEG_REG          (OpcodeMC opcode);
+    void Instruction_ADD_IMM_TO_REG   ();
+    void Instruction_SUB_IMM_TO_REG   ();
+    void Instruction_ADD_REG_TO_REG   ();
+    void Instruction_SUB_REG_TO_REG   ();
+    void Instruction_MUL_IMM_TO_REG   ();
+    void Instruction_MUL_REG_TO_REG   ();
+    void Instruction_IMUL_IMM_TO_REG  ();
+    void Instruction_IMUL_REG_TO_REG  ();
+    void Instruction_DIV_IMM_TO_REG   ();
+    void Instruction_DIV_REG_TO_REG   ();
+    void Instruction_IDIV_IMM_TO_REG  ();
+    void Instruction_IDIV_REG_TO_REG  ();
+    void Instruction_NEG_REG          ();
     
     // Byte operations
-    void Instruction_EXTBH_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_EXTBL_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_INSBH_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_INSBL_REG_TO_REG (OpcodeMC opcode);
-    void Instruction_SWAPB_REG        (OpcodeMC opcode);
-    void Instruction_AND_REG_TO_REG   (OpcodeMC opcode);
-    void Instruction_AND_IMM_TO_REG   (OpcodeMC opcode);
-    void Instruction_OR_REG_TO_REG    (OpcodeMC opcode);
-    void Instruction_OR_IMM_TO_REG    (OpcodeMC opcode);
-    void Instruction_XOR_REG_TO_REG   (OpcodeMC opcode);
-    void Instruction_XOR_IMM_TO_REG   (OpcodeMC opcode);
+    void Instruction_EXTBH_REG_TO_REG ();
+    void Instruction_EXTBL_REG_TO_REG ();
+    void Instruction_INSBH_REG_TO_REG ();
+    void Instruction_INSBL_REG_TO_REG ();
+    void Instruction_SWAPB_REG        ();
+    void Instruction_AND_REG_TO_REG   ();
+    void Instruction_AND_IMM_TO_REG   ();
+    void Instruction_OR_REG_TO_REG    ();
+    void Instruction_OR_IMM_TO_REG    ();
+    void Instruction_XOR_REG_TO_REG   ();
+    void Instruction_XOR_IMM_TO_REG   ();
 public:
     explicit CPU(const PROM& prom, RAM& ram) : m_Prom(prom), m_Ram(ram) {};
     CPU(CPU&& cpu) noexcept;
