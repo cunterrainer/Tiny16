@@ -49,12 +49,18 @@ void WriteBinaryFile(const std::vector<InstructionMC>& instructions)
     }
 }
 
-int main()
+int main(int argc, const char** argv)
 {
+    if (argc < 2)
+    {
+        std::cout << "Usage: " << argv[0] << " [path]" << std::endl;
+        return 0;
+    }
+
     try
     {
-        const std::string file = "examples/example3.s";
-        const std::vector<std::string> sourceLines = ReadFile(file).Unwrap();
+        //const std::string file = "examples/example3.s";
+        const std::vector<std::string> sourceLines = ReadFile(argv[1]).Unwrap();
 
         const auto parseResult = ParseSourceCode(sourceLines).Unwrap();
         const std::vector<ParsedInstruction> parsedInstructions = parseResult.first;
