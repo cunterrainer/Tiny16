@@ -13,6 +13,7 @@ A custom assembler designed to write programs for the Tiny16 CPU using a simple 
 
 - Syntax includes support for decimal, hexadecimal (`0x`), and binary (`0b`) literals.
 - Example programs can be found in [`Assembler/examples`](Assembler/examples).
+- For additional information see the SPEC.txt
 
 ### Emulator
 A full emulator for the Tiny16 system:
