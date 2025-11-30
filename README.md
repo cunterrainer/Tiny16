@@ -30,6 +30,7 @@ cd Tiny16
 ```
 
 ## Build
+Currently Windows only. There are prebuild binaries in `docs/`
 ```
 vendor\premake5.exe vs2022
 ```
