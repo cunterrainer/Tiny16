@@ -70,6 +70,10 @@ The binary starts at main and has to start with an instruction,
 then we just execute these instructions, e.g. the binary looks like:
 mov 1 r0 add 2 r0 sub 3 r0
 
+=== Addresses ===
+   0 - 6FFE Are free to use
+6FFF - FFFF Correspond to 1 byte per pixel pixel coordinates for a 256x144 screen
+
 === INSTRUCTIONS ===
 1: HALT
 
