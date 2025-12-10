@@ -4,6 +4,12 @@
 - A custom **Assembler** for writing programs in a tailored assembly language.
 - A full **Emulator** for simulating the Tiny16 CPU and its graphical output.
 
+### Emulator
+![](docs/Emulator_Example.png)
+
+### Editor
+![](docs/Editor_Example.png)
+
 ---
 
 ## Project Overview
@@ -21,6 +27,7 @@ A full emulator for the Tiny16 system:
 - Provides a graphical output window for visual feedback.
 
 # Build
+There are prebuild binaries available in the [`docs/`](docs/) folder
 ## Clone
 ```
 git clone https://github.com/cunterrainer/Tiny16.git
