@@ -64,10 +64,10 @@ namespace UI
             ImGui::BeginChild(1, { width, 85 }, ImGuiChildFlags_Borders);
             {
                 cursorY = ImGui::GetWindowPos().y;
-                float item_width = 100;
+                float item_width = 130;
 
-                ImGui::Text("%f", m_Emulator.m_Frequenz.load());
-                ImGui::Text("%f", m_Emulator.m_Elapsed);
+                //ImGui::Text("%f", m_Emulator.m_Frequenz.load());
+                //ImGui::Text("%f", m_Emulator.m_Elapsed);
                 ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R0Label", "R0: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R0));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R3Label", "R3: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R3));
                 ImGui::SameLine(); ImGui::SetNextItemWidth(item_width); ImGui::LabelText("##R6Label", "R6: 0x%04X", m_Emulator.m_CPU->GetRegister(CPU::Register::R6));
